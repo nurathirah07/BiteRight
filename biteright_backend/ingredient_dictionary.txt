@@ -1,0 +1,95 @@
+agave
+almonds
+anchovy
+baking powder
+baking soda
+barley
+beef
+broccoli
+buckwheat
+butter
+cabbage
+canola oil
+carrageenan
+carrot
+casein
+cashews
+cauliflower
+celery
+cheese
+chicken
+chocolate
+cinnamon
+cocoa
+coconut oil
+cod
+corn
+corn syrup
+crab
+cream
+eggs
+fish
+flour
+garlic
+gelatin
+ginger
+gluten
+hazelnuts
+honey
+lactose
+lamb
+lecithin
+lettuce
+lobster
+macadamia
+mackerel
+maple syrup
+margarine
+milk
+milk solids
+molasses
+monosodium glutamate
+msg
+nutmeg
+oats
+oil
+olive oil
+onion
+palm oil
+peanut
+peanuts
+pecans
+pectin
+pepper
+pistachios
+pork
+potato
+quinoa
+rice
+rye
+salmon
+salt
+seitan
+sesame
+shellfish
+shortening
+shrimp
+soy
+spelt
+spinach
+sugar
+sunflower
+syrup
+tempeh
+tofu
+tomato
+tree nuts
+tuna
+vanilla
+vegetable oil
+walnuts
+wheat
+whey
+xanthan gum
+yeast
+yogurt

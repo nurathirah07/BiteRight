@@ -1,0 +1,123 @@
+peanuts 1000
+peanut 1000
+milk 1000
+eggs 1000
+soy 900
+wheat 900
+gluten 900
+shellfish 800
+fish 800
+tree nuts 800
+almonds 800
+walnuts 700
+cashews 700
+pecans 600
+pistachios 600
+hazelnuts 600
+macadamia 500
+sesame 700
+sunflower 600
+butter 900
+cream 800
+cheese 900
+yogurt 800
+whey 700
+casein 700
+lactose 700
+milk solids 600
+flour 900
+corn 800
+rice 800
+oats 700
+barley 600
+rye 500
+spelt 400
+quinoa 500
+buckwheat 400
+sugar 1000
+honey 800
+syrup 700
+molasses 500
+corn syrup 700
+maple syrup 600
+agave 400
+oil 900
+vegetable oil 800
+olive oil 800
+coconut oil 700
+canola oil 700
+palm oil 600
+shortening 500
+margarine 500
+vanilla 800
+chocolate 900
+cocoa 800
+cinnamon 600
+nutmeg 500
+ginger 600
+garlic 700
+onion 700
+pepper 700
+salt 1000
+baking soda 700
+baking powder 700
+yeast 600
+tomato 700
+potato 700
+carrot 600
+celery 600
+spinach 600
+lettuce 500
+cabbage 500
+broccoli 500
+cauliflower 400
+beef 700
+chicken 800
+pork 700
+lamb 500
+tofu 600
+tempeh 400
+seitan 300
+shrimp 600
+crab 500
+lobster 400
+salmon 500
+tuna 500
+cod 400
+mackerel 300
+anchovy 300
+lecithin 600
+monosodium glutamate 500
+msg 500
+gelatin 500
+pectin 400
+carrageenan 400
+xanthan gum 300
+peanutt 1
+peantus 1
+allmond 1
+allmonds 1
+wellnut 1
+wellnuts 1
+cashewes 1
+choclate 1
+choclatey 1
+vinella 1
+vanila 1
+buter 1
+buttar 1
+suger 1
+suggar 1
+flourr 1
+flower 1
+yeest 1
+bakin 1
+sodum 1
+creem 1
+chesse 1
+yougurt 1
+yoghurt 1
+cocnut 1
+cocount 1
+seseme 1
+sesem 1
