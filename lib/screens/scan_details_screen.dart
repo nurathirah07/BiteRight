@@ -34,18 +34,35 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
   // ─── Risk Score & Confidence Calculation ─────────────────────────────────
 
   void _calculateMetrics() {
+    final storedRiskLevel = _scanData['risk_level']?.toString();
+    final storedRiskScore = _asInt(_scanData['risk_score']);
+    final storedConfidence = _asConfidence(_scanData['confidence']);
+    if (storedRiskLevel != null &&
+        storedRiskLevel.isNotEmpty &&
+        storedRiskLevel != 'unknown') {
+      _calculatedRiskLevel = storedRiskLevel;
+      _calculatedRiskScore = storedRiskScore;
+      _calculatedConfidence = storedConfidence;
+      _scanData['risk_level'] = _calculatedRiskLevel;
+      _scanData['risk_score'] = _calculatedRiskScore;
+      _scanData['confidence'] = _calculatedConfidence;
+      return;
+    }
+
     // Get data from scan
-    final allergensFound = List<dynamic>.from(_scanData['allergens_found'] ?? []);
+    final allergensFound =
+        List<dynamic>.from(_scanData['allergens_found'] ?? []);
     final userAllergies = List<dynamic>.from(_scanData['user_allergies'] ?? []);
     final dietaryIssues = List<dynamic>.from(_scanData['dietary_issues'] ?? []);
     final ingredients = List<String>.from(_scanData['ingredients'] ?? []);
     final alerts = List<String>.from(_scanData['alerts'] ?? []);
     final wasEdited = _scanData['was_edited'] ?? false;
-    final hasProductName = (_scanData['product_name'] ?? '').toString().isNotEmpty;
+    final hasProductName =
+        (_scanData['product_name'] ?? '').toString().isNotEmpty;
 
     // CRITICAL FIX: Parse alerts to find allergens that weren't in allergens_found array
     final List<String> extractedAllergensFromAlerts = [];
-    
+
     for (var alert in alerts) {
       final alertLower = alert.toLowerCase();
       // Check for "matches your X allergy" pattern
@@ -68,7 +85,8 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
       ingredients: ingredients,
       wasEdited: wasEdited,
       hasProductName: hasProductName,
-      allergensFoundCount: allergensFound.length + extractedAllergensFromAlerts.length,
+      allergensFoundCount:
+          allergensFound.length + extractedAllergensFromAlerts.length,
     );
 
     // Determine risk level based on score AND alerts
@@ -80,6 +98,20 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     _scanData['risk_level'] = _calculatedRiskLevel;
   }
 
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.round();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  double _asConfidence(dynamic value) {
+    if (value is num) {
+      return value > 1 ? (value / 100).clamp(0.0, 1.0) : value.toDouble();
+    }
+    final parsed = double.tryParse(value?.toString() ?? '') ?? 0.0;
+    return parsed > 1 ? (parsed / 100).clamp(0.0, 1.0) : parsed;
+  }
+
   int _calculateRiskScore({
     required List<dynamic> allergensFound,
     required List<dynamic> userAllergies,
@@ -89,14 +121,14 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
   }) {
     // Start with perfect score
     int riskScore = 100;
-    
+
     // Severity weights for deductions
     final Map<String, int> severityScores = {
       'high': 35,
       'medium': 20,
       'low': 10,
     };
-    
+
     // Create a map of user allergies with their severity
     final Map<String, String> userAllergySeverity = {};
     for (var allergy in userAllergies) {
@@ -110,7 +142,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
         userAllergySeverity[allergy.toString()] = 'medium';
       }
     }
-    
+
     // DEDUCT FOR ALLERGENS FROM ALERTS (CRITICAL FIX)
     // Each "matches your" alert is a direct allergen match
     if (extractedAllergensFromAlerts.isNotEmpty) {
@@ -118,19 +150,19 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
       int alertDeduction = extractedAllergensFromAlerts.length * 30;
       riskScore -= alertDeduction;
     }
-    
+
     // Check alerts for "may violate" patterns (dietary issues)
     for (var alert in alerts) {
       if (alert.toLowerCase().contains('may violate')) {
         riskScore -= 15;
       }
     }
-    
+
     // Deduct points for each allergen found in allergens_found array
     for (var allergen in allergensFound) {
       String allergenId;
       String severity = 'medium';
-      
+
       if (allergen is Map) {
         allergenId = allergen['id']?.toString() ?? '';
         if (userAllergySeverity.containsKey(allergenId)) {
@@ -144,15 +176,15 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
           severity = userAllergySeverity[allergenId] ?? 'medium';
         }
       }
-      
+
       int deduction = severityScores[severity] ?? 20;
       riskScore -= deduction;
     }
-    
+
     // Deduct points for dietary issues
     int dietaryDeduction = dietaryIssues.length * 15;
     riskScore -= dietaryDeduction > 50 ? 50 : dietaryDeduction;
-    
+
     // Ensure score stays within 0-100 range
     return riskScore.clamp(0, 100);
   }
@@ -164,17 +196,17 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     required int allergensFoundCount,
   }) {
     double confidence = 0.70; // Base confidence (70%)
-    
+
     // Increase confidence if user manually edited ingredients
     if (wasEdited) {
       confidence += 0.15;
     }
-    
+
     // Increase confidence if product name is available
     if (hasProductName) {
       confidence += 0.05;
     }
-    
+
     // Increase confidence if enough ingredients were extracted
     if (ingredients.length >= 5) {
       confidence += 0.05;
@@ -183,12 +215,12 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     } else if (ingredients.length < 2) {
       confidence -= 0.10; // Penalize for too few ingredients
     }
-    
+
     // Small boost if allergens were detected (system is working)
     if (allergensFoundCount > 0) {
       confidence += 0.05;
     }
-    
+
     // Cap confidence at 0.95 (95%)
     return confidence > 0.95 ? 0.95 : confidence;
   }
@@ -200,7 +232,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
         return 'unsafe';
       }
     }
-    
+
     // SECOND: Check score-based determination
     if (riskScore >= 70) {
       return 'safe';
@@ -503,12 +535,9 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
                 if (ingredientDetails.isNotEmpty)
                   ...List.generate(ingredientDetails.length, (i) {
                     final detail = ingredientDetails[i];
-                    final name =
-                        detail['ingredient']?.toString() ?? 'Unknown';
-                    final status =
-                        detail['status']?.toString() ?? 'safe';
-                    final reasons =
-                        List<String>.from(detail['reasons'] ?? []);
+                    final name = detail['ingredient']?.toString() ?? 'Unknown';
+                    final status = detail['status']?.toString() ?? 'safe';
+                    final reasons = List<String>.from(detail['reasons'] ?? []);
                     return _IngredientRow(
                       name: name,
                       status: status,
@@ -559,8 +588,8 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 15),
+                    icon:
+                        const Icon(Icons.arrow_back_ios_new_rounded, size: 15),
                     label: const Text('Back'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 13),
@@ -574,8 +603,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon:
-                        const Icon(Icons.camera_alt_rounded, size: 15),
+                    icon: const Icon(Icons.camera_alt_rounded, size: 15),
                     label: const Text('Scan again'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
@@ -696,8 +724,7 @@ class _RiskHeroCard extends StatelessWidget {
               Expanded(
                 child: _MetricPill(
                   label: 'Risk level',
-                  value: riskLevel[0].toUpperCase() +
-                      riskLevel.substring(1),
+                  value: riskLevel[0].toUpperCase() + riskLevel.substring(1),
                   description: riskScoreDescription,
                   bg: riskMetricBg,
                   labelColor: riskLabelColor,
@@ -836,8 +863,7 @@ class _SectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             child: Row(
               children: [
                 Icon(headerIcon, size: 16, color: const Color(0xFF9A9790)),
@@ -1036,9 +1062,8 @@ class _IngredientRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: nameColor,
-                    fontWeight: status == 'safe'
-                        ? FontWeight.w400
-                        : FontWeight.w500,
+                    fontWeight:
+                        status == 'safe' ? FontWeight.w400 : FontWeight.w500,
                   ),
                 ),
                 if (reasons.isNotEmpty) ...[
@@ -1058,8 +1083,7 @@ class _IngredientRow extends StatelessWidget {
           const SizedBox(width: 8),
           // Status badge
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: badgeBg,
               borderRadius: BorderRadius.circular(99),

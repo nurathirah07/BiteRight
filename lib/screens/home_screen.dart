@@ -1,9 +1,10 @@
-﻿// lib/screens/home_screen.dart
+// lib/screens/home_screen.dart
 import 'package:biteright_mobile/screens/scan_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import 'edit_account_screen.dart';
 import 'profile_setup_screen.dart';
 import 'scan_screen.dart';
 import 'scan_history_screen.dart';
@@ -1099,6 +1100,11 @@ class _ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayName = userProfile?['username']?.toString().isNotEmpty == true
+        ? userProfile!['username'].toString()
+        : username;
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F4F0),
       appBar: AppBar(
@@ -1143,7 +1149,7 @@ class _ProfilePage extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      username[0].toUpperCase(),
+                      initial,
                       style: const TextStyle(
                         fontSize: 36,
                         color: Colors.white,
@@ -1154,7 +1160,7 @@ class _ProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  username,
+                  displayName,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -1183,6 +1189,21 @@ class _ProfilePage extends StatelessWidget {
                 iconColor: const Color(0xFF185FA5),
                 iconBg: const Color(0xFFE6F1FB),
                 title: 'Edit profile',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditAccountScreen(
+                      userId: userId,
+                      userProfile: userProfile,
+                    ),
+                  ),
+                ).then((_) => onProfileUpdated()),
+              ),
+              _MenuItem(
+                icon: Icons.restaurant_menu_outlined,
+                iconColor: const Color(0xFF854F0B),
+                iconBg: const Color(0xFFFFF3E2),
+                title: 'Dietary profile',
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(

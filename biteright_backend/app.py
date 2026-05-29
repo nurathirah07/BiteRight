@@ -533,9 +533,13 @@ def update_user(user_id):
     try:
         user_ref = db.collection('users').document(user_id)
         if user_ref.get().exists:
-            data = request.get_json()
+            data = request.get_json() or {}
             data.pop('password_hash', None)
-            data.pop('password', None)
+            if data.get('password'):
+                data['password_hash'] = hash_password(data.pop('password'))
+            else:
+                data.pop('password', None)
+            data['updated_at'] = firestore.SERVER_TIMESTAMP
             user_ref.update(data)
             return jsonify({'message': 'User updated successfully'}), 200
         else:
@@ -820,6 +824,8 @@ def extract_ingredients_only():
             'ingredients': parsed_ingredients or cleaned_ingredients,
             'raw_ingredients': raw_ingredients,
             'raw_text': raw_text,
+            'ocr_confidence': ocr_result.get('ocr_confidence', 0.0),
+            'ocr_strategy': ocr_result.get('strategy_used', ''),
             'processed_count': len(parsed_ingredients or cleaned_ingredients),
             'raw_count': len(raw_ingredients)
         }), 200
@@ -852,10 +858,11 @@ def analyze_with_profile():
         user_dietary = user_data.get('dietary_restrictions', [])
 
         ingredients = parse_ingredients_input_v2(ingredients_text)
-        analysis = build_personalized_analysis(
+        analysis = build_personalized_analysis_v2(
             ingredients,
             user_allergies,
             user_dietary,
+            raw_text=ingredients_text,
         )
 
         user_allergy_strings = []
@@ -965,9 +972,9 @@ def get_user_profile(user_id):
 
 @app.route('/users/<user_id>/profile', methods=['PUT'])
 def update_user_profile(user_id):
-    """Update user's dietary profile with selected options including severity"""
+    """Update user's account information and dietary profile."""
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         user_ref = db.collection('users').document(user_id)
         if not user_ref.get().exists:
             return jsonify({'message': 'User not found'}), 404
@@ -985,6 +992,28 @@ def update_user_profile(user_id):
             if not isinstance(restrictions, list):
                 return jsonify({'error': 'Dietary restrictions must be a list'}), 400
             update_data['dietary_restrictions'] = restrictions
+
+        if 'username' in data:
+            username = str(data.get('username', '')).strip()
+            if len(username) < 3:
+                return jsonify({'error': 'Name must be at least 3 characters'}), 400
+            update_data['username'] = username
+
+        if 'email' in data:
+            email = str(data.get('email', '')).strip().lower()
+            if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+                return jsonify({'error': 'Invalid email address'}), 400
+            matching_users = db.collection('users').where('email', '==', email).limit(2).get()
+            for user_doc in matching_users:
+                if user_doc.id != user_id:
+                    return jsonify({'error': 'Email is already in use'}), 409
+            update_data['email'] = email
+
+        if data.get('password'):
+            password = str(data.get('password'))
+            if len(password) < 6:
+                return jsonify({'error': 'Password must be at least 6 characters'}), 400
+            update_data['password_hash'] = hash_password(password)
         
         update_data['updated_at'] = firestore.SERVER_TIMESTAMP
         user_ref.update(update_data)
@@ -994,6 +1023,9 @@ def update_user_profile(user_id):
             'success': True,
             'message': 'Profile updated successfully',
             'profile': {
+                'user_id': user_id,
+                'username': updated_user.get('username', ''),
+                'email': updated_user.get('email', ''),
                 'allergies': updated_user.get('allergies', []),
                 'dietary_restrictions': updated_user.get('dietary_restrictions', [])
             }

@@ -24,7 +24,7 @@
     default-src 'self' http://localhost:5000 ws://localhost:5000 ws://localhost:*;
     connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 http://10.0.2.2:5000 ws://localhost:* ws://127.0.0.1:*;
     script-src 'self' 'unsafe-inline' 'unsafe-eval';
-    style-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' data: https:;
     font-src 'self' data: https://fonts.gstatic.com;
   ">
@@ -123,8 +123,8 @@
         serviceWorkerSettings: {
           url: "flutter_service_worker.js?v=" + Date.now(),
         },
-        // Force canvas rendering if needed (helps with font issues)
-        renderer: "canvaskit", // Use "html" for better font rendering or "canvaskit" for consistency
+        // HTML renderer is more reliable for form-heavy mobile UI in Chrome.
+        renderer: "html",
       };
       
       // Start the Flutter app

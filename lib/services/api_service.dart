@@ -10,8 +10,8 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:5000';
     } else if (Platform.isAndroid) {
-      // Android emulator uses 10.0.2.2 to reach host machine's localhost
-      return 'http://10.0.2.2:5000';
+      // YOUR COMPUTER'S ACTUAL IP ADDRESS
+      return 'http://192.168.0.4:5000';
     } else if (Platform.isIOS) {
       // iOS simulator can use localhost directly
       return 'http://localhost:5000';
@@ -22,11 +22,12 @@ class ApiService {
   }
 
   // Alternative URLs to try if connection fails
-  static const List<String> _alternativeUrls = [
-    'http://10.0.2.2:5000', // Android emulator
-    'http://localhost:5000', // Web / iOS simulator
-    'http://127.0.0.1:5000', // Web / iOS simulator (IP loopback)
-  ];
+  static List<String> get _alternativeUrls => [
+        'http://192.168.0.4:5000', // YOUR IP - MUST BE FIRST
+        'http://10.0.2.2:5000', // Android emulator
+        'http://localhost:5000', // Web / iOS simulator
+        'http://127.0.0.1:5000', // Web / iOS simulator (IP loopback)
+      ];
 
   late String _currentBaseUrl;
 
@@ -398,6 +399,46 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> updateAccountInfo({
+    required String userId,
+    required String username,
+    required String email,
+    String? password,
+  }) async {
+    try {
+      _log('Updating account info for user: $userId');
+
+      final body = <String, dynamic>{
+        'username': username,
+        'email': email,
+      };
+      if (password != null && password.trim().isNotEmpty) {
+        body['password'] = password.trim();
+      }
+
+      final response = await http
+          .put(
+            Uri.parse('$_currentBaseUrl/users/$userId/profile'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(body),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      _log('Update account response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(json.decode(response.body));
+      }
+
+      final details =
+          response.body.isNotEmpty ? response.body : response.reasonPhrase;
+      throw Exception(details ?? 'Failed to update account');
+    } catch (e) {
+      _log('Error updating account info: $e');
+      return {'error': e.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>?> extractIngredients(File image) async {
     try {
       await testConnection();
@@ -452,16 +493,16 @@ class ApiService {
       _log('Analyze response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> analysisResult = 
+        final Map<String, dynamic> analysisResult =
             Map<String, dynamic>.from(json.decode(response.body));
-        
+
         _log('=== BACKEND ANALYSIS RESULT ===');
         _log('Risk Level: ${analysisResult['risk_level']}');
         _log('Risk Score: ${analysisResult['risk_score']}');
         _log('Confidence: ${analysisResult['confidence']}');
         _log('Alerts: ${analysisResult['alerts']}');
         _log('===============================');
-        
+
         return analysisResult;
       }
 
@@ -483,37 +524,38 @@ class ApiService {
     try {
       // CRITICAL FIX: Use the values from the analysis result directly
       // DO NOT recalculate anything - the backend already did the calculation
-      
+
       final riskLevel = scanData['risk_level'] ?? 'unknown';
       final riskScore = scanData['risk_score'] ?? 0;
       final confidence = scanData['confidence'] ?? 0.75;
       final alerts = scanData['alerts'] ?? [];
-      
+
       _log('=== SAVING SCAN TO HISTORY ===');
       _log('Risk Level from analysis: $riskLevel');
       _log('Risk Score from analysis: $riskScore');
       _log('Confidence from analysis: $confidence');
       _log('Alerts count: ${alerts.length}');
-      
+
       // Prepare the scan data to save - USE THE EXACT SAME VALUES FROM ANALYSIS
       final Map<String, dynamic> dataToSave = {
         'user_id': userId,
         'product_name': scanData['product_name'] ?? 'Scanned Product',
         'ingredients': scanData['ingredients'] ?? [],
         'ingredient_details': scanData['ingredient_details'] ?? [],
-        'risk_level': riskLevel,  // USE BACKEND VALUE
-        'risk_score': riskScore,  // USE BACKEND VALUE
+        'risk_level': riskLevel, // USE BACKEND VALUE
+        'risk_score': riskScore, // USE BACKEND VALUE
         'safety_classification': riskLevel,
         'alerts': alerts,
         'recommendations': scanData['recommendations'] ?? [],
-        'confidence': confidence,  // USE BACKEND VALUE
+        'confidence': confidence, // USE BACKEND VALUE
         'detection_method': scanData['detection_method'] ?? 'AI Analysis',
         'allergens_detected': scanData['allergens_detected'] ?? [],
         'raw_text': scanData['raw_text'] ?? '',
-        'input_image_url': scanData['input_image_url'] ?? scanData['image_url'] ?? '',
+        'input_image_url':
+            scanData['input_image_url'] ?? scanData['image_url'] ?? '',
         'scanned_at': DateTime.now().toIso8601String(),
       };
-      
+
       _log('Data being saved:');
       _log('  risk_level: ${dataToSave['risk_level']}');
       _log('  risk_score: ${dataToSave['risk_score']}');

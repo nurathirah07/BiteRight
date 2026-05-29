@@ -106,6 +106,36 @@ class _MyAppState extends State<MyApp> {
       theme: AppTheme.theme,
       initialRoute: '/',
       onGenerateRoute: _onGenerateRoute,
+      builder: (context, child) {
+        if (child == null) return const SizedBox.shrink();
+
+        final width = MediaQuery.sizeOf(context).width;
+        if (!kIsWeb || width < 700) {
+          return child;
+        }
+
+        return ColoredBox(
+          color: AppTheme.background,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 430),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppTheme.background,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 30,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

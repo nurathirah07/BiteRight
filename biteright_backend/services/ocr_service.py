@@ -10,45 +10,88 @@ import os
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def preprocess_image_multiple(image_bytes):
-    """Apply multiple preprocessing techniques and return the best one"""
-    # Convert bytes to numpy array
+    """Apply complementary preprocessing techniques for noisy package labels."""
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
     if img is None:
         return None, "Failed to decode image"
     
-    # Resize image (make it larger for better OCR)
     height, width = img.shape[:2]
-    scale_factor = max(2, 1500 / min(height, width))
+    scale_factor = min(4.0, max(1.5, 1800 / max(min(height, width), 1)))
     new_width = int(width * scale_factor)
     new_height = int(height * scale_factor)
     img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
     
     processed_images = []
-    
-    # Strategy 1: Basic grayscale + threshold
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    processed_images.append(('Basic Threshold', thresh1))
-    
-    # Strategy 2: Adaptive threshold
-    thresh2 = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 8)
-    processed_images.append(('Adaptive Threshold', thresh2))
-    
-    # Strategy 3: Denoise + sharpen
-    denoised = cv2.medianBlur(gray, 3)
-    kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    sharpened = cv2.filter2D(denoised, -1, kernel)
-    _, thresh3 = cv2.threshold(sharpened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    processed_images.append(('Sharpened', thresh3))
-    
-    # Strategy 4: Morphological operations
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-    morphed = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel)
-    processed_images.append(('Morphological', morphed))
-    
+    gray = cv2.fastNlMeansDenoising(gray, None, 12, 7, 21)
+    clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(gray)
+
+    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    sharpened = cv2.filter2D(clahe, -1, kernel)
+
+    _, otsu = cv2.threshold(sharpened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    processed_images.append(("CLAHE + Otsu", otsu))
+
+    adaptive = cv2.adaptiveThreshold(
+        sharpened,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        31,
+        9,
+    )
+    processed_images.append(("Adaptive Gaussian", adaptive))
+
+    morph_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
+    opened = cv2.morphologyEx(adaptive, cv2.MORPH_OPEN, morph_kernel)
+    processed_images.append(("Adaptive + Open", opened))
+
+    inverted = cv2.bitwise_not(adaptive)
+    processed_images.append(("Inverted Adaptive", inverted))
+
+    denoised = cv2.medianBlur(otsu, 3)
+    close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    closed = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, close_kernel)
+    processed_images.append(("Otsu + Close", closed))
+
     return processed_images, None
+
+def _ocr_score(text, avg_confidence):
+    cleaned = text.strip()
+    if not cleaned:
+        return 0
+
+    alpha_ratio = sum(ch.isalpha() for ch in cleaned) / max(len(cleaned), 1)
+    separator_bonus = cleaned.count(",") * 25 + cleaned.count(";") * 20
+    ingredient_bonus = 600 if re.search(r"\bingredients?\b", cleaned, re.IGNORECASE) else 0
+    allergen_bonus = 250 if re.search(r"\bcontains?\b", cleaned, re.IGNORECASE) else 0
+    readable_bonus = int(alpha_ratio * 300)
+    return len(cleaned) + separator_bonus + ingredient_bonus + allergen_bonus + readable_bonus + int(avg_confidence * 8)
+
+def _run_tesseract(image, config):
+    data = pytesseract.image_to_data(
+        image,
+        config=config,
+        output_type=pytesseract.Output.DICT,
+    )
+    words = []
+    confidences = []
+    for word, conf in zip(data.get("text", []), data.get("conf", [])):
+        word = str(word).strip()
+        try:
+            confidence = float(conf)
+        except (TypeError, ValueError):
+            confidence = -1
+        if word:
+            words.append(word)
+        if confidence >= 0:
+            confidences.append(confidence)
+    text = " ".join(words)
+    avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+    return text, avg_confidence
 
 def extract_with_multiple_strategies(image_bytes):
     """Try multiple OCR strategies and return the best result"""
@@ -58,31 +101,24 @@ def extract_with_multiple_strategies(image_bytes):
         return {'success': False, 'error': error}
     
     best_result = None
-    best_confidence = 0
+    best_score = 0
+    best_strategy = None
+    best_ocr_confidence = 0
     
-    # Try different page segmentation modes
-    psm_modes = [6, 8, 11, 12]  # Different layout analysis modes
+    psm_modes = [6, 4, 11, 12]
     
     for strategy_name, processed_img in processed_images:
         for psm in psm_modes:
             try:
-                config = f'--oem 3 --psm {psm}'
-                text = pytesseract.image_to_string(processed_img, config=config)
-                
-                # Calculate confidence based on text length and readability
-                score = len(text.strip())
-                
-                # Bonus for finding "INGREDIENTS" keyword
-                if 'INGREDIENTS' in text.upper() or 'INGREDIENT' in text.upper():
-                    score += 500
-                
-                # Bonus for having commas (likely ingredient list)
-                if ',' in text:
-                    score += 200
-                
-                if score > best_confidence:
-                    best_confidence = score
+                config = f"--oem 3 --psm {psm} -c preserve_interword_spaces=1"
+                text, avg_confidence = _run_tesseract(processed_img, config)
+                score = _ocr_score(text, avg_confidence)
+
+                if score > best_score:
+                    best_score = score
                     best_result = text
+                    best_strategy = f"{strategy_name}, PSM {psm}"
+                    best_ocr_confidence = avg_confidence
                     
             except Exception as e:
                 continue
@@ -96,7 +132,8 @@ def extract_with_multiple_strategies(image_bytes):
     return {
         'success': True,
         'raw_text': best_result,
-        'strategy_used': 'Multiple strategies'
+        'strategy_used': best_strategy or 'Multiple strategies',
+        'ocr_confidence': round(best_ocr_confidence / 100, 2),
     }
 
 def extract_ingredients(image_bytes):
@@ -124,6 +161,8 @@ def extract_ingredients(image_bytes):
             'raw_text': extracted_text.strip(),
             'cleaned_text': cleaned_result['ingredients'],
             'ingredients_list': cleaned_result['ingredients_list'],
+            'strategy_used': result.get('strategy_used'),
+            'ocr_confidence': result.get('ocr_confidence', 0.0),
             'warning': cleaned_result.get('warning')
         }
     except Exception as e:
@@ -141,7 +180,7 @@ def clean_extracted_text(text):
     }
     
     try:
-        # Remove excessive whitespace and newlines
+        text = fix_common_ocr_errors(text)
         text = re.sub(r'\s+', ' ', text.strip())
         
         # Try to find the "INGREDIENTS:" section
@@ -186,25 +225,7 @@ def clean_extracted_text(text):
             
             # Only keep if it has letters and is longer than 2 characters
             if ingredient and len(ingredient) > 2 and re.search(r'[a-zA-Z]', ingredient):
-                # Normalize common ingredient names
                 ingredient = ingredient.lower()
-                
-                # Fix common OCR errors
-                fixes = {
-                    'wheat': 'wheat',
-                    'flour': 'flour',
-                    'soy': 'soy',
-                    'milk': 'milk',
-                    'egg': 'egg',
-                    'sugar': 'sugar',
-                    'salt': 'salt',
-                    'oil': 'oil',
-                }
-                
-                for wrong, correct in fixes.items():
-                    if wrong in ingredient:
-                        ingredient = correct
-                
                 cleaned_ingredients.append(ingredient)
         
         # Remove duplicates while preserving order
@@ -224,6 +245,27 @@ def clean_extracted_text(text):
         result['ingredients_list'] = [text]
     
     return result
+
+def fix_common_ocr_errors(text):
+    fixes = {
+        "ingrediants": "ingredients",
+        "ingredlents": "ingredients",
+        "contalns": "contains",
+        "miik": "milk",
+        "mllk": "milk",
+        "wbeat": "wheat",
+        "wheaf": "wheat",
+        "soya bean": "soybean",
+        "peant": "peanut",
+        "peanutt": "peanut",
+        "seseme": "sesame",
+        "glulen": "gluten",
+        "sait": "salt",
+        "suger": "sugar",
+    }
+    for wrong, correct in fixes.items():
+        text = re.sub(rf"\b{re.escape(wrong)}\b", correct, text, flags=re.IGNORECASE)
+    return text
 
 def extract_ingredients_from_path(image_path):
     """Extract ingredients from image file path"""

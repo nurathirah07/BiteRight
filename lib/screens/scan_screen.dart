@@ -39,14 +39,13 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-  // Pick image from gallery only (camera removed)
-  Future<void> _pickImageFromGallery() async {
+  Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 80,
+        source: source,
+        maxWidth: 1800,
+        maxHeight: 1800,
+        imageQuality: 92,
       );
 
       if (image != null) {
@@ -59,13 +58,20 @@ class _ScanScreenState extends State<ScanScreen> {
           _processedIngredients = [];
           _ingredientsController.clear();
         });
-        _scanImage();
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error accessing gallery: $e';
+        _errorMessage = 'Error accessing image: $e';
       });
     }
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    await _pickImage(ImageSource.camera);
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    await _pickImage(ImageSource.gallery);
   }
 
   // Validate image before scanning
@@ -170,6 +176,8 @@ class _ScanScreenState extends State<ScanScreen> {
           'detection_method': data['detection_method'] ?? 'AI Analysis',
           'allergens_detected': data['allergens_detected'] ?? [],
           'raw_text': _editableIngredientsText,
+          'was_edited':
+              _editableIngredientsText.trim() != _rawExtractedText.trim(),
         };
 
         // Save to history
@@ -182,6 +190,7 @@ class _ScanScreenState extends State<ScanScreen> {
           data['id'] = scanId;
           data['scan_id'] = scanId;
         }
+        data['was_edited'] = scanDataToSave['was_edited'];
 
         setState(() {
           _scanResult = data;
@@ -358,19 +367,42 @@ class _ScanScreenState extends State<ScanScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: _pickImageFromGallery,
-                  icon: const Icon(Icons.photo_library_rounded, size: 20),
-                  label: const Text('Choose from Gallery'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _pickImageFromCamera,
+                        icon: const Icon(Icons.camera_alt_rounded, size: 20),
+                        label: const Text('Scan Label'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickImageFromGallery,
+                        icon: const Icon(Icons.photo_library_rounded, size: 20),
+                        label: const Text('Gallery'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(
+                            color: AppTheme.primary.withValues(alpha: 0.35),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
