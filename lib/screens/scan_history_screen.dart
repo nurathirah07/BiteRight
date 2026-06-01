@@ -53,41 +53,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     }
   }
 
-  // ONLY ensure required fields exist - DO NOT recalculate risk level
   Map<String, dynamic> _ensureScanData(Map<String, dynamic> scan) {
-    // Get the stored risk level - use it as is
-    String riskLevel = scan['risk_level'] ?? 'unknown';
-    int riskScore = scan['risk_score'] ?? 0;
-    final alerts = List<String>.from(scan['alerts'] ?? []);
-    
-    // If risk_level is 'unknown' or empty, determine from alerts ONLY as fallback
-    if (riskLevel == 'unknown' || riskLevel == '') {
-      // Check alerts for actual risk
-      for (var alert in alerts) {
-        final alertLower = alert.toLowerCase();
-        if (alertLower.contains('matches your') || 
-            (alertLower.contains('may violate') && alertLower.contains('diabetic'))) {
-          riskLevel = 'unsafe';
-          riskScore = 35;
-          break;
-        } else if (alertLower.contains('may violate')) {
-          riskLevel = 'caution';
-          riskScore = 55;
-        }
-      }
-      if (riskLevel == 'unknown' || riskLevel == '') {
-        riskLevel = 'safe';
-        if (riskScore == 0) riskScore = 100;
-      }
-    }
-    
-    // Return scan with ensured fields (preserving original values)
-    return {
-      ...scan,
-      'risk_level': riskLevel,
-      'risk_score': riskScore,
-      'confidence': scan['confidence'] ?? 0.75,
-    };
+    return _apiService.normalizeScanAnalysis(scan);
   }
 
   List<Map<String, dynamic>> get _filteredScans {
@@ -251,13 +218,19 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                   riskIcon: _getRiskIcon(riskLevel),
                                   riskColor: _getRiskColor(riskLevel),
                                   onTap: () {
+                                    final normalized =
+                                        _apiService.normalizeScanAnalysis(
+                                      Map.from(scan),
+                                    );
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => ScanDetailsScreen(
                                           userId: widget.userId,
-                                          scanId: scan['id'],
-                                          scanData: scan,
+                                          scanId:
+                                              normalized['id']?.toString() ??
+                                                  '',
+                                          scanData: normalized,
                                         ),
                                       ),
                                     );
