@@ -5,9 +5,29 @@ from PIL import Image
 import io
 import re
 import os
+import shutil
 
-# Configure Tesseract path (Windows only - adjust to your installation path)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+def _configure_tesseract():
+    """Locate Tesseract OCR binary across common install paths."""
+    env_path = os.environ.get('TESSERACT_CMD') or os.environ.get('TESSERACT_PATH')
+    candidates = [
+        env_path,
+        shutil.which('tesseract'),
+        r'C:\Program Files\Tesseract-OCR\tesseract.exe',
+        r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
+        '/usr/bin/tesseract',
+        '/usr/local/bin/tesseract',
+        '/opt/homebrew/bin/tesseract',
+    ]
+    for candidate in candidates:
+        if candidate and os.path.isfile(candidate):
+            pytesseract.pytesseract.tesseract_cmd = candidate
+            return candidate
+    return None
+
+
+TESSERACT_PATH = _configure_tesseract()
 
 def preprocess_image_multiple(image_bytes):
     """Apply complementary preprocessing techniques for noisy package labels."""
@@ -44,18 +64,6 @@ def preprocess_image_multiple(image_bytes):
         9,
     )
     processed_images.append(("Adaptive Gaussian", adaptive))
-
-    morph_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
-    opened = cv2.morphologyEx(adaptive, cv2.MORPH_OPEN, morph_kernel)
-    processed_images.append(("Adaptive + Open", opened))
-
-    inverted = cv2.bitwise_not(adaptive)
-    processed_images.append(("Inverted Adaptive", inverted))
-
-    denoised = cv2.medianBlur(otsu, 3)
-    close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-    closed = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, close_kernel)
-    processed_images.append(("Otsu + Close", closed))
 
     return processed_images, None
 
@@ -94,7 +102,7 @@ def _run_tesseract(image, config):
     return text, avg_confidence
 
 def extract_with_multiple_strategies(image_bytes):
-    """Try multiple OCR strategies and return the best result"""
+    """Try OCR strategies and return the best result (bounded for speed)."""
     processed_images, error = preprocess_image_multiple(image_bytes)
     
     if error:
@@ -105,9 +113,14 @@ def extract_with_multiple_strategies(image_bytes):
     best_strategy = None
     best_ocr_confidence = 0
     
-    psm_modes = [6, 4, 11, 12]
-    
+    # Fewer PSM modes keeps extraction under mobile timeouts.
+    psm_modes = [6, 11]
+    early_exit_score = 1400
+    done = False
+
     for strategy_name, processed_img in processed_images:
+        if done:
+            break
         for psm in psm_modes:
             try:
                 config = f"--oem 3 --psm {psm} -c preserve_interword_spaces=1"
@@ -119,8 +132,13 @@ def extract_with_multiple_strategies(image_bytes):
                     best_result = text
                     best_strategy = f"{strategy_name}, PSM {psm}"
                     best_ocr_confidence = avg_confidence
-                    
-            except Exception as e:
+
+                if score >= early_exit_score and re.search(
+                    r"\bingredients?\b", text, re.IGNORECASE
+                ):
+                    done = True
+                    break
+            except Exception:
                 continue
     
     if not best_result:
@@ -139,6 +157,15 @@ def extract_with_multiple_strategies(image_bytes):
 def extract_ingredients(image_bytes):
     """Enhanced extraction with multiple strategies"""
     try:
+        if not TESSERACT_PATH:
+            return {
+                'success': False,
+                'error': (
+                    'Tesseract OCR is not installed. Install Tesseract and set '
+                    'TESSERACT_CMD to its executable path.'
+                ),
+            }
+
         # First try multiple strategies
         result = extract_with_multiple_strategies(image_bytes)
         

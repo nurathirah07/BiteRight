@@ -3,13 +3,10 @@ Extract training data from Firebase for ML model training
 UPDATED with synthetic negative sample generation
 """
 
-import firebase_admin
-from firebase_admin import credentials, firestore
-import pandas as pd
-import numpy as np
+import csv
+import firebase_admin  # type: ignore
+from firebase_admin import credentials, firestore  # type: ignore
 from collections import Counter
-import re
-import os
 import random
 
 # Initialize Firebase
@@ -17,139 +14,146 @@ cred = credentials.Certificate('serviceAccountKey.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+
+def save_to_csv(data, filename):
+    if not data:
+        print(f"No data to save to {filename}")
+        return
+
+    fieldnames = sorted({key for row in data for key in row.keys()})
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            writer.writerow({key: '' if value is None else str(value) for key, value in row.items()})
+
+
+def parse_allergens(allergens):
+    if isinstance(allergens, list):
+        return allergens
+    if isinstance(allergens, str):
+        allergens = allergens.strip()
+        if allergens.startswith('[') and allergens.endswith(']'):
+            try:
+                parsed = eval(allergens)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+        return [a.strip() for a in allergens.split(',') if a.strip()]
+    return []
+
+
 def extract_training_data():
     """Extract products with allergen information from Firebase"""
-    
     print("Extracting training data from Firebase...")
-    
-    # List available collections
+
     collections = [col.id for col in db.collections()]
     print(f"Available collections: {collections}")
-    
-    # Use openfoodfacts_products collection
+
     collection_name = 'openfoodfacts_products'
-    
     if collection_name not in collections:
         print(f"Collection '{collection_name}' not found!")
-        return pd.DataFrame()
-    
+        return []
+
     print(f"\nExtracting from: {collection_name}")
     products_ref = db.collection(collection_name).stream()
-    
+
     data = []
     count = 0
-    
+
     for product in products_ref:
-        product_data = product.to_dict()
+        product_data = product.to_dict() or {}
         count += 1
-        
-        # Extract fields based on your actual structure
+
         barcode = product_data.get('barcode', '') or product.id
-        product_name = product_data.get('product_name', '')
-        brands = product_data.get('brands', '')
-        categories = product_data.get('categories', '')
-        
-        # Get allergens (array in your structure)
+        product_name = product_data.get('product_name', '') or ''
+        brands = product_data.get('brands', '') or ''
+        categories = product_data.get('categories', '') or ''
+
         allergens = product_data.get('allergens', [])
         if not isinstance(allergens, list):
-            # If it's a string, convert to list
-            if isinstance(allergens, str):
-                allergens = [a.strip() for a in allergens.split(',') if a.strip()]
-            else:
-                allergens = []
-        
-        # Get has_allergens flag
-        has_allergens = product_data.get('has_allergens', False)
-        
-        # Since there's no ingredients field, we'll use product_name + categories as text
-        text_for_ml = f"{product_name} {categories} {brands}".lower()
-        
-        # Only include if we have some text to work with
+            allergens = parse_allergens(allergens)
+
+        has_allergens = bool(product_data.get('has_allergens', False))
+        text_for_ml = f"{product_name} {categories} {brands}".lower().strip()
+
         if len(text_for_ml) > 10:
             data.append({
                 'barcode': barcode,
                 'product_name': product_name,
                 'brands': brands,
                 'categories': categories,
-                'text': text_for_ml,  # Combined text for ML
-                'allergens': str(allergens),  # Store as string for CSV
+                'text': text_for_ml,
+                'allergens': str(allergens),
                 'has_allergens': 1 if has_allergens else 0,
                 'allergen_count': len(allergens)
             })
-        
-        # Progress indicator
+
         if count % 100 == 0:
             print(f"   Processed {count} products...")
-    
+
     if not data:
         print("No products extracted!")
-        return pd.DataFrame()
-    
-    df = pd.DataFrame(data)
-    print(f"\nExtracted {len(df)} products")
-    print(f"   Products with allergens: {df['has_allergens'].sum()}")
-    print(f"   Products without allergens: {len(df) - df['has_allergens'].sum()}")
-    
-    # Show sample
-    print("\nSample products:")
-    for i, row in df.head(3).iterrows():
-        print(f"   • {row['product_name']}: {row['allergens']}")
-    
-    # Save to CSV
-    df.to_csv('training_data.csv', index=False)
-    print("Saved training data to training_data.csv")
-    
-    return df
+        return []
 
-def analyze_allergen_distribution(df):
+    total = len(data)
+    positives = sum(item['has_allergens'] for item in data)
+    negatives = total - positives
+
+    print(f"\nExtracted {total} products")
+    print(f"   Products with allergens: {positives}")
+    print(f"   Products without allergens: {negatives}")
+
+    print("\nSample products:")
+    for row in data[:3]:
+        print(f"   • {row['product_name']}: {row['allergens']}")
+
+    save_to_csv(data, 'training_data.csv')
+    print("Saved training data to training_data.csv")
+
+    return data
+
+
+def analyze_allergen_distribution(data):
     """Analyze the distribution of allergens in your dataset"""
-    
-    if len(df) == 0:
+    if not data:
         print("No data to analyze")
         return
-    
+
     print("\nAllergen Distribution Analysis:")
-    
-    # Count all allergens
     all_allergens = []
-    for idx, row in df[df['has_allergens'] == 1].iterrows():
-        allergens_str = row['allergens']
-        # Parse string representation of list
-        if isinstance(allergens_str, str) and allergens_str.startswith('['):
-            try:
-                allergens = eval(allergens_str)
-                if isinstance(allergens, list):
-                    all_allergens.extend(allergens)
-            except:
-                pass
-    
+
+    for row in data:
+        if row.get('has_allergens') == 1:
+            all_allergens.extend(parse_allergens(row.get('allergens', [])))
+
     if not all_allergens:
         print("No allergen data found in the extracted products")
         return
-    
+
     allergen_counts = Counter(all_allergens)
-    
+
     print(f"Total allergen occurrences: {len(all_allergens)}")
     print(f"Unique allergens: {len(allergen_counts)}")
     print("\nTop 20 most common allergens:")
     for allergen, count in allergen_counts.most_common(20):
         print(f"   {allergen}: {count}")
 
-def add_synthetic_negative_samples(df, target_ratio=0.5):
+
+def add_synthetic_negative_samples(data, target_ratio=0.5):
     """
     Add synthetic negative samples if real ones are missing
     """
-    
-    positive = df[df['has_allergens'] == 1]
-    negative = df[df['has_allergens'] == 0]
-    
+    positive = [item for item in data if item.get('has_allergens') == 1]
+    negative = [item for item in data if item.get('has_allergens') == 0]
+
     if len(negative) > 0:
         print(f"\nAlready have {len(negative)} negative samples")
-        return df
-    
+        return data
+
     print(f"\nNo negative samples found. Creating synthetic ones...")
-    
-    # Common non-allergenic products (safe products)
+
     safe_products = [
         {
             'product_name': 'Pure Salt',
@@ -272,102 +276,97 @@ def add_synthetic_negative_samples(df, target_ratio=0.5):
             'has_allergens': 0
         }
     ]
-    
-    # Create variations by adding numbers to product names
+
     synthetic_negatives = []
-    num_needed = len(positive)  # Create as many negatives as positives
-    
+    num_needed = len(positive)
+
     for i in range(num_needed):
         base = random.choice(safe_products)
         synthetic = base.copy()
-        
-        # Add variation to make each slightly different
         variation = random.choice(['', ' Organic', ' Premium', ' Fine', ' Pure', ' Natural'])
         synthetic['product_name'] = base['product_name'] + variation
         synthetic['barcode'] = f"SYNTHETIC_{i:04d}"
         synthetic['brands'] = base['brands'] + random.choice(['', ' Co.', ' Inc.', ' Brands'])
-        
-        # Slightly vary the text
+
         words = synthetic['text'].split()
         if len(words) > 2:
             random.shuffle(words)
             synthetic['text'] = ' '.join(words)
-        
-        synthetic_negatives.append(synthetic)
-    
-    synthetic_df = pd.DataFrame(synthetic_negatives)
-    print(f"Created {len(synthetic_df)} synthetic negative samples")
-    
-    # Combine with original data
-    combined_df = pd.concat([df, synthetic_df], ignore_index=True)
-    
-    # Shuffle the dataset
-    combined_df = combined_df.sample(frac=1, random_state=42).reset_index(drop=True)
-    
-    print(f"\nCombined dataset statistics:")
-    print(f"   Total samples: {len(combined_df)}")
-    print(f"   Positive (has allergens): {combined_df['has_allergens'].sum()}")
-    print(f"   Negative (no allergens): {len(combined_df) - combined_df['has_allergens'].sum()}")
-    print(f"   Ratio positive/negative: {combined_df['has_allergens'].sum() / (len(combined_df) - combined_df['has_allergens'].sum()):.2f}")
-    
-    return combined_df
 
-def create_balanced_dataset(df):
+        synthetic['allergen_count'] = 0
+        synthetic_negatives.append(synthetic)
+
+    print(f"Created {len(synthetic_negatives)} synthetic negative samples")
+
+    combined_data = list(data) + synthetic_negatives
+    random.Random(42).shuffle(combined_data)
+
+    total = len(combined_data)
+    positives = sum(item['has_allergens'] for item in combined_data)
+    negatives = total - positives
+
+    print(f"\nCombined dataset statistics:")
+    print(f"   Total samples: {total}")
+    print(f"   Positive (has allergens): {positives}")
+    print(f"   Negative (no allergens): {negatives}")
+    if negatives > 0:
+        print(f"   Ratio positive/negative: {positives / negatives:.2f}")
+    else:
+        print("   Ratio positive/negative: infinite")
+
+    return combined_data
+
+
+def create_balanced_dataset(data):
     """Create a balanced dataset for training"""
-    
-    if len(df) == 0:
+    if not data:
         print("No data to balance")
-        return df
-    
-    # Separate positive and negative samples
-    positive = df[df['has_allergens'] == 1]
-    negative = df[df['has_allergens'] == 0]
-    
+        return data
+
+    positive = [item for item in data if item.get('has_allergens') == 1]
+    negative = [item for item in data if item.get('has_allergens') == 0]
+
     print(f"\nBefore balancing:")
     print(f"   Positive samples: {len(positive)}")
     print(f"   Negative samples: {len(negative)}")
-    
+
     if len(positive) == 0:
         print("No positive samples found!")
-        return df
-    
-    # If no negative samples, add synthetic ones
+        return data
+
     if len(negative) == 0:
         print("No negative samples found! Adding synthetic negatives...")
-        df = add_synthetic_negative_samples(df)
-        # Re-extract positive and negative
-        positive = df[df['has_allergens'] == 1]
-        negative = df[df['has_allergens'] == 0]
-    
-    # Balance the dataset
+        data = add_synthetic_negative_samples(data)
+        positive = [item for item in data if item.get('has_allergens') == 1]
+        negative = [item for item in data if item.get('has_allergens') == 0]
+
     if len(positive) < len(negative):
-        # Undersample negative
-        negative_sampled = negative.sample(n=len(positive), random_state=42)
-        balanced_df = pd.concat([positive, negative_sampled])
+        sampled_negative = random.Random(42).sample(negative, len(positive))
+        balanced_data = list(positive) + sampled_negative
     elif len(negative) < len(positive):
-        # Undersample positive
-        positive_sampled = positive.sample(n=len(negative), random_state=42)
-        balanced_df = pd.concat([positive_sampled, negative])
+        sampled_positive = random.Random(42).sample(positive, len(negative))
+        balanced_data = sampled_positive + list(negative)
     else:
-        # Already balanced
-        balanced_df = df.copy()
-    
-    # Shuffle
-    balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
-    
+        balanced_data = list(data)
+
+    random.Random(42).shuffle(balanced_data)
+
+    positives = sum(item['has_allergens'] for item in balanced_data)
+    negatives = len(balanced_data) - positives
+
     print(f"\nAfter balancing:")
-    print(f"   Total samples: {len(balanced_df)}")
-    print(f"   Positive: {len(balanced_df[balanced_df['has_allergens']==1])}")
-    print(f"   Negative: {len(balanced_df[balanced_df['has_allergens']==0])}")
-    
-    return balanced_df
+    print(f"   Total samples: {len(balanced_data)}")
+    print(f"   Positive: {positives}")
+    print(f"   Negative: {negatives}")
+
+    return balanced_data
+
 
 def create_sample_data():
     """Create sample data for testing if no real data exists"""
     print("\nCreating sample data for testing...")
-    
+
     sample_data = [
-        # Positive samples (with allergens)
         {
             'barcode': '001',
             'product_name': 'Creamy Peanut Butter',
@@ -375,7 +374,8 @@ def create_sample_data():
             'categories': 'Spread,Nut Butter',
             'text': 'creamy peanut butter spread nut butter test brand',
             'allergens': "['peanuts']",
-            'has_allergens': 1
+            'has_allergens': 1,
+            'allergen_count': 1
         },
         {
             'barcode': '002',
@@ -384,7 +384,8 @@ def create_sample_data():
             'categories': 'Confectionery,Chocolate',
             'text': 'milk chocolate bar confectionery chocolate test brand',
             'allergens': "['milk']",
-            'has_allergens': 1
+            'has_allergens': 1,
+            'allergen_count': 1
         },
         {
             'barcode': '003',
@@ -393,7 +394,8 @@ def create_sample_data():
             'categories': 'Bakery,Bread',
             'text': 'whole wheat bread bakery bread test brand',
             'allergens': "['gluten', 'wheat']",
-            'has_allergens': 1
+            'has_allergens': 1,
+            'allergen_count': 2
         },
         {
             'barcode': '004',
@@ -402,7 +404,8 @@ def create_sample_data():
             'categories': 'Beverages,Milk Alternative',
             'text': 'soy milk beverages milk alternative test brand',
             'allergens': "['soy']",
-            'has_allergens': 1
+            'has_allergens': 1,
+            'allergen_count': 1
         },
         {
             'barcode': '005',
@@ -411,9 +414,9 @@ def create_sample_data():
             'categories': 'Baking,Flour',
             'text': 'almond flour baking flour test brand',
             'allergens': "['almonds', 'tree nuts']",
-            'has_allergens': 1
+            'has_allergens': 1,
+            'allergen_count': 2
         },
-        # Negative samples (no allergens)
         {
             'barcode': '006',
             'product_name': 'Pure Sea Salt',
@@ -421,7 +424,8 @@ def create_sample_data():
             'categories': 'Seasoning,Spices',
             'text': 'pure sea salt seasoning spices test brand',
             'allergens': "[]",
-            'has_allergens': 0
+            'has_allergens': 0,
+            'allergen_count': 0
         },
         {
             'barcode': '007',
@@ -430,7 +434,8 @@ def create_sample_data():
             'categories': 'Sweetener,Baking',
             'text': 'white cane sugar sweetener baking test brand',
             'allergens': "[]",
-            'has_allergens': 0
+            'has_allergens': 0,
+            'allergen_count': 0
         },
         {
             'barcode': '008',
@@ -439,7 +444,8 @@ def create_sample_data():
             'categories': 'Beverages,Water',
             'text': 'spring water beverages water test brand',
             'allergens': "[]",
-            'has_allergens': 0
+            'has_allergens': 0,
+            'allergen_count': 0
         },
         {
             'barcode': '009',
@@ -448,7 +454,8 @@ def create_sample_data():
             'categories': 'Oils,Cooking',
             'text': 'extra virgin olive oil oils cooking test brand',
             'allergens': "[]",
-            'has_allergens': 0
+            'has_allergens': 0,
+            'allergen_count': 0
         },
         {
             'barcode': '010',
@@ -457,67 +464,75 @@ def create_sample_data():
             'categories': 'Grains,Rice',
             'text': 'basmati rice grains rice test brand',
             'allergens': "[]",
-            'has_allergens': 0
+            'has_allergens': 0,
+            'allergen_count': 0
         }
     ]
-    
-    df = pd.DataFrame(sample_data)
-    print(f"Created {len(df)} sample products (5 positive, 5 negative)")
-    return df
 
-def validate_dataset(df):
+    print(f"Created {len(sample_data)} sample products (5 positive, 5 negative)")
+    return sample_data
+
+
+def validate_dataset(data):
     """Validate the dataset before saving"""
-    
     print("\nValidating dataset...")
-    
+
+    if not data:
+        print("No data to validate")
+        return False
+
     issues = []
-    
-    # Check for required columns
     required_cols = ['barcode', 'product_name', 'text', 'has_allergens']
+    available_cols = set()
+    for row in data:
+        available_cols.update(row.keys())
+
     for col in required_cols:
-        if col not in df.columns:
+        if col not in available_cols:
             issues.append(f"Missing required column: {col}")
-    
+
     if issues:
         print("Issues found:")
         for issue in issues:
             print(f"   • {issue}")
         return False
-    
-    # Check for null values
-    null_counts = df.isnull().sum()
-    if null_counts.sum() > 0:
+
+    null_counts = {}
+    for row in data:
+        for key, value in row.items():
+            if value is None:
+                null_counts[key] = null_counts.get(key, 0) + 1
+                row[key] = ''
+
+    if null_counts:
         print("Null values found:")
-        for col, count in null_counts[null_counts > 0].items():
+        for col, count in null_counts.items():
             print(f"   • {col}: {count} nulls")
-        # Fill nulls
-        df = df.fillna('')
-    
-    # Check class balance
-    pos = df['has_allergens'].sum()
-    neg = len(df) - pos
+
+    pos = sum(1 for row in data if row.get('has_allergens') == 1)
+    neg = len(data) - pos
+
     print(f"\nFinal class distribution:")
-    print(f"   Positive: {pos} ({pos/len(df)*100:.1f}%)")
-    print(f"   Negative: {neg} ({neg/len(df)*100:.1f}%)")
-    
+    print(f"   Positive: {pos} ({pos/len(data)*100:.1f}%)")
+    print(f"   Negative: {neg} ({neg/len(data)*100:.1f}%)")
+
     if pos == 0 or neg == 0:
         print("CRITICAL: Only one class present!")
         return False
-    
-    if abs(pos - neg) > len(df) * 0.3:  # If imbalance > 30%
+
+    if abs(pos - neg) > len(data) * 0.3:
         print("Warning: Significant class imbalance detected")
-    
+
     return True
 
+
 if __name__ == "__main__":
-    print("="*60)
+    print("=" * 60)
     print("BITERIGHT - TRAINING DATA EXTRACTION")
-    print("="*60)
-    
-    # Try to extract real data
+    print("=" * 60)
+
     df = extract_training_data()
-    
-    # If no real data, use sample data
+
     if len(df) == 0:
         print("\nNo real data found in Firebase.")
         use_sample = input("Use sample data for testing? (y/n): ").lower()
@@ -526,27 +541,22 @@ if __name__ == "__main__":
         else:
             print("Exiting...")
             exit()
-    
+
     if len(df) > 0:
         analyze_allergen_distribution(df)
-        
-        # Create balanced dataset (this will add synthetic negatives if needed)
         balanced_df = create_balanced_dataset(df)
-        
-        # Validate the dataset
+
         if validate_dataset(balanced_df):
-            # Save balanced dataset
-            balanced_df.to_csv('training_data_balanced.csv', index=False)
+            save_to_csv(balanced_df, 'training_data_balanced.csv')
             print("\nTraining data preparation complete!")
             print(f"Saved to: training_data_balanced.csv")
             print(f"\nFinal dataset size: {len(balanced_df)} products")
-            print(f"   Used fields: product_name, brands, categories")
-            
-            # Show sample of the final dataset
+            print("   Used fields: product_name, brands, categories")
+
             print("\nSample from final dataset:")
-            sample = balanced_df.sample(min(3, len(balanced_df)))
-            for idx, row in sample.iterrows():
-                status = "HAS ALLERGENS" if row['has_allergens'] == 1 else "SAFE"
+            sample = random.sample(balanced_df, min(3, len(balanced_df)))
+            for row in sample:
+                status = "HAS ALLERGENS" if row.get('has_allergens') == 1 else "SAFE"
                 print(f"   • {row['product_name']}: {status}")
         else:
             print("\nDataset validation failed. Please check the issues above.")

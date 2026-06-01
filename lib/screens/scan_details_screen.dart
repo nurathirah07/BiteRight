@@ -1,5 +1,6 @@
 // lib/screens/scan_details_screen.dart
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
 class ScanDetailsScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _scanData = Map.from(widget.scanData);
+    _scanData = ApiService().normalizeScanAnalysis(Map.from(widget.scanData));
     _calculateMetrics();
   }
 
@@ -41,8 +42,21 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
         storedRiskLevel.isNotEmpty &&
         storedRiskLevel != 'unknown') {
       _calculatedRiskLevel = storedRiskLevel;
-      _calculatedRiskScore = storedRiskScore;
-      _calculatedConfidence = storedConfidence;
+      _calculatedRiskScore = _normalizeDisplayRiskScore(
+        storedRiskLevel,
+        storedRiskScore,
+      );
+      _calculatedConfidence = storedConfidence > 0
+          ? storedConfidence
+          : _calculateConfidence(
+              ingredients: List<String>.from(_scanData['ingredients'] ?? []),
+              wasEdited: _scanData['was_edited'] ?? false,
+              hasProductName:
+                  (_scanData['product_name'] ?? '').toString().isNotEmpty,
+              allergensFoundCount: List<String>.from(_scanData['alerts'] ?? [])
+                  .where((a) => a.toLowerCase().contains('matches your'))
+                  .length,
+            );
       _scanData['risk_level'] = _calculatedRiskLevel;
       _scanData['risk_score'] = _calculatedRiskScore;
       _scanData['confidence'] = _calculatedConfidence;
@@ -110,6 +124,19 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     }
     final parsed = double.tryParse(value?.toString() ?? '') ?? 0.0;
     return parsed > 1 ? (parsed / 100).clamp(0.0, 1.0) : parsed;
+  }
+
+  int _normalizeDisplayRiskScore(String riskLevel, int score) {
+    if (riskLevel == 'safe' && score < 70) {
+      return score == 0 ? 100 : (100 - score).clamp(85, 100);
+    }
+    if (riskLevel == 'caution' && score > 75) {
+      return (100 - score).clamp(40, 75);
+    }
+    if (riskLevel == 'unsafe' && score > 39) {
+      return (100 - score).clamp(0, 39);
+    }
+    return score;
   }
 
   int _calculateRiskScore({

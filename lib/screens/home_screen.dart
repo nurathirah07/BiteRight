@@ -84,13 +84,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToScanDetails(Map<String, dynamic> scan) {
+    final normalized = _apiService.normalizeScanAnalysis(Map.from(scan));
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ScanDetailsScreen(
           userId: widget.userId,
-          scanId: scan['id'],
-          scanData: scan,
+          scanId: normalized['id']?.toString() ?? '',
+          scanData: normalized,
         ),
       ),
     );
@@ -807,15 +808,15 @@ class _RecentScansList extends StatelessWidget {
       child: Column(
         children: List.generate(scans.length, (i) {
           final scan = scans[i];
-          final enrichedScan = {
-            'id': scan['id'],
+          // Keep full scan payload for navigation so details match scan history.
+          final displayScan = {
+            ...scan,
             'risk_level': scan['risk_level'] ?? 'unknown',
             'product_name': scan['product_name'] ?? 'Unknown product',
             'ingredients': scan['ingredients'] ?? [],
-            'scanned_at': scan['scanned_at'],
           };
           return _ScanTile(
-            scan: enrichedScan,
+            scan: displayScan,
             isLast: i == scans.length - 1,
             onTap: onTap,
           );
@@ -1051,7 +1052,7 @@ class _EmptyScans extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Scan your first food product\nto see results here',
+            'Upload your first ingredients image\nto see results here',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
@@ -1062,8 +1063,8 @@ class _EmptyScans extends StatelessWidget {
           const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: onScanTap,
-            icon: const Icon(Icons.camera_alt_rounded, size: 18),
-            label: const Text('Start scanning'),
+            icon: const Icon(Icons.upload_rounded, size: 18),
+            label: const Text('Upload image'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppTheme.primary,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),

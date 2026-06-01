@@ -1,4 +1,5 @@
 // lib/services/api_service.dart
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -48,6 +49,77 @@ class ApiService {
   }
 
   int _min(int a, int b) => a < b ? a : b;
+
+  double _asConfidence(dynamic value) {
+    if (value is num) {
+      return value > 1 ? (value / 100).clamp(0.0, 1.0) : value.toDouble();
+    }
+    final parsed = double.tryParse(value?.toString() ?? '') ?? 0.0;
+    return parsed > 1 ? (parsed / 100).clamp(0.0, 1.0) : parsed;
+  }
+
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.round();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  /// Normalizes backend/legacy scan payloads for UI (safety score + confidence).
+  Map<String, dynamic> normalizeScanAnalysis(Map<String, dynamic> raw) {
+    final merged = Map<String, dynamic>.from(raw);
+    if (merged['analysis'] is Map) {
+      merged.addAll(Map<String, dynamic>.from(merged['analysis'] as Map));
+    }
+
+    var riskLevel = (merged['risk_level'] ?? merged['safety_classification'] ?? 'unknown')
+        .toString()
+        .toLowerCase();
+    var riskScore = _asInt(merged['risk_score']);
+    var confidence = _asConfidence(merged['confidence']);
+    final ingredients = List<String>.from(merged['ingredients'] ?? []);
+    final rawText = (merged['raw_text'] ?? '').toString().trim();
+    final alerts = List<String>.from(merged['alerts'] ?? []);
+
+    // Legacy hazard scores: safe products were often stored as 0.
+    if (riskLevel == 'safe' && riskScore < 70) {
+      riskScore = riskScore == 0 ? 100 : (100 - riskScore).clamp(85, 100);
+    } else if (riskLevel == 'caution' && riskScore > 75) {
+      riskScore = (100 - riskScore).clamp(40, 75);
+    } else if (riskLevel == 'unsafe' && riskScore > 39) {
+      riskScore = (100 - riskScore).clamp(0, 39);
+    }
+
+    if (confidence <= 0 && (ingredients.isNotEmpty || rawText.isNotEmpty)) {
+      confidence = 0.72;
+    }
+
+    if ((riskLevel.isEmpty || riskLevel == 'unknown') && alerts.isNotEmpty) {
+      final hasUnsafe = alerts.any(
+        (a) => a.toLowerCase().contains('matches your'),
+      );
+      final hasCaution = alerts.any(
+        (a) => a.toLowerCase().contains('may violate'),
+      );
+      if (hasUnsafe) {
+        riskLevel = 'unsafe';
+        if (riskScore >= 70) riskScore = 25;
+      } else if (hasCaution) {
+        riskLevel = 'caution';
+        if (riskScore >= 70) riskScore = 55;
+      } else {
+        riskLevel = 'safe';
+        if (riskScore < 70) riskScore = 100;
+      }
+    }
+
+    merged['risk_level'] = riskLevel;
+    merged['risk_score'] = riskScore;
+    merged['confidence'] = confidence;
+    if (ingredients.isNotEmpty) {
+      merged['ingredients'] = ingredients;
+    }
+    return merged;
+  }
 
   /// Tests multiple URLs and returns the first working one
   Future<String?> findWorkingUrl() async {
@@ -208,7 +280,11 @@ class ApiService {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         _log('Found ${data.length} scans');
-        return List<Map<String, dynamic>>.from(data);
+        return data
+            .map((scan) => normalizeScanAnalysis(
+                  Map<String, dynamic>.from(scan as Map),
+                ))
+            .toList();
       } else {
         _log('Failed to fetch scan history: ${response.body}');
         return [];
@@ -439,6 +515,8 @@ class ApiService {
     }
   }
 
+  static const Duration _extractTimeout = Duration(seconds: 120);
+
   Future<Map<String, dynamic>?> extractIngredients(File image) async {
     try {
       await testConnection();
@@ -450,9 +528,22 @@ class ApiService {
       );
       request.files.add(await http.MultipartFile.fromPath('image', image.path));
 
-      final streamedResponse =
-          await request.send().timeout(const Duration(seconds: 30));
-      final response = await http.Response.fromStream(streamedResponse);
+      final streamedResponse = await request.send().timeout(
+        _extractTimeout,
+        onTimeout: () {
+          throw TimeoutException(
+            'Ingredient extraction timed out after ${_extractTimeout.inSeconds}s',
+          );
+        },
+      );
+      final response = await http.Response.fromStream(streamedResponse).timeout(
+        _extractTimeout,
+        onTimeout: () {
+          throw TimeoutException(
+            'Timed out while reading extraction response',
+          );
+        },
+      );
 
       _log('Extract response: ${response.statusCode}');
       if (response.statusCode == 200) {
@@ -463,6 +554,13 @@ class ApiService {
       return {
         'error': 'Extraction failed: ${response.statusCode}',
         'details': response.body,
+      };
+    } on TimeoutException catch (e) {
+      _log('Error extracting ingredients: $e');
+      return {
+        'error':
+            'Extraction took too long. Use a clear photo of the ingredients list, '
+            'ensure the backend is running, and try again.',
       };
     } catch (e) {
       _log('Error extracting ingredients: $e');
@@ -493,8 +591,9 @@ class ApiService {
       _log('Analyze response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> analysisResult =
-            Map<String, dynamic>.from(json.decode(response.body));
+        final Map<String, dynamic> analysisResult = normalizeScanAnalysis(
+          Map<String, dynamic>.from(json.decode(response.body)),
+        );
 
         _log('=== BACKEND ANALYSIS RESULT ===');
         _log('Risk Level: ${analysisResult['risk_level']}');
@@ -525,10 +624,11 @@ class ApiService {
       // CRITICAL FIX: Use the values from the analysis result directly
       // DO NOT recalculate anything - the backend already did the calculation
 
-      final riskLevel = scanData['risk_level'] ?? 'unknown';
-      final riskScore = scanData['risk_score'] ?? 0;
-      final confidence = scanData['confidence'] ?? 0.75;
-      final alerts = scanData['alerts'] ?? [];
+      final normalized = normalizeScanAnalysis(scanData);
+      final riskLevel = normalized['risk_level'] ?? 'unknown';
+      final riskScore = normalized['risk_score'] ?? 0;
+      final confidence = normalized['confidence'] ?? 0.75;
+      final alerts = normalized['alerts'] ?? [];
 
       _log('=== SAVING SCAN TO HISTORY ===');
       _log('Risk Level from analysis: $riskLevel');
@@ -539,18 +639,22 @@ class ApiService {
       // Prepare the scan data to save - USE THE EXACT SAME VALUES FROM ANALYSIS
       final Map<String, dynamic> dataToSave = {
         'user_id': userId,
-        'product_name': scanData['product_name'] ?? 'Scanned Product',
-        'ingredients': scanData['ingredients'] ?? [],
-        'ingredient_details': scanData['ingredient_details'] ?? [],
-        'risk_level': riskLevel, // USE BACKEND VALUE
-        'risk_score': riskScore, // USE BACKEND VALUE
+        'product_name': normalized['product_name'] ?? scanData['product_name'] ?? 'Scanned Product',
+        'ingredients': normalized['ingredients'] ?? scanData['ingredients'] ?? [],
+        'ingredient_details':
+            normalized['ingredient_details'] ?? scanData['ingredient_details'] ?? [],
+        'risk_level': riskLevel,
+        'risk_score': riskScore,
         'safety_classification': riskLevel,
         'alerts': alerts,
-        'recommendations': scanData['recommendations'] ?? [],
-        'confidence': confidence, // USE BACKEND VALUE
-        'detection_method': scanData['detection_method'] ?? 'AI Analysis',
-        'allergens_detected': scanData['allergens_detected'] ?? [],
-        'raw_text': scanData['raw_text'] ?? '',
+        'recommendations':
+            normalized['recommendations'] ?? scanData['recommendations'] ?? [],
+        'confidence': confidence,
+        'detection_method':
+            normalized['detection_method'] ?? scanData['detection_method'] ?? 'AI Analysis',
+        'allergens_detected':
+            normalized['allergens_detected'] ?? scanData['allergens_detected'] ?? [],
+        'raw_text': normalized['raw_text'] ?? scanData['raw_text'] ?? '',
         'input_image_url':
             scanData['input_image_url'] ?? scanData['image_url'] ?? '',
         'scanned_at': DateTime.now().toIso8601String(),

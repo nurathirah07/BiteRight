@@ -187,13 +187,47 @@ def split_ingredient_text(text):
     return list(dict.fromkeys(ingredients))
 
 
+def _dedupe_ingredients(ingredients):
+    seen = set()
+    unique = []
+    for ingredient in ingredients:
+        key = normalize_text(ingredient)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        unique.append(ingredient.strip())
+    return unique
+
+
 def parse_ingredients_input(ingredients_input):
     if isinstance(ingredients_input, list):
         values = []
         for item in ingredients_input:
+            if item is None:
+                continue
             values.extend(split_ingredient_text(str(item)))
-        return values
-    return split_ingredient_text(str(ingredients_input)) or [str(ingredients_input or "").strip()]
+        if values:
+            return _dedupe_ingredients(values)
+        joined = " ".join(str(item).strip() for item in ingredients_input if str(item).strip())
+        if joined:
+            return parse_ingredients_input(joined)
+        return []
+
+    text = str(ingredients_input or "").strip()
+    values = split_ingredient_text(text)
+    if values:
+        return _dedupe_ingredients(values)
+    return [text] if text else []
+
+
+def _to_safety_score(risk_level, hazard_score):
+    """Convert hazard severity (higher = more dangerous) to UI safety score (higher = safer)."""
+    hazard_score = int(hazard_score or 0)
+    if risk_level == "safe":
+        return 100 if hazard_score == 0 else max(85, 100 - hazard_score)
+    if risk_level == "caution":
+        return max(40, min(75, 100 - hazard_score))
+    return max(0, min(39, 100 - hazard_score))
 
 
 def _allergen_rules():
@@ -335,7 +369,13 @@ def _severity_score(severity, default_score):
 
 
 def build_personalized_analysis(ingredients, user_allergies, user_dietary, raw_text=None):
-    parsed_ingredients = parse_ingredients_input(ingredients)
+    parsed_ingredients = [
+        item for item in parse_ingredients_input(ingredients) if normalize_text(item)
+    ]
+    if not parsed_ingredients and raw_text:
+        parsed_ingredients = [
+            item for item in parse_ingredients_input(raw_text) if normalize_text(item)
+        ]
     allergy_ids, allergy_severity = _selected_allergy_ids(user_allergies)
     dietary_ids = _selected_diet_ids(user_dietary)
     full_text = normalize_text(raw_text if raw_text else " ".join(parsed_ingredients))
@@ -349,6 +389,8 @@ def build_personalized_analysis(ingredients, user_allergies, user_dietary, raw_t
 
     for ingredient in parsed_ingredients:
         normalized = normalize_text(ingredient)
+        if not normalized:
+            continue
         is_trace_context = any(pattern in normalized for pattern in CROSS_CONTACT_PATTERNS)
         status = "safe"
         reasons = []
@@ -479,10 +521,21 @@ def build_personalized_analysis(ingredients, user_allergies, user_dietary, raw_t
             "Keep the ingredient text and user profile updated for the most accurate result.",
         ]
 
+    hazard_score = min(int(max_risk_score), 100)
+    if confidence_values:
+        final_confidence = round(sum(confidence_values) / len(confidence_values), 2)
+    elif parsed_ingredients or full_text:
+        final_confidence = 0.72
+    else:
+        final_confidence = 0.0
+
     return {
         "risk_level": risk_level,
-        "risk_score": min(int(max_risk_score), 100),
-        "confidence": round(sum(confidence_values) / len(confidence_values), 2) if confidence_values else 0.0,
+        "risk_score": _to_safety_score(risk_level, hazard_score),
+        "hazard_score": hazard_score,
+        "confidence": final_confidence,
+        "ingredients": [detail["ingredient"] for detail in details]
+        or parsed_ingredients,
         "alerts": list(dict.fromkeys(allergen_alerts + dietary_alerts)),
         "allergen_alerts": list(dict.fromkeys(allergen_alerts)),
         "dietary_alerts": list(dict.fromkeys(dietary_alerts)),

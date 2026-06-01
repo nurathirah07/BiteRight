@@ -601,6 +601,8 @@ def add_scan(user_id):
         confidence = data.get('confidence', 0.0)
         if confidence == 0.0:
             confidence = data.get('ml_confidence', 0.0)
+        if confidence == 0.0 and (data.get('ingredients') or data.get('raw_text')):
+            confidence = 0.72
         
         now = firestore.SERVER_TIMESTAMP
         safety_classification = data.get('safety_classification', data.get('risk_level', 'unknown'))
@@ -857,13 +859,13 @@ def analyze_with_profile():
         user_allergies = user_data.get('allergies', [])
         user_dietary = user_data.get('dietary_restrictions', [])
 
-        ingredients = parse_ingredients_input_v2(ingredients_text)
         analysis = build_personalized_analysis_v2(
-            ingredients,
+            ingredients_text,
             user_allergies,
             user_dietary,
             raw_text=ingredients_text,
         )
+        ingredients = analysis.get('ingredients') or parse_ingredients_input_v2(ingredients_text)
 
         user_allergy_strings = []
         for allergy in user_allergies:

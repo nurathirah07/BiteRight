@@ -39,13 +39,13 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage(ImageSource source) async {
+  Future<void> _pickImageFromGallery() async {
     try {
       final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1800,
-        maxHeight: 1800,
-        imageQuality: 92,
+        source: ImageSource.gallery,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 85,
       );
 
       if (image != null) {
@@ -58,20 +58,13 @@ class _ScanScreenState extends State<ScanScreen> {
           _processedIngredients = [];
           _ingredientsController.clear();
         });
+        await _scanImage();
       }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error accessing image: $e';
       });
     }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    await _pickImage(ImageSource.camera);
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    await _pickImage(ImageSource.gallery);
   }
 
   // Validate image before scanning
@@ -113,10 +106,24 @@ class _ScanScreenState extends State<ScanScreen> {
       final data = await _apiService.extractIngredients(_selectedImage!);
 
       if (data != null && data['error'] == null) {
+        final rawText = (data['raw_text'] ?? '').toString().trim();
+        final ingredients = List<String>.from(data['ingredients'] ?? []);
+        if (rawText.isEmpty && ingredients.isEmpty) {
+          setState(() {
+            _errorMessage =
+                data['warning']?.toString() ??
+                'No text could be read from this image. Try a clearer photo of the ingredients list.';
+            _isLoading = false;
+          });
+          return;
+        }
+
         setState(() {
           // Store processed ingredients for analysis
-          _processedIngredients = List<String>.from(data['ingredients'] ?? []);
-          _rawExtractedText = data['raw_text'] ?? '';
+          _processedIngredients = ingredients;
+          _rawExtractedText = rawText.isNotEmpty
+              ? rawText
+              : ingredients.join(', ');
 
           // Use RAW EXTRACTED TEXT for editing (not processed)
           _editableIngredientsText = _rawExtractedText;
@@ -158,7 +165,26 @@ class _ScanScreenState extends State<ScanScreen> {
       );
 
       if (data != null && data['error'] == null) {
+        final ingredients = List<String>.from(data['ingredients'] ?? []);
+        if (ingredients.isEmpty && _editableIngredientsText.trim().isEmpty) {
+          setState(() {
+            _errorMessage =
+                'No ingredients found to analyze. Edit the extracted text and try again.';
+            _isAnalyzing = false;
+          });
+          return;
+        }
+
         final riskLevel = data['risk_level'] ?? 'unknown';
+        if (riskLevel == 'unknown') {
+          setState(() {
+            _errorMessage =
+                'Analysis could not determine a risk level. Please verify the ingredient text.';
+            _isAnalyzing = false;
+          });
+          return;
+        }
+
         final riskScore = data['risk_score'] ?? 0;
         final confidence = data['confidence'] ?? 0.75;
         final alerts = data['alerts'] as List? ?? [];
@@ -166,7 +192,7 @@ class _ScanScreenState extends State<ScanScreen> {
         // Prepare the scan data with ALL fields properly set
         final Map<String, dynamic> scanDataToSave = {
           'product_name': 'Scanned Product',
-          'ingredients': data['ingredients'] ?? [],
+          'ingredients': ingredients.isNotEmpty ? ingredients : data['ingredients'] ?? [],
           'ingredient_details': data['ingredient_details'] ?? [],
           'risk_level': riskLevel,
           'risk_score': riskScore,
@@ -271,14 +297,14 @@ class _ScanScreenState extends State<ScanScreen> {
               },
         ),
         title: const Text(
-          'Scan Label',
+          'Upload ingredients',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         actions: [
           if (_selectedImage != null)
             TextButton(
               onPressed: _resetScan,
-              child: const Text('New Scan', style: TextStyle(fontSize: 12)),
+              child: const Text('New image', style: TextStyle(fontSize: 12)),
             ),
         ],
       ),
@@ -291,7 +317,11 @@ class _ScanScreenState extends State<ScanScreen> {
                     valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
                   ),
                   SizedBox(height: 16),
-                  Text('Extracting ingredients...'),
+                  Text(
+                    'Reading ingredients from image...\nThis may take up to a minute.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: Color(0xFF9A9790)),
+                  ),
                 ],
               ),
             )
@@ -343,7 +373,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: const Icon(
-                    Icons.document_scanner_rounded,
+                    Icons.upload_file_rounded,
                     size: 46,
                     color: AppTheme.primary,
                   ),
@@ -367,42 +397,21 @@ class _ScanScreenState extends State<ScanScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _pickImageFromCamera,
-                        icon: const Icon(Icons.camera_alt_rounded, size: 20),
-                        label: const Text('Scan Label'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _pickImageFromGallery,
+                    icon: const Icon(Icons.upload_rounded, size: 20),
+                    label: const Text('Upload image'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _pickImageFromGallery,
-                        icon: const Icon(Icons.photo_library_rounded, size: 20),
-                        label: const Text('Gallery'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: BorderSide(
-                            color: AppTheme.primary.withValues(alpha: 0.35),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -437,10 +446,10 @@ class _ScanScreenState extends State<ScanScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _buildTipItem('Hold camera steady and close to the label'),
-                _buildTipItem('Ensure good lighting (no shadows or glare)'),
-                _buildTipItem('Make sure text is clearly visible'),
-                _buildTipItem('Take photo of the "INGREDIENTS" section'),
+                _buildTipItem('Upload a clear photo of the ingredients list'),
+                _buildTipItem('Avoid glare, blur, and heavy shadows'),
+                _buildTipItem('Crop so the "INGREDIENTS" section fills the frame'),
+                _buildTipItem('You can edit extracted text before analyzing'),
               ],
             ),
           ),
@@ -499,6 +508,39 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget _buildPreviewView() {
     return Column(
       children: [
+        if (_errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDECEA),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFFA32D2D).withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: Color(0xFFA32D2D),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFFA32D2D),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: Center(
             child: Container(
@@ -566,7 +608,7 @@ class _ScanScreenState extends State<ScanScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Extract Text'),
+                  child: const Text('Retry extraction'),
                 ),
               ),
             ],
