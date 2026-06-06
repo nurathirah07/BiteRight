@@ -1,0 +1,37 @@
+BiteRight Random Forest Evaluation Report
+Generated: 2026-06-05T18:48:00
+Rows: train=193, test=49
+
+Overall Metrics:
+  accuracy: 1.0000
+  precision: 1.0000
+  recall: 1.0000
+  f1: 1.0000
+
+Confusion Matrix:
+  [[true_negative, false_positive],
+   [false_negative, true_positive]]
+  [[25, 0], [0, 24]]
+
+Classification Report:
+               precision    recall  f1-score   support
+
+ No Allergens       1.00      1.00      1.00        25
+Has Allergens       1.00      1.00      1.00        24
+
+     accuracy                           1.00        49
+    macro avg       1.00      1.00      1.00        49
+ weighted avg       1.00      1.00      1.00        49
+
+
+Per-Allergen Performance:
+  Note: the current Random Forest is a binary allergen detector, so per-allergen rows report
+  whether products containing each allergen were classified as allergen-positive.
+  celery: support=1, detected=1, missed=0, recall=1.0000
+  eggs: support=3, detected=3, missed=0, recall=1.0000
+  gluten: support=11, detected=11, missed=0, recall=1.0000
+  milk: support=13, detected=13, missed=0, recall=1.0000
+  nuts: support=1, detected=1, missed=0, recall=1.0000
+  peanuts: support=1, detected=1, missed=0, recall=1.0000
+  soybeans: support=6, detected=6, missed=0, recall=1.0000
+  sulphur-dioxide-and-sulphites: support=1, detected=1, missed=0, recall=1.0000

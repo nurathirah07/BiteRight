@@ -859,10 +859,10 @@ def analyze_with_profile():
         user_allergies = user_data.get('allergies', [])
         user_dietary = user_data.get('dietary_restrictions', [])
 
-        analysis = build_personalized_analysis_v2(
+        analysis = processor.analyze_ingredients(
             ingredients_text,
-            user_allergies,
-            user_dietary,
+            user_allergies=user_allergies,
+            user_dietary=user_dietary,
             raw_text=ingredients_text,
         )
         ingredients = analysis.get('ingredients') or parse_ingredients_input_v2(ingredients_text)
@@ -884,7 +884,7 @@ def analyze_with_profile():
         return jsonify({
             'success': True,
             'ingredients': ingredients,
-            'detection_method': 'Profile Rules + Synonyms + Trace Detection',
+            'detection_method': analysis.get('detection_method', 'Random Forest Primary Classifier + Profile Rules'),
             **analysis,
             'user_profile': {
                 'allergies': user_allergy_strings,
@@ -910,11 +910,11 @@ def analyze_ingredients():
         if not ingredients_input:
             return jsonify({'error': 'No ingredients provided'}), 400
         
-        analysis = build_general_analysis(ingredients_input)
+        analysis = processor.analyze_ingredients(ingredients_input)
         
         return jsonify({
             'success': True,
-            'detection_method': 'Common Allergen Rules + Synonyms',
+            'detection_method': analysis.get('detection_method', 'Random Forest Primary Classifier + Common Allergen Rules'),
             **analysis,
             'message': 'Create a user profile for personalized allergen detection based on your specific allergies'
         }), 200
