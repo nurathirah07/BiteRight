@@ -1,0 +1,25 @@
+======================================================================
+BITERIGHT - DETAILED ANALYSIS REPORT
+Generated: 2026-06-12 17:49:00
+======================================================================
+
+TEST SUMMARY
+--------------------------------------------------
+Total Test Cases: 100
+Successful: 100
+Failed: 0
+Binary Accuracy: 0.00%
+
+ERROR ANALYSIS
+--------------------------------------------------
+False Negatives (Missed Dangers): 0
+False Positives (False Alarms): 0
+
+RISK SCORE ERROR
+--------------------------------------------------
+Mean Error: 5.6 points
+
+PERFORMANCE
+--------------------------------------------------
+Average Response Time: 2.10 seconds
+Requirement (<60s): MET

@@ -2,8 +2,11 @@
 import 'package:biteright_mobile/screens/scan_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/analytics_summary.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import 'analytics_screen.dart';
 import 'edit_account_screen.dart';
 import 'profile_setup_screen.dart';
 import 'scan_screen.dart';
@@ -30,12 +33,32 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _allScans = [];
   List<Map<String, dynamic>> _recentScans = [];
   int _selectedIndex = 0;
+  bool _hasNewBadges = false;
+  List<AnalyticsBadge> _badges = [];
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
     _loadAllScans();
+    _loadBadges();
+  }
+
+  Future<void> _loadBadges() async {
+    try {
+      final summary = await _apiService.getAnalyticsSummary(widget.userId);
+      if (summary != null && mounted) {
+        setState(() {
+          _hasNewBadges = (summary['new_badge_count'] ?? 0) > 0;
+          _badges = (summary['badges'] as List?)
+                  ?.map((b) => AnalyticsBadge.fromJson(b))
+                  .toList() ??
+              [];
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error loading badges: $e');
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -111,17 +134,24 @@ class _HomeScreenState extends State<HomeScreen> {
             userProfile: _userProfile,
             totalScans: _allScans.length,
             recentScans: _recentScans,
+            badges: _badges,
             onScanTap: _navigateToScanDetails,
             onViewAllTap: _navigateToScanHistory,
             onScanButtonTap: () => setState(() => _selectedIndex = 1),
-            onProfileButtonTap: () => setState(() => _selectedIndex = 2),
+            onProfileButtonTap: () => setState(() => _selectedIndex = 3),
             onRefresh: () async {
               await _loadUserData();
               await _loadAllScans();
+              await _loadBadges();
             },
           ),
           ScanScreen(
             userId: widget.userId,
+            onBack: () => setState(() => _selectedIndex = 0),
+          ),
+          AnalyticsScreen(
+            userId: widget.userId,
+            isActive: _selectedIndex == 2,
             onBack: () => setState(() => _selectedIndex = 0),
           ),
           _ProfilePage(
@@ -136,7 +166,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: _BottomNav(
         selectedIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        hasNewBadges: _hasNewBadges,
+        onTap: (i) {
+          setState(() {
+            _selectedIndex = i;
+            if (i == 2) {
+              _hasNewBadges = false;
+            }
+          });
+        },
       ),
     );
   }
@@ -147,8 +185,13 @@ class _HomeScreenState extends State<HomeScreen> {
 class _BottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTap;
+  final bool hasNewBadges;
 
-  const _BottomNav({required this.selectedIndex, required this.onTap});
+  const _BottomNav({
+    required this.selectedIndex,
+    required this.onTap,
+    required this.hasNewBadges,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -179,18 +222,28 @@ class _BottomNav extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_rounded),
               label: 'Home',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.document_scanner_outlined),
               activeIcon: Icon(Icons.document_scanner_rounded),
               label: 'Scan',
             ),
             BottomNavigationBarItem(
+              icon: Badge(
+                isLabelVisible: hasNewBadges,
+                backgroundColor: const Color(0xFFA32D2D),
+                smallSize: 8,
+                child: const Icon(Icons.analytics_outlined),
+              ),
+              activeIcon: const Icon(Icons.analytics_rounded),
+              label: 'Insights',
+            ),
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
               activeIcon: Icon(Icons.person_rounded),
               label: 'Profile',
@@ -211,6 +264,7 @@ class _HomePage extends StatelessWidget {
   final Map<String, dynamic>? userProfile;
   final int totalScans;
   final List<Map<String, dynamic>> recentScans;
+  final List<AnalyticsBadge> badges;
   final void Function(Map<String, dynamic>) onScanTap;
   final VoidCallback onViewAllTap;
   final VoidCallback onScanButtonTap;
@@ -224,6 +278,7 @@ class _HomePage extends StatelessWidget {
     required this.userProfile,
     required this.totalScans,
     required this.recentScans,
+    required this.badges,
     required this.onScanTap,
     required this.onViewAllTap,
     required this.onScanButtonTap,
@@ -247,38 +302,43 @@ class _HomePage extends StatelessWidget {
                 color: AppTheme.primary,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // â”€â”€ Welcome Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                      // ── Welcome Header ──────────────────────────────────────
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Welcome back,',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF9A9790),
-                                    letterSpacing: 0.3,
-                                  ),
+                                const Row(
+                                  children: [
+                                    Text(
+                                      'Welcome back,',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.textMuted,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                  ],
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
                                 Text(
                                   username,
                                   style: const TextStyle(
-                                    fontSize: 28,
-                                    height: 1.1,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1A1814),
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppTheme.text,
+                                    letterSpacing: -0.5,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
                                 const Text(
                                   'Ready to check your food safety?',
                                   style: TextStyle(
@@ -316,6 +376,9 @@ class _HomePage extends StatelessWidget {
                         _ProfileReminder(onTap: onProfileButtonTap),
                         const SizedBox(height: 24),
                       ],
+
+                      _HomeBadgeGallery(badges: badges),
+                      const SizedBox(height: 24),
 
                       // â”€â”€ Recent Scans Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                       Row(
@@ -1280,11 +1343,17 @@ class _ProfilePage extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/',
-              (route) => false,
-            ),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              }
+            },
             style:
                 TextButton.styleFrom(foregroundColor: const Color(0xFFA32D2D)),
             child: const Text('Log out'),
@@ -1335,6 +1404,7 @@ class _MenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -1395,6 +1465,222 @@ class _SectionLabel extends StatelessWidget {
         fontWeight: FontWeight.w600,
         color: Color(0xFF9A9790),
         letterSpacing: 0.8,
+      ),
+    );
+  }
+}
+
+// ── Home Badge Gallery ─────────────────────────────────────────────
+
+class _HomeBadgeGallery extends StatelessWidget {
+  final List<AnalyticsBadge> badges;
+
+  const _HomeBadgeGallery({required this.badges});
+
+  @override
+  Widget build(BuildContext context) {
+    if (badges.isEmpty) return const SizedBox.shrink();
+
+    final unlockedCount = badges.where((b) => b.isUnlocked).length;
+    final totalCount = badges.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const _SectionLabel(label: 'Badge Collection'),
+            Text(
+              '$unlockedCount/$totalCount unlocked',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: badges.length,
+            clipBehavior: Clip.none,
+            itemBuilder: (context, index) {
+              final badge = badges[index];
+              return _HomeBadgeItem(badge: badge);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeBadgeItem extends StatelessWidget {
+  final AnalyticsBadge badge;
+
+  const _HomeBadgeItem({required this.badge});
+
+  void _showBadgeDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0DDD8),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Badge icon / lock
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: badge.isUnlocked
+                      ? const Color(0xFFE9F5EE)
+                      : const Color(0xFFEBE8E3),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: badge.isUnlocked
+                      ? Text(badge.icon, style: const TextStyle(fontSize: 40))
+                      : const Icon(Icons.lock_rounded, color: Color(0xFF9A9790), size: 36),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Badge name
+              Text(
+                badge.name,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1A1814),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Status chip
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: badge.isUnlocked
+                      ? const Color(0xFFE9F5EE)
+                      : const Color(0xFFF3F0EB),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  badge.isUnlocked ? '✅ Unlocked' : '🔒 Locked',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: badge.isUnlocked
+                        ? AppTheme.primaryDark
+                        : const Color(0xFF9A9790),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Description
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F6F2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'How to earn',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF9A9790),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      badge.description,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF1A1814),
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showBadgeDetail(context),
+      child: Container(
+        width: 80,
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        decoration: BoxDecoration(
+          color: badge.isUnlocked ? Colors.white : const Color(0xFFEBE8E3),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: badge.isUnlocked ? AppTheme.primary.withValues(alpha: 0.3) : Colors.transparent,
+            width: 1.5,
+          ),
+          boxShadow: badge.isUnlocked ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            )
+          ] : [],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!badge.isUnlocked)
+              const Icon(Icons.lock_rounded, color: Color(0xFF9A9790), size: 18)
+            else
+              Text(badge.icon, style: const TextStyle(fontSize: 24)),
+            const SizedBox(height: 6),
+            Text(
+              badge.name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: badge.isUnlocked ? const Color(0xFF1A1814) : const Color(0xFF9A9790),
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

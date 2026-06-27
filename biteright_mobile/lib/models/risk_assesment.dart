@@ -49,6 +49,6 @@ class RiskAssessment {
   String getConfidenceLabel() {
     if (confidence >= 0.9) return 'High Confidence';
     if (confidence >= 0.7) return 'Medium Confidence';
-    return 'Low Confidence - Verify Ingredients';
+    return 'Low Confidence - Check Ingredients';
   }
 }

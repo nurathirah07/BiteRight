@@ -1,0 +1,232 @@
+{
+  "summary": {
+    "avg_cer": 0.009513274336283186,
+    "avg_wer": 0.006060606060606061,
+    "avg_accuracy": 99.04867256637168,
+    "avg_confidence": 0.78,
+    "total_tests": 20,
+    "successful": 20
+  },
+  "details": [
+    {
+      "success": true,
+      "image": "almond milk.jpg",
+      "ground_truth": "almondmilk, calcium carbonate, natural flavors, sea salt, potassium citrate, sunflower lecithin, gellan gum, vitamin a palmitate, vitamin dz, d-alpha-tocopheroi. . contains almonds",
+      "extracted": "almondmilk, calcium carbonate, natural flavors, sea salt, potassium citrate, sunflower lecithin, gellan gum, vitamin a palmitate, vitamin dz, d-alpha-tocopheroi. . contains almonds",
+      "raw_text": "INGREDIENTS: ALMONDMILK\n(FILTERED WATER, ALMONDS),\nCALCIUM CARBONATE, NATURAL\nFLAVORS, SEA SALT, POTASSIUM\nCITRATE, SUNFLOWER LECITHIN,\nGELLAN GUM, VITAMIN A\nPALMITATE, VITAMIN DZ,\nD-ALPHA-TOCOPHEROI.",
+      "ocr_confidence": 0.79,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "biscuits.jpg",
+      "ground_truth": "flour, vegetable oil, wholemeal wheat flour, sugar, partially inverted sugar syrup, raising agents, salt, dried skimmed milk",
+      "extracted": "flour, vegetable oil, wholemeal wheat flour, sugar, partially inverted sugar syrup, raising agents, salt, dried skimmed milk",
+      "raw_text": "Ingredients: Flour (54%) (Wheat\nFlour, Calcium, Iron, Niacin, Thiamin),\nVegetable Oil (Palm), Wholemeal\nWheat Flour (16%), Sugar, Partially\nInverted Sugar Syrup, Raising Agents\n(Sodium Bicarbonate, Ma",
+      "ocr_confidence": 0.78,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "canned tuna.jpg",
+      "ground_truth": "chunk light skipjack tuna, water. contains fish  ingredients",
+      "extracted": "chunk light skipjack tuna, water. contains fish  ingredients",
+      "raw_text": "INGREDIENTS: CHUNK LIGHT SKIPJACK TUNA, WATER.\nCONTAINS FISH (TUNA) INGREDIENTS.",
+      "ocr_confidence": 0.76,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "cereal.jpg",
+      "ground_truth": "rice, whole grain wheat, sugars, vitamins and minerals: dicalcium phosphate, ascorbic acid, dl-alpha-tocopheryl acetate, niacinamide, magnesium oxide, iron, zinc oxide, biotin, d-calcium pantothenate, vitamin a palmitate, manganese sulfate monohydrate, copper oxide, pyridoxine hydrochloride, riboflavin, thiamine hydrochloride, potassium iodide, folic acid, cholecalciferol  contains: wheat, barley, soy, oats",
+      "extracted": "rice, whole grain wheat, sugars, vitamins and minerals: dicalcium phosphate, ascorbic acid, dl-alpha-tocopheryl acetate, niacinamide, magnesium oxide, iron, zinc oxide, biotin, d-calcium pantothenate, vitamin a palmitate, manganese sulfate monohydrate, copper oxide, pyridoxine hydrochloride, riboflavin, thiamine hydrochloride, potassium iodide, folic acid, cholecalciferol  contains: wheat, barley, soy, oats",
+      "raw_text": "Ingredients: Rice, Whole grain wheat, Sugars\n(sugar, blackstrap molasses, corn syrup, honey.\ncorn and barley malt extract, Soy protein\nconcentrate, Vegetable oil, Whole grain oats, Rice\nflour, Salt, S",
+      "ocr_confidence": 0.82,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "egg noodles.jpeg",
+      "ground_truth": "durum wheat semolina, durum wheat flour, eggs, niacin, iron, thiamin mononitrate, riboflavin, folic acid. contains: wheat, egg",
+      "extracted": "durum wheat semolina, durum wheat flour, eggs, niacin, iron, thiamin mononitrate, riboflavin, folic acid. contains: wheat, egg",
+      "raw_text": "INGREDIENTS: DURUM WHEAT SEMOLINA,\nDURUM WHEAT FLOUR, EGGS, NIACIN, IRON\n(FERROUS SULFATE), THIAMIN\nMONONITRATE, RIBOFLAVIN, FOLIC ACID.\nCONTAINS: WHEAT, EGG",
+      "ocr_confidence": 0.78,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "granola bar.jpg",
+      "ground_truth": "granola, corn syrup, semisweet chocolate chips, crisp rice, salt, calcium carbonate). fructose, sugar, canola and/or soybean oil, glycerin, liquid invert sugar, dried unsweetened coconut, soy lecithin - an emusifier, honey, wheat flakes, ascorbic acid, citric acid, rosemary extract, natural flavor",
+      "extracted": "granola, corn syrup, semisweet chocolate chips, crisp rice, salt, calcium carbonate). fructose, sugar, canola and/or soybean oil, glycerin, liquid invert sugar, dried unsweetened coconut, soy lecithin - an emusifier, honey, wheat flakes, ascorbic acid, citric acid, rosemary extract, natural flavor",
+      "raw_text": "INGREDIENTS: Granola (Whole\nRolled Oats, Sugar, Rice Flour,\nCanola and/or Soybean Oil,\nMolasses, Sodium Bicarbonate,\nSoy Lecithin - an Emulsifier.\nCalcium Carbonate, Salt), Corn\nSyrup, Semisweet Choco",
+      "ocr_confidence": 0.82,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "ice cream.png",
+      "ground_truth": "cherry and coconut flavoured ice cream milk, cream, liquid sugar, water, milk solids non fat, glucose syrup, emulsifier, vegetable gums, colour, flavour, old gold dark chocolate, cherry sauce, sugar, food acid, toasted coconut",
+      "extracted": "cherry and coconut flavoured ice cream milk, cream, liquid sugar, water, milk solids non fat, glucose syrup, emulsifier, vegetable gums, colour, flavouri, old gold dark chocolate, flavour, cherry sauce, narra sugar, flavour food acid, toasted coconut",
+      "raw_text": "INGREDIENTS: CHERRY AND COCONUT\nFLAVOURED ICE CREAM [MILK, CREAM,\nLIQUID SUGAR, WATER, MILK SOLIDS NON\nFAT, GLUCOSE SYRUP (FROM MAIZE),\nEMULSIFIER (47I), VEGETABLE GUMS (412, 410,\n407, 401), COLOUR (1",
+      "ocr_confidence": 0.83,
+      "cer": 0.1902654867256637,
+      "wer": 0.12121212121212122,
+      "accuracy": 80.97345132743364
+    },
+    {
+      "success": true,
+      "image": "instant noodles.jpg",
+      "ground_truth": "noodles: wheat flour, palm oil, salt, potassium carbonate, sodium tripolyphosphate scuium carbonate, sodium hexametaphosphate, algin acid, sodium phosphate, guar gum, tocopherols, ascorbyl palmitate . soup base : salt, soy sauce powder, sugar, monosodium glutamate, caramel color, autolyzed yeast ted green onion, white pepper powder, maltodeytrin, ginger powder, citric acid, disodium guanylate, disodium inosinate, rice oil, natural and artificial sesame flavor",
+      "extracted": "noodles: wheat flour, palm oil, salt, potassium carbonate, sodium tripolyphosphate scuium carbonate, sodium hexametaphosphate, algin acid, sodium phosphate, guar gum, tocopherols, ascorbyl palmitate . soup base : salt, soy sauce powder, sugar, monosodium glutamate, caramel color, autolyzed yeast ted green onion, white pepper powder, maltodeytrin, ginger powder, citric acid, disodium guanylate, disodium inosinate, rice oil, natural and artificial sesame flavor",
+      "raw_text": "INGREDIENTS: NOODLES: WHEAT FLOUR, PALM OIL, SALT,\nPOTASSIUM CARBONATE,\n, SODIUM TRIPOLYPHOSPHATE\nSCUIUM CARBONATE, SODIUM HEXAMETAPHOSPHATE,\nALGIN ACID,\nSODIUM PHOSPHATE, GUAR GUM,\nTOCOPHEROLS (PRESE",
+      "ocr_confidence": 0.83,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "milk_chocolate.jpg",
+      "ground_truth": "sugar, cocoa butter, whole milk powder, cocoa mass, sweet whey powder, milk solids % minimum",
+      "extracted": "sugar, cocoa butter, whole milk powder, cocoa mass, sweet whey powder, milk solids % minimum",
+      "raw_text": "INGREDIENTS\nSugar, Cocoa Butter*, Whole Milk Powder, Cocoa Mass*, Sweet\nWhey Powder (Milk), Emulsifier: Lecithins (Soya); Flavourings.\nMILK CHOCOLATE CONTAINS COCOA SOLIDS 30% MINIMUM,\nMILK SOLIDS 14%",
+      "ocr_confidence": 0.79,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "olive oil.jpeg",
+      "ground_truth": "water, vegetable oil blend, less than % of salt, vegetable monoglycerides, natural and artificial flavors, potassium sorbate, lactic acid and calcium disodium edta, vitamin a palmitate, beta carotene, vitamin d",
+      "extracted": "water, vegetable oil blend, less than % of salt, vegetable monoglycerides, natural and artificial flavors, potassium sorbate, lactic acid and calcium disodium edta, vitamin a palmitate, beta carotene, vitamin d",
+      "raw_text": "INGREDIENTS: WATER, VEGETABLE OIL\nBLEND (PALM, CANOLA, OLIVE OIL), LESS\nTHAN 2% OF SALT, VEGETABLE\nMONOGLYCERIDES, SORBITAN TRISREARATE\nAND POLYGLYCEROL POLYRICINOLEATE\n(EMULSIFIERS), NATURAL AND ARTI",
+      "ocr_confidence": 0.82,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "peanut_butter.png",
+      "ground_truth": "roasted peanuts, sugar, rapeseed oil, cottonseed oil, salt",
+      "extracted": "roasted peanuts, sugar, rapeseed oil, cottonseed oil, salt",
+      "raw_text": "salt\n1.009\nINGREDIENTS\nRoasted Peanuts (90%), Sugar,\nRapeseed Oil, Cottonseed Oil,\nSalt.",
+      "ocr_confidence": 0.78,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "potato chips.jpg",
+      "ground_truth": "potatoes, canola oil, sunflower oil, sugar, salt, food acids, buttermilk powder, sour cream powder, yeast extract, mineral salt, onion powder, garlic powder, spices, corn starch, tomato powder, natural colours, natural flavours, antioxidants (tocopherols, ascorbic acid, rosemary extract",
+      "extracted": "potatoes, canola oil, sunflower oil, sugar, salt, food acids, buttermilk powder, sour cream powder, yeast extract, mineral salt, onion powder, garlic powder, spices, corn starch, tomato powder, natural colours, natural flavours, antioxidants (tocopherols, ascorbic acid, rosemary extract",
+      "raw_text": "INGREDIENTS\nPOTATOES, CANOLA OIL, SUNFLOWER OIL, SUGAR, SALT, FOOD\nACIDS (SODIUM DIACETATE, CITRIC ACID), BUTTERMILK POWDER\n(MILK), SOUR CREAM POWDER (MILK), YEAST EXTRACT,\nMINERAL SALT (POTASSIUM CHL",
+      "ocr_confidence": 0.83,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "rice.png",
+      "ground_truth": "rice, wild rice, salt, autolyzed yeast extract, dried parsley, onions, garlic, spices, turmeric, natural flavor",
+      "extracted": "rice, wild rice, salt, autolyzed yeast extract, dried parsley, onions, garlic, spices, turmeric, natural flavor",
+      "raw_text": "INGREDIENTS: Rice, wild rice, salt, autolyzed yeast\nextract, dried parsley, onions, garlic, spices, turmeric\n(color), natural flavor.",
+      "ocr_confidence": 0.77,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "salt.jpg",
+      "ground_truth": "salt, calcium silicate, sodium thiosulphate, potassium iodide, sodium bicarbonate",
+      "extracted": "salt, calcium silicate, sodium thiosulphate, potassium iodide, sodium bicarbonate",
+      "raw_text": "Vile\nINGREDIENTS: SALT,\nCALCIUM SILICATE,\nSODIUM THIOSULPHATE,\nPOTASSIUM IODIDE,\nSODIUM BICARBONATE.",
+      "ocr_confidence": 0.77,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "seitan.jpg",
+      "ground_truth": "seitan %, apple vinegar sunflower oil, garlic powder, milk, nuts, celery, mustard, sesame and lupin",
+      "extracted": "seitan %, apple vinegar sunflower oil, garlic powder, milk, nuts, celery, mustard, sesame and lupin",
+      "raw_text": "EN Organic seitan with teriayki marinade\nIngredients: Seitan* 66% (water, WHEAT gluten\", sunflower\nprotein, SUY sauce\" (water, SOY beans\"\nWHEAT\", salt, SUY\n*, ginger*, onion*,\n*, WHEAT syrup* (glutenf",
+      "ocr_confidence": 0.76,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "soy_sauce.jpg",
+      "ground_truth": "ments: sugar %, water %, brown sugar %, glucose syrup %, soy sauce  % alleroy a",
+      "extracted": "ments: sugar %, water %, brown sugar %, glucose syrup %, soy sauce  % alleroy a",
+      "raw_text": "080)\nMents: Sugar 38%, Water 25%, Brown Sugar\n17%, Glucose Syrup 15%, Soy Sauce (Salt Water,\nSoybean, Wheat Flour) 5%\nAlleroy A",
+      "ocr_confidence": 0.66,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "whey protein.jpg",
+      "ground_truth": "whey protein blend, natural vanilla flavours, xanthan gum, sunflower lecithin, sodium chlaride, stevia, vegetarian enzyme blend",
+      "extracted": "whey protein blend, natural vanilla flavours, xanthan gum, sunflower lecithin, sodium chlaride, stevia, vegetarian enzyme blend",
+      "raw_text": "INGREDIENTS: Whey Protein Blend (Whey Protein Concentrate, Whey Protein Isolate)\n(milk), Natural Vanilla Flavours, Xanthan Gum, Sunflower Lecithin (emulsifier),\nSodium Chlaride, Stevia (Leaf, Extract)",
+      "ocr_confidence": 0.79,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "white sugar.jpg",
+      "ground_truth": "cane sugar",
+      "extracted": "cane sugar",
+      "raw_text": "Ingredients: Cane Sugar",
+      "ocr_confidence": 0.67,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "whole wheat bread.jpg",
+      "ground_truth": "whole wheat flour, water, unbleached wheat flour, honey, yeast, sea salt, sunflower seeds, sesame seeds, flaxseed, millet, oats, cracked whole wheat, oat bran",
+      "extracted": "whole wheat flour, water, unbleached wheat flour, honey, yeast, sea salt, sunflower seeds, sesame seeds, flaxseed, millet, oats, cracked whole wheat, oat bran",
+      "raw_text": "Ingredients: Whole Wheat Flour, Water,\nUnbleached Wheat Flour, Honey, Yeast,\nSea Salt, Sunflower Seeds, Sesame\nSeeds, Flaxseed, Millet, Oats, Cracked\nWhole Wheat, Oat Bran.",
+      "ocr_confidence": 0.8,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    },
+    {
+      "success": true,
+      "image": "yogurt.jpg",
+      "ground_truth": "cultured pasteurized grade a milk, cream, pectin. contains milk",
+      "extracted": "cultured pasteurized grade a milk, cream, pectin. contains milk",
+      "raw_text": "tainer\n(170g)\nINGREDIENTS: CULTURED PASTEURIZED\nGRADE A MILK, CREAM, PECTIN.\nCONTAINS MILK.",
+      "ocr_confidence": 0.75,
+      "cer": 0.0,
+      "wer": 0.0,
+      "accuracy": 100.0
+    }
+  ]
+}

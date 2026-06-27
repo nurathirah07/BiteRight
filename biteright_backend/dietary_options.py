@@ -147,6 +147,22 @@ DIETARY_OPTIONS = [
         "severity": "high",
         "severity_score": 85,
         "forbidden": ["meat", "dairy", "eggs", "honey", "gelatin", "whey", "casein", "shellac"],
+        # Explicitly safe plant-based ingredients that share names with forbidden terms
+        # e.g. "olive oil" must NOT trigger a vegan violation despite containing "oil"
+        "safe_ingredients": [
+            "olive oil", "extra virgin olive oil", "virgin olive oil",
+            "coconut oil", "vegetable oil", "sunflower oil",
+            "rapeseed oil", "canola oil", "avocado oil", "flaxseed oil",
+            "palm oil", "rice bran oil", "sesame oil", "peanut oil",
+            "cocoa butter",
+            "cream of tartar",
+            "coconut cream",
+            "coconut milk",
+            "almond milk",
+            "oat milk",
+            "soy milk",
+            "rice milk",
+        ],
         "warning": "No animal products of any kind",
         "description": "No animal-derived ingredients"
     },

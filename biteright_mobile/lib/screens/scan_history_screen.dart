@@ -19,6 +19,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   String _filter = 'all'; // 'all', 'safe', 'caution', 'unsafe'
+  String _dateFilter = 'all'; // 'all', 'week', 'month'
 
   @override
   void initState() {
@@ -58,8 +59,33 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredScans {
-    if (_filter == 'all') return _scans;
-    return _scans.where((scan) => scan['risk_level'] == _filter).toList();
+    List<Map<String, dynamic>> result = _scans;
+    
+    if (_filter != 'all') {
+      result = result.where((scan) => scan['risk_level'] == _filter).toList();
+    }
+    
+    if (_dateFilter != 'all') {
+      final now = DateTime.now();
+      result = result.where((scan) {
+        final scannedAtStr = scan['scanned_at'];
+        if (scannedAtStr == null) return false;
+        try {
+          final scannedAt = DateTime.parse(scannedAtStr);
+          final diffDays = now.difference(scannedAt).inDays;
+          if (_dateFilter == 'week') {
+            return diffDays <= 7;
+          } else if (_dateFilter == 'month') {
+            return diffDays <= 30;
+          }
+        } catch (e) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
+    
+    return result;
   }
 
   Color _getRiskColor(String riskLevel) {
@@ -151,9 +177,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F4F0),
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -162,8 +188,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
         ),
         title: const Text(
           'Scan History',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF1A1814)),
         ),
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, size: 20),
@@ -180,6 +207,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                   ? _buildEmptyView()
                   : Column(
                       children: [
+                        _buildDateFilterChips(),
                         _buildFilterChips(),
                         _buildStatsSummary(),
                         Expanded(
@@ -346,6 +374,60 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     );
   }
 
+  Widget _buildDateFilterChips() {
+    final filters = [
+      {'id': 'all', 'label': 'All Time'},
+      {'id': 'week', 'label': 'This Week'},
+      {'id': 'month', 'label': 'This Month'},
+    ];
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: filters.map((filter) {
+            final isSelected = _dateFilter == filter['id'];
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(
+                  filter['label'] as String,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected ? Colors.white : const Color(0xFF5A5754),
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    _dateFilter = filter['id'] as String;
+                  });
+                },
+                backgroundColor: Colors.white,
+                selectedColor: AppTheme.primary,
+                showCheckmark: false,
+                side: BorderSide(
+                  color: isSelected
+                      ? AppTheme.primary
+                      : const Color(0xFFE5E0D8),
+                ),
+                shape: StadiumBorder(
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppTheme.primary
+                        : const Color(0xFFE5E0D8),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterChips() {
     final filters = [
       {'id': 'all', 'label': 'All', 'color': const Color(0xFF9A9790)},
@@ -355,7 +437,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     ];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -402,10 +484,11 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   }
 
   Widget _buildStatsSummary() {
-    final total = _scans.length;
-    final safeCount = _scans.where((s) => s['risk_level'] == 'safe').length;
-    final cautionCount = _scans.where((s) => s['risk_level'] == 'caution').length;
-    final unsafeCount = _scans.where((s) => s['risk_level'] == 'unsafe').length;
+    final scansToAnalyze = _filteredScans; // Calculate stats based on filtered data
+    final total = scansToAnalyze.length;
+    final safeCount = scansToAnalyze.where((s) => s['risk_level'] == 'safe').length;
+    final cautionCount = scansToAnalyze.where((s) => s['risk_level'] == 'caution').length;
+    final unsafeCount = scansToAnalyze.where((s) => s['risk_level'] == 'unsafe').length;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

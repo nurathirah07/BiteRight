@@ -30,15 +30,47 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     super.initState();
     _scanData = ApiService().normalizeScanAnalysis(Map.from(widget.scanData));
     _calculateMetrics();
+    _fetchProfileAndCalculate();
+  }
+
+  Future<void> _fetchProfileAndCalculate() async {
+    try {
+      if (widget.userId.isNotEmpty) {
+        final profile = await ApiService().getUserProfile(widget.userId);
+        if (profile != null && profile['profile'] != null) {
+          final Map<String, dynamic> profileData = Map<String, dynamic>.from(profile['profile'] as Map);
+          final allergies = profileData['allergies'] ?? [];
+          final dietary = profileData['dietary_restrictions'] ?? [];
+          
+          if (mounted) {
+            setState(() {
+              _scanData['user_allergies'] = allergies;
+              _scanData['dietary_issues'] = dietary;
+              _calculateMetrics(forceRecalculate: false);
+            });
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user profile: $e');
+    }
+    
+    if (mounted) {
+      setState(() {
+        _calculateMetrics();
+      });
+    }
   }
 
   // ─── Risk Score & Confidence Calculation ─────────────────────────────────
 
-  void _calculateMetrics() {
+  void _calculateMetrics({bool forceRecalculate = false}) {
     final storedRiskLevel = _scanData['risk_level']?.toString();
     final storedRiskScore = _asInt(_scanData['risk_score']);
     final storedConfidence = _asConfidence(_scanData['confidence']);
-    if (storedRiskLevel != null &&
+    if (!forceRecalculate &&
+        storedRiskLevel != null &&
         storedRiskLevel.isNotEmpty &&
         storedRiskLevel != 'unknown') {
       _calculatedRiskLevel = storedRiskLevel;
@@ -127,15 +159,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
   }
 
   int _normalizeDisplayRiskScore(String riskLevel, int score) {
-    if (riskLevel == 'safe' && score < 70) {
-      return score == 0 ? 100 : (100 - score).clamp(85, 100);
-    }
-    if (riskLevel == 'caution' && score > 75) {
-      return (100 - score).clamp(40, 75);
-    }
-    if (riskLevel == 'unsafe' && score > 39) {
-      return (100 - score).clamp(0, 39);
-    }
+    // Return score as-is since it has already been converted to Safety Score format.
     return score;
   }
 
@@ -408,9 +432,9 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     if (percent >= 80) {
       return 'High - Analysis is reliable';
     } else if (percent >= 60) {
-      return 'Medium - May need verification';
+      return 'Medium - Double-check details';
     } else {
-      return 'Low - Please verify ingredients manually';
+      return 'Low - Review ingredients list';
     }
   }
 
@@ -607,46 +631,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
               ),
             ],
 
-            const SizedBox(height: 24),
-
-            // ── Action Buttons ──────────────────────────────────────────────
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon:
-                        const Icon(Icons.arrow_back_ios_new_rounded, size: 15),
-                    label: const Text('Back'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.camera_alt_rounded, size: 15),
-                    label: const Text('Scan again'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
           ],
         ),
       ),

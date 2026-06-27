@@ -1,0 +1,110 @@
+[
+  {
+    "profile_id": "TEST_PROFILE_1",
+    "name": "TEST_PROFILE_1 (Peanuts + Soy + Eggs)",
+    "description": "Allergic to peanuts, soy, and eggs.",
+    "allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "dietary_restrictions": []
+  },
+  {
+    "profile_id": "TEST_PROFILE_2",
+    "name": "TEST_PROFILE_2 (Milk + Tree Nuts + Shellfish)",
+    "description": "Allergic to milk, tree nuts, and shellfish.",
+    "allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "dietary_restrictions": []
+  },
+  {
+    "profile_id": "TEST_PROFILE_3",
+    "name": "TEST_PROFILE_3 (Peanuts + Sesame + Tree Nuts + Fish)",
+    "description": "Allergic to peanuts, sesame, tree nuts, and fish.",
+    "allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "dietary_restrictions": []
+  },
+  {
+    "profile_id": "TEST_PROFILE_4",
+    "name": "TEST_PROFILE_4 (Shellfish + Peanuts + Eggs)",
+    "description": "Allergic to shellfish, peanuts, and eggs.",
+    "allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "dietary_restrictions": []
+  },
+  {
+    "profile_id": "TEST_PROFILE_5",
+    "name": "TEST_PROFILE_5 (Eggs + Fish + Soy + Gluten)",
+    "description": "Allergic to eggs, fish, soy, and gluten.",
+    "allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "dietary_restrictions": []
+  }
+]

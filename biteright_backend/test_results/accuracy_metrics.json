@@ -1,0 +1,219 @@
+{
+  "timestamp": "2026-06-13T01:53:19.145578",
+  "total_tests": 100,
+  "successful_tests": 100,
+  "failed_tests": 0,
+  "binary_accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "exact_3class_accuracy": 1.0,
+  "risk_score_mae": 6.1,
+  "avg_confidence": 0.7435,
+  "avg_ocr_confidence": 0.78,
+  "avg_response_time_s": 0.155,
+  "confusion_matrix": {
+    "TP": 41,
+    "TN": 59,
+    "FP": 0,
+    "FN": 0
+  },
+  "false_negative_count": 0,
+  "false_negative_cases": [],
+  "false_positive_count": 0,
+  "false_positive_cases": [],
+  "profile_metrics": {
+    "TEST_PROFILE_1": {
+      "tests": 20,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_3class_accuracy": 1.0,
+      "confusion": {
+        "tp": 9,
+        "tn": 11,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "TEST_PROFILE_2": {
+      "tests": 20,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_3class_accuracy": 1.0,
+      "confusion": {
+        "tp": 10,
+        "tn": 10,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "TEST_PROFILE_3": {
+      "tests": 20,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_3class_accuracy": 1.0,
+      "confusion": {
+        "tp": 8,
+        "tn": 12,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "TEST_PROFILE_4": {
+      "tests": 20,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_3class_accuracy": 1.0,
+      "confusion": {
+        "tp": 3,
+        "tn": 17,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "TEST_PROFILE_5": {
+      "tests": 20,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_3class_accuracy": 1.0,
+      "confusion": {
+        "tp": 11,
+        "tn": 9,
+        "fp": 0,
+        "fn": 0
+      }
+    }
+  },
+  "image_metrics": {
+    "almond milk.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.79
+    },
+    "biscuits.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.78
+    },
+    "canned tuna.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.76
+    },
+    "cereal.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.82
+    },
+    "egg noodles.jpeg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.78
+    },
+    "granola bar.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.82
+    },
+    "ice cream.png": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.83
+    },
+    "instant noodles.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.83
+    },
+    "milk_chocolate.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.79
+    },
+    "olive oil.jpeg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.82
+    },
+    "peanut_butter.png": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.78
+    },
+    "potato chips.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.83
+    },
+    "rice.png": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.77
+    },
+    "salt.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.77
+    },
+    "seitan.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.76
+    },
+    "soy_sauce.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.66
+    },
+    "whey protein.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.79
+    },
+    "white sugar.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.67
+    },
+    "whole wheat bread.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.8
+    },
+    "yogurt.jpg": {
+      "tests": 5,
+      "binary_correct": 5,
+      "binary_accuracy": 1.0,
+      "ocr_confidence": 0.75
+    }
+  }
+}

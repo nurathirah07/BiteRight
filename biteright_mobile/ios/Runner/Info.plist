@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to take photos of food items for allergen analysis.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs gallery access to upload photos of food items for allergen analysis.</string>
 </dict>
 </plist>

@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'screens/home_screen.dart';
+import 'package:biteright_mobile/screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_setup_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/welcome_screen.dart';
-import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -28,74 +27,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  final ApiService _apiService = ApiService();
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.checkBackendOnStartup) {
-      _checkBackendConnection();
-    }
-  }
-
-  Future<void> _checkBackendConnection() async {
-    try {
-      final isConnected = await _apiService.testConnection();
-
-      if (kDebugMode) {
-        debugPrint(
-          isConnected
-              ? 'Backend connection is reachable.'
-              : 'Backend connection is not reachable.',
-        );
-      }
-
-      if (!isConnected) {
-        _showConnectionDialog();
-      }
-    } catch (error) {
-      if (kDebugMode) {
-        debugPrint('Backend connection check failed: $error');
-      }
-      _showConnectionDialog();
-    }
-  }
-
-  void _showConnectionDialog() {
-    final context = _navigatorKey.currentContext;
-    if (context == null) {
-      return;
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-
-      showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Connection Error'),
-          content: const Text(
-            'Unable to connect to the server. Make sure the backend is running on port 5000. Android emulators use 10.0.2.2 to reach your computer.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _checkBackendConnection();
-              },
-              child: const Text('Retry'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Continue Anyway'),
-            ),
-          ],
-        ),
-      );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

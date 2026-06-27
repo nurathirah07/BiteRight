@@ -301,18 +301,30 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       if (success && mounted) {
         _log('Profile saved successfully');
 
-        final profile = await _apiService.getUserProfile(widget.userId);
-        final username = profile?['profile']?['username'] ?? 'User';
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Dietary profile updated successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
 
-        if (mounted) {
-          Navigator.pushReplacementNamed(
-            context,
-            '/home',
-            arguments: {
-              'userId': widget.userId,
-              'username': username,
-            },
-          );
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context, true);
+        } else {
+          final profile = await _apiService.getUserProfile(widget.userId);
+          final username = profile?['profile']?['username'] ?? 'User';
+
+          if (mounted) {
+            Navigator.pushReplacementNamed(
+              context,
+              '/home',
+              arguments: {
+                'userId': widget.userId,
+                'username': username,
+              },
+            );
+          }
         }
       } else if (mounted) {
         _showErrorDialog('Failed to save profile');
@@ -330,6 +342,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Future<void> _goHome() async {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+
     if (widget.userId.isEmpty) {
       Navigator.pop(context);
       return;
@@ -389,8 +406,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final canPop = Navigator.canPop(context);
     return PopScope(
-      canPop: false,
+      canPop: canPop,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           _goHome();
@@ -533,41 +551,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 20),
 
-                        // Progress indicator
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                                color: Colors.black.withValues(alpha: 0.06)),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: LinearProgressIndicator(
-                                  value: _calculateProgress(),
-                                  minHeight: 3,
-                                  backgroundColor: const Color(0xFFE5E0D8),
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                          AppTheme.primary),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                '${_selectedAllergiesWithSeverity.length + _selectedDiets.length} selected',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
 
                         const SizedBox(height: 20),
 
@@ -635,29 +619,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  double _calculateProgress() {
-    int totalItems = 0;
-    int selectedItems = 0;
 
-    for (var category in _allergenCategories) {
-      final items = List<Map<String, dynamic>>.from(category['items'] ?? []);
-      totalItems += items.length;
-      selectedItems += items
-          .where(
-              (item) => _selectedAllergiesWithSeverity.containsKey(item['id']))
-          .length;
-    }
-
-    for (var category in _dietaryCategories) {
-      final items = List<Map<String, dynamic>>.from(category['items'] ?? []);
-      totalItems += items.length;
-      selectedItems +=
-          items.where((item) => _selectedDiets.contains(item['id'])).length;
-    }
-
-    if (totalItems == 0) return 0;
-    return selectedItems / totalItems;
-  }
 
   List<Widget> _buildAllergenItems() {
     List<Widget> items = [];
@@ -858,39 +820,49 @@ class _AllergenTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       child: Row(
         children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: Checkbox(
-              value: isSelected,
-              onChanged: (_) => onToggle(item['id']),
-              activeColor: AppTheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-          ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['label'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1A1814),
-                  ),
-                ),
-                if (item['warning'] != null)
-                  Text(
-                    item['warning'],
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF9A9790),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onToggle(item['id']),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Checkbox(
+                      value: isSelected,
+                      onChanged: (_) => onToggle(item['id']),
+                      activeColor: AppTheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                   ),
-              ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['label'] ?? 'Unknown',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF1A1814),
+                          ),
+                        ),
+                        if (item['warning'] != null)
+                          Text(
+                            item['warning'],
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF9A9790),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (isSelected)
@@ -970,64 +942,68 @@ class _DietaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : const Border(bottom: BorderSide(color: Color(0x0A000000))),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: Checkbox(
-              value: isSelected,
-              onChanged: (_) => onToggle(item['id']),
-              activeColor: AppTheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onToggle(item['id']),
+      child: Container(
+        decoration: BoxDecoration(
+          border: isLast
+              ? null
+              : const Border(bottom: BorderSide(color: Color(0x0A000000))),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Checkbox(
+                value: isSelected,
+                onChanged: (_) => onToggle(item['id']),
+                activeColor: AppTheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['label'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1A1814),
-                  ),
-                ),
-                if (item['warning'] != null)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    item['warning'],
+                    item['label'] ?? 'Unknown',
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF9A9790),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1A1814),
                     ),
                   ),
-              ],
+                  if (item['warning'] != null)
+                    Text(
+                      item['warning'],
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF9A9790),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2EFE9),
-              borderRadius: BorderRadius.circular(8),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2EFE9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.restaurant_menu_outlined,
+                size: 16,
+                color: isSelected ? AppTheme.primary : const Color(0xFF9A9790),
+              ),
             ),
-            child: Icon(
-              Icons.restaurant_menu_outlined,
-              size: 16,
-              color: isSelected ? AppTheme.primary : const Color(0xFF9A9790),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

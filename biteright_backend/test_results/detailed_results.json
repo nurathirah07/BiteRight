@@ -1,0 +1,4232 @@
+[
+  {
+    "success": true,
+    "image_name": "almond milk.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "ALMONDMILK (FILTERED WATER",
+      "ALMONDS)",
+      "CALCIUM CARBONATE",
+      "NATURAL FLAVORS",
+      "SEA SALT",
+      "POTASSIUM CITRATE",
+      "SUNFLOWER LECITHIN",
+      "GELLAN GUM"
+    ],
+    "response_time": 0.13804984092712402
+  },
+  {
+    "success": true,
+    "image_name": "almond milk.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.81,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "ALMONDMILK (FILTERED WATER",
+      "ALMONDS)",
+      "CALCIUM CARBONATE",
+      "NATURAL FLAVORS",
+      "SEA SALT",
+      "POTASSIUM CITRATE",
+      "SUNFLOWER LECITHIN",
+      "GELLAN GUM"
+    ],
+    "response_time": 0.16507792472839355
+  },
+  {
+    "success": true,
+    "image_name": "almond milk.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.81,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "ALMONDMILK (FILTERED WATER",
+      "ALMONDS)",
+      "CALCIUM CARBONATE",
+      "NATURAL FLAVORS",
+      "SEA SALT",
+      "POTASSIUM CITRATE",
+      "SUNFLOWER LECITHIN",
+      "GELLAN GUM"
+    ],
+    "response_time": 0.12732529640197754
+  },
+  {
+    "success": true,
+    "image_name": "almond milk.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "ALMONDMILK (FILTERED WATER",
+      "ALMONDS)",
+      "CALCIUM CARBONATE",
+      "NATURAL FLAVORS",
+      "SEA SALT",
+      "POTASSIUM CITRATE",
+      "SUNFLOWER LECITHIN",
+      "GELLAN GUM"
+    ],
+    "response_time": 0.1457531452178955
+  },
+  {
+    "success": true,
+    "image_name": "almond milk.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "ALMONDMILK (FILTERED WATER",
+      "ALMONDS)",
+      "CALCIUM CARBONATE",
+      "NATURAL FLAVORS",
+      "SEA SALT",
+      "POTASSIUM CITRATE",
+      "SUNFLOWER LECITHIN",
+      "GELLAN GUM"
+    ],
+    "response_time": 0.18010783195495605
+  },
+  {
+    "success": true,
+    "image_name": "biscuits.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.75,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "Flour (54%) (Wheat Flour",
+      "Calcium",
+      "Iron",
+      "Niacin",
+      "Thiamin)",
+      "Vegetable Oil (Palm)",
+      "Wholemeal Wheat Flour (16%)",
+      "Sugar"
+    ],
+    "response_time": 0.1753559112548828
+  },
+  {
+    "success": true,
+    "image_name": "biscuits.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "Flour (54%) (Wheat Flour",
+      "Calcium",
+      "Iron",
+      "Niacin",
+      "Thiamin)",
+      "Vegetable Oil (Palm)",
+      "Wholemeal Wheat Flour (16%)",
+      "Sugar"
+    ],
+    "response_time": 0.20778393745422363
+  },
+  {
+    "success": true,
+    "image_name": "biscuits.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.75,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "Flour (54%) (Wheat Flour",
+      "Calcium",
+      "Iron",
+      "Niacin",
+      "Thiamin)",
+      "Vegetable Oil (Palm)",
+      "Wholemeal Wheat Flour (16%)",
+      "Sugar"
+    ],
+    "response_time": 0.14310574531555176
+  },
+  {
+    "success": true,
+    "image_name": "biscuits.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.75,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "Flour (54%) (Wheat Flour",
+      "Calcium",
+      "Iron",
+      "Niacin",
+      "Thiamin)",
+      "Vegetable Oil (Palm)",
+      "Wholemeal Wheat Flour (16%)",
+      "Sugar"
+    ],
+    "response_time": 0.16220974922180176
+  },
+  {
+    "success": true,
+    "image_name": "biscuits.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "Flour (54%) (Wheat Flour",
+      "Calcium",
+      "Iron",
+      "Niacin",
+      "Thiamin)",
+      "Vegetable Oil (Palm)",
+      "Wholemeal Wheat Flour (16%)",
+      "Sugar"
+    ],
+    "response_time": 0.1461648941040039
+  },
+  {
+    "success": true,
+    "image_name": "canned tuna.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "CHUNK LIGHT SKIPJACK TUNA",
+      "WATER. FISH (TUNA)"
+    ],
+    "response_time": 0.14006733894348145
+  },
+  {
+    "success": true,
+    "image_name": "canned tuna.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "CHUNK LIGHT SKIPJACK TUNA",
+      "WATER. FISH (TUNA)"
+    ],
+    "response_time": 0.12246465682983398
+  },
+  {
+    "success": true,
+    "image_name": "canned tuna.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "CHUNK LIGHT SKIPJACK TUNA",
+      "WATER. FISH (TUNA)"
+    ],
+    "response_time": 0.11691427230834961
+  },
+  {
+    "success": true,
+    "image_name": "canned tuna.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "CHUNK LIGHT SKIPJACK TUNA",
+      "WATER. FISH (TUNA)"
+    ],
+    "response_time": 0.094512939453125
+  },
+  {
+    "success": true,
+    "image_name": "canned tuna.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "CHUNK LIGHT SKIPJACK TUNA",
+      "WATER. FISH (TUNA)"
+    ],
+    "response_time": 0.11043167114257812
+  },
+  {
+    "success": true,
+    "image_name": "cereal.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Rice",
+      "Whole grain wheat",
+      "Sugars (sugar",
+      "blackstrap molasses",
+      "corn syrup",
+      "honey. corn barley malt extract",
+      "Soy protein concentrate",
+      "Vegetable oil"
+    ],
+    "response_time": 0.15409302711486816
+  },
+  {
+    "success": true,
+    "image_name": "cereal.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Rice",
+      "Whole grain wheat",
+      "Sugars (sugar",
+      "blackstrap molasses",
+      "corn syrup",
+      "honey. corn barley malt extract",
+      "Soy protein concentrate",
+      "Vegetable oil"
+    ],
+    "response_time": 0.2075033187866211
+  },
+  {
+    "success": true,
+    "image_name": "cereal.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Rice",
+      "Whole grain wheat",
+      "Sugars (sugar",
+      "blackstrap molasses",
+      "corn syrup",
+      "honey. corn barley malt extract",
+      "Soy protein concentrate",
+      "Vegetable oil"
+    ],
+    "response_time": 0.18329834938049316
+  },
+  {
+    "success": true,
+    "image_name": "cereal.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Rice",
+      "Whole grain wheat",
+      "Sugars (sugar",
+      "blackstrap molasses",
+      "corn syrup",
+      "honey. corn barley malt extract",
+      "Soy protein concentrate",
+      "Vegetable oil"
+    ],
+    "response_time": 0.167680025100708
+  },
+  {
+    "success": true,
+    "image_name": "cereal.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 70,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Rice",
+      "Whole grain wheat",
+      "Sugars (sugar",
+      "blackstrap molasses",
+      "corn syrup",
+      "honey. corn barley malt extract",
+      "Soy protein concentrate",
+      "Vegetable oil"
+    ],
+    "response_time": 0.1703016757965088
+  },
+  {
+    "success": true,
+    "image_name": "egg noodles.jpeg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "DURUM WHEAT SEMOLINA",
+      "DURUM WHEAT FLOUR",
+      "EGGS",
+      "NIACIN",
+      "IRON (FERROUS SULFATE)",
+      "THIAMIN MONONITRATE",
+      "RIBOFLAVIN",
+      "FOLIC ACID. WHEAT"
+    ],
+    "response_time": 0.1278848648071289
+  },
+  {
+    "success": true,
+    "image_name": "egg noodles.jpeg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "DURUM WHEAT SEMOLINA",
+      "DURUM WHEAT FLOUR",
+      "EGGS",
+      "NIACIN",
+      "IRON (FERROUS SULFATE)",
+      "THIAMIN MONONITRATE",
+      "RIBOFLAVIN",
+      "FOLIC ACID. WHEAT"
+    ],
+    "response_time": 0.14021563529968262
+  },
+  {
+    "success": true,
+    "image_name": "egg noodles.jpeg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "DURUM WHEAT SEMOLINA",
+      "DURUM WHEAT FLOUR",
+      "EGGS",
+      "NIACIN",
+      "IRON (FERROUS SULFATE)",
+      "THIAMIN MONONITRATE",
+      "RIBOFLAVIN",
+      "FOLIC ACID. WHEAT"
+    ],
+    "response_time": 0.1397092342376709
+  },
+  {
+    "success": true,
+    "image_name": "egg noodles.jpeg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "DURUM WHEAT SEMOLINA",
+      "DURUM WHEAT FLOUR",
+      "EGGS",
+      "NIACIN",
+      "IRON (FERROUS SULFATE)",
+      "THIAMIN MONONITRATE",
+      "RIBOFLAVIN",
+      "FOLIC ACID. WHEAT"
+    ],
+    "response_time": 0.13156390190124512
+  },
+  {
+    "success": true,
+    "image_name": "egg noodles.jpeg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 70,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.75,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "DURUM WHEAT SEMOLINA",
+      "DURUM WHEAT FLOUR",
+      "EGGS",
+      "NIACIN",
+      "IRON (FERROUS SULFATE)",
+      "THIAMIN MONONITRATE",
+      "RIBOFLAVIN",
+      "FOLIC ACID. WHEAT"
+    ],
+    "response_time": 0.13754796981811523
+  },
+  {
+    "success": true,
+    "image_name": "granola bar.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Granola (Whole Rolled Oats",
+      "Sugar",
+      "Rice Flour",
+      "Canola and/or Soybean Oil",
+      "Molasses",
+      "Sodium Bicarbonate",
+      "Soy Lecithin - an Emulsifier. Calcium Carbonate",
+      "Salt)"
+    ],
+    "response_time": 0.185014009475708
+  },
+  {
+    "success": true,
+    "image_name": "granola bar.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 90,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 30,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Granola (Whole Rolled Oats",
+      "Sugar",
+      "Rice Flour",
+      "Canola and/or Soybean Oil",
+      "Molasses",
+      "Sodium Bicarbonate",
+      "Soy Lecithin - an Emulsifier. Calcium Carbonate",
+      "Salt)"
+    ],
+    "response_time": 0.30388641357421875
+  },
+  {
+    "success": true,
+    "image_name": "granola bar.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Granola (Whole Rolled Oats",
+      "Sugar",
+      "Rice Flour",
+      "Canola and/or Soybean Oil",
+      "Molasses",
+      "Sodium Bicarbonate",
+      "Soy Lecithin - an Emulsifier. Calcium Carbonate",
+      "Salt)"
+    ],
+    "response_time": 0.2216787338256836
+  },
+  {
+    "success": true,
+    "image_name": "granola bar.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Granola (Whole Rolled Oats",
+      "Sugar",
+      "Rice Flour",
+      "Canola and/or Soybean Oil",
+      "Molasses",
+      "Sodium Bicarbonate",
+      "Soy Lecithin - an Emulsifier. Calcium Carbonate",
+      "Salt)"
+    ],
+    "response_time": 0.18418645858764648
+  },
+  {
+    "success": true,
+    "image_name": "granola bar.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 70,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.8,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "Granola (Whole Rolled Oats",
+      "Sugar",
+      "Rice Flour",
+      "Canola and/or Soybean Oil",
+      "Molasses",
+      "Sodium Bicarbonate",
+      "Soy Lecithin - an Emulsifier. Calcium Carbonate",
+      "Salt)"
+    ],
+    "response_time": 0.18719935417175293
+  },
+  {
+    "success": true,
+    "image_name": "ice cream.png",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "CHERRY COCONUT FLAVOURED ICE CREAM [MILK",
+      "CREAM",
+      "LIQUID SUGAR",
+      "WATER",
+      "MILK SOLIDS NON FAT",
+      "GLUCOSE SYRUP (FROM MAIZE)",
+      "EMULSIFIER (47I)",
+      "VEGETABLE GUMS (412"
+    ],
+    "response_time": 0.17052602767944336
+  },
+  {
+    "success": true,
+    "image_name": "ice cream.png",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 90,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 30,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "CHERRY COCONUT FLAVOURED ICE CREAM [MILK",
+      "CREAM",
+      "LIQUID SUGAR",
+      "WATER",
+      "MILK SOLIDS NON FAT",
+      "GLUCOSE SYRUP (FROM MAIZE)",
+      "EMULSIFIER (47I)",
+      "VEGETABLE GUMS (412"
+    ],
+    "response_time": 0.2389659881591797
+  },
+  {
+    "success": true,
+    "image_name": "ice cream.png",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "CHERRY COCONUT FLAVOURED ICE CREAM [MILK",
+      "CREAM",
+      "LIQUID SUGAR",
+      "WATER",
+      "MILK SOLIDS NON FAT",
+      "GLUCOSE SYRUP (FROM MAIZE)",
+      "EMULSIFIER (47I)",
+      "VEGETABLE GUMS (412"
+    ],
+    "response_time": 0.18264031410217285
+  },
+  {
+    "success": true,
+    "image_name": "ice cream.png",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.69,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "CHERRY COCONUT FLAVOURED ICE CREAM [MILK",
+      "CREAM",
+      "LIQUID SUGAR",
+      "WATER",
+      "MILK SOLIDS NON FAT",
+      "GLUCOSE SYRUP (FROM MAIZE)",
+      "EMULSIFIER (47I)",
+      "VEGETABLE GUMS (412"
+    ],
+    "response_time": 0.21123313903808594
+  },
+  {
+    "success": true,
+    "image_name": "ice cream.png",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "CHERRY COCONUT FLAVOURED ICE CREAM [MILK",
+      "CREAM",
+      "LIQUID SUGAR",
+      "WATER",
+      "MILK SOLIDS NON FAT",
+      "GLUCOSE SYRUP (FROM MAIZE)",
+      "EMULSIFIER (47I)",
+      "VEGETABLE GUMS (412"
+    ],
+    "response_time": 0.1852426528930664
+  },
+  {
+    "success": true,
+    "image_name": "instant noodles.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.8,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "NOODLES: WHEAT FLOUR",
+      "PALM OIL",
+      "SALT",
+      "POTASSIUM CARBONATE",
+      "SODIUM TRIPOLYPHOSPHATE SCUIUM CARBONATE",
+      "SODIUM HEXAMETAPHOSPHATE",
+      "ALGIN ACID",
+      "SODIUM PHOSPHATE"
+    ],
+    "response_time": 0.1712336540222168
+  },
+  {
+    "success": true,
+    "image_name": "instant noodles.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "NOODLES: WHEAT FLOUR",
+      "PALM OIL",
+      "SALT",
+      "POTASSIUM CARBONATE",
+      "SODIUM TRIPOLYPHOSPHATE SCUIUM CARBONATE",
+      "SODIUM HEXAMETAPHOSPHATE",
+      "ALGIN ACID",
+      "SODIUM PHOSPHATE"
+    ],
+    "response_time": 0.23378300666809082
+  },
+  {
+    "success": true,
+    "image_name": "instant noodles.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.8,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "NOODLES: WHEAT FLOUR",
+      "PALM OIL",
+      "SALT",
+      "POTASSIUM CARBONATE",
+      "SODIUM TRIPOLYPHOSPHATE SCUIUM CARBONATE",
+      "SODIUM HEXAMETAPHOSPHATE",
+      "ALGIN ACID",
+      "SODIUM PHOSPHATE"
+    ],
+    "response_time": 0.2277681827545166
+  },
+  {
+    "success": true,
+    "image_name": "instant noodles.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "NOODLES: WHEAT FLOUR",
+      "PALM OIL",
+      "SALT",
+      "POTASSIUM CARBONATE",
+      "SODIUM TRIPOLYPHOSPHATE SCUIUM CARBONATE",
+      "SODIUM HEXAMETAPHOSPHATE",
+      "ALGIN ACID",
+      "SODIUM PHOSPHATE"
+    ],
+    "response_time": 0.1984865665435791
+  },
+  {
+    "success": true,
+    "image_name": "instant noodles.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 70,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.81,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "NOODLES: WHEAT FLOUR",
+      "PALM OIL",
+      "SALT",
+      "POTASSIUM CARBONATE",
+      "SODIUM TRIPOLYPHOSPHATE SCUIUM CARBONATE",
+      "SODIUM HEXAMETAPHOSPHATE",
+      "ALGIN ACID",
+      "SODIUM PHOSPHATE"
+    ],
+    "response_time": 0.22447800636291504
+  },
+  {
+    "success": true,
+    "image_name": "milk_chocolate.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.67,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Sugar",
+      "Cocoa Butter*",
+      "Whole Milk Powder",
+      "Cocoa Mass*",
+      "Sweet Whey Powder (Milk)",
+      "Emulsifier: Lecithins (Soya); Flavourings. MILK CHOCOLATE COCOA SOLIDS 30% MINIMUM",
+      "MILK SOLIDS 14% MINIMUM"
+    ],
+    "response_time": 0.11916422843933105
+  },
+  {
+    "success": true,
+    "image_name": "milk_chocolate.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.69,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Sugar",
+      "Cocoa Butter*",
+      "Whole Milk Powder",
+      "Cocoa Mass*",
+      "Sweet Whey Powder (Milk)",
+      "Emulsifier: Lecithins (Soya); Flavourings. MILK CHOCOLATE COCOA SOLIDS 30% MINIMUM",
+      "MILK SOLIDS 14% MINIMUM"
+    ],
+    "response_time": 0.15659046173095703
+  },
+  {
+    "success": true,
+    "image_name": "milk_chocolate.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.66,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Sugar",
+      "Cocoa Butter*",
+      "Whole Milk Powder",
+      "Cocoa Mass*",
+      "Sweet Whey Powder (Milk)",
+      "Emulsifier: Lecithins (Soya); Flavourings. MILK CHOCOLATE COCOA SOLIDS 30% MINIMUM",
+      "MILK SOLIDS 14% MINIMUM"
+    ],
+    "response_time": 0.1594085693359375
+  },
+  {
+    "success": true,
+    "image_name": "milk_chocolate.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.66,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Sugar",
+      "Cocoa Butter*",
+      "Whole Milk Powder",
+      "Cocoa Mass*",
+      "Sweet Whey Powder (Milk)",
+      "Emulsifier: Lecithins (Soya); Flavourings. MILK CHOCOLATE COCOA SOLIDS 30% MINIMUM",
+      "MILK SOLIDS 14% MINIMUM"
+    ],
+    "response_time": 0.16248726844787598
+  },
+  {
+    "success": true,
+    "image_name": "milk_chocolate.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.67,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Sugar",
+      "Cocoa Butter*",
+      "Whole Milk Powder",
+      "Cocoa Mass*",
+      "Sweet Whey Powder (Milk)",
+      "Emulsifier: Lecithins (Soya); Flavourings. MILK CHOCOLATE COCOA SOLIDS 30% MINIMUM",
+      "MILK SOLIDS 14% MINIMUM"
+    ],
+    "response_time": 0.16330671310424805
+  },
+  {
+    "success": true,
+    "image_name": "olive oil.jpeg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "WATER",
+      "VEGETABLE OIL BLEND (PALM",
+      "CANOLA",
+      "OLIVE OIL)",
+      "LESS THAN 2% OF SALT",
+      "VEGETABLE MONOGLYCERIDES",
+      "SORBITAN TRISREARATE POLYGLYCEROL POLYRICINOLEATE (EMULSIFIERS)",
+      "NATURAL ARTIFICIAL FLAVORS (INCLUDES MILK*)"
+    ],
+    "response_time": 0.17821311950683594
+  },
+  {
+    "success": true,
+    "image_name": "olive oil.jpeg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.79,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "WATER",
+      "VEGETABLE OIL BLEND (PALM",
+      "CANOLA",
+      "OLIVE OIL)",
+      "LESS THAN 2% OF SALT",
+      "VEGETABLE MONOGLYCERIDES",
+      "SORBITAN TRISREARATE POLYGLYCEROL POLYRICINOLEATE (EMULSIFIERS)",
+      "NATURAL ARTIFICIAL FLAVORS (INCLUDES MILK*)"
+    ],
+    "response_time": 0.19487333297729492
+  },
+  {
+    "success": true,
+    "image_name": "olive oil.jpeg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "WATER",
+      "VEGETABLE OIL BLEND (PALM",
+      "CANOLA",
+      "OLIVE OIL)",
+      "LESS THAN 2% OF SALT",
+      "VEGETABLE MONOGLYCERIDES",
+      "SORBITAN TRISREARATE POLYGLYCEROL POLYRICINOLEATE (EMULSIFIERS)",
+      "NATURAL ARTIFICIAL FLAVORS (INCLUDES MILK*)"
+    ],
+    "response_time": 0.1727147102355957
+  },
+  {
+    "success": true,
+    "image_name": "olive oil.jpeg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "WATER",
+      "VEGETABLE OIL BLEND (PALM",
+      "CANOLA",
+      "OLIVE OIL)",
+      "LESS THAN 2% OF SALT",
+      "VEGETABLE MONOGLYCERIDES",
+      "SORBITAN TRISREARATE POLYGLYCEROL POLYRICINOLEATE (EMULSIFIERS)",
+      "NATURAL ARTIFICIAL FLAVORS (INCLUDES MILK*)"
+    ],
+    "response_time": 0.156480073928833
+  },
+  {
+    "success": true,
+    "image_name": "olive oil.jpeg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.78,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.82,
+    "extracted_ingredients": [
+      "WATER",
+      "VEGETABLE OIL BLEND (PALM",
+      "CANOLA",
+      "OLIVE OIL)",
+      "LESS THAN 2% OF SALT",
+      "VEGETABLE MONOGLYCERIDES",
+      "SORBITAN TRISREARATE POLYGLYCEROL POLYRICINOLEATE (EMULSIFIERS)",
+      "NATURAL ARTIFICIAL FLAVORS (INCLUDES MILK*)"
+    ],
+    "response_time": 0.15697360038757324
+  },
+  {
+    "success": true,
+    "image_name": "peanut_butter.png",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "salt 1.009 Roasted Peanuts (90%)",
+      "Sugar",
+      "Rapeseed Oil",
+      "Cottonseed Oil",
+      "Salt"
+    ],
+    "response_time": 0.14344072341918945
+  },
+  {
+    "success": true,
+    "image_name": "peanut_butter.png",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.75,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "salt 1.009 Roasted Peanuts (90%)",
+      "Sugar",
+      "Rapeseed Oil",
+      "Cottonseed Oil",
+      "Salt"
+    ],
+    "response_time": 0.16362595558166504
+  },
+  {
+    "success": true,
+    "image_name": "peanut_butter.png",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "salt 1.009 Roasted Peanuts (90%)",
+      "Sugar",
+      "Rapeseed Oil",
+      "Cottonseed Oil",
+      "Salt"
+    ],
+    "response_time": 0.16420364379882812
+  },
+  {
+    "success": true,
+    "image_name": "peanut_butter.png",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "salt 1.009 Roasted Peanuts (90%)",
+      "Sugar",
+      "Rapeseed Oil",
+      "Cottonseed Oil",
+      "Salt"
+    ],
+    "response_time": 0.09531378746032715
+  },
+  {
+    "success": true,
+    "image_name": "peanut_butter.png",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.75,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.78,
+    "extracted_ingredients": [
+      "salt 1.009 Roasted Peanuts (90%)",
+      "Sugar",
+      "Rapeseed Oil",
+      "Cottonseed Oil",
+      "Salt"
+    ],
+    "response_time": 0.08969902992248535
+  },
+  {
+    "success": true,
+    "image_name": "potato chips.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "POTATOES",
+      "CANOLA OIL",
+      "SUNFLOWER OIL",
+      "SUGAR",
+      "SALT",
+      "FOOD ACIDS (SODIUM DIACETATE",
+      "CITRIC ACID)",
+      "BUTTERMILK POWDER (MILK)"
+    ],
+    "response_time": 0.1454324722290039
+  },
+  {
+    "success": true,
+    "image_name": "potato chips.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "POTATOES",
+      "CANOLA OIL",
+      "SUNFLOWER OIL",
+      "SUGAR",
+      "SALT",
+      "FOOD ACIDS (SODIUM DIACETATE",
+      "CITRIC ACID)",
+      "BUTTERMILK POWDER (MILK)"
+    ],
+    "response_time": 0.1959991455078125
+  },
+  {
+    "success": true,
+    "image_name": "potato chips.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "POTATOES",
+      "CANOLA OIL",
+      "SUNFLOWER OIL",
+      "SUGAR",
+      "SALT",
+      "FOOD ACIDS (SODIUM DIACETATE",
+      "CITRIC ACID)",
+      "BUTTERMILK POWDER (MILK)"
+    ],
+    "response_time": 0.17834973335266113
+  },
+  {
+    "success": true,
+    "image_name": "potato chips.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "POTATOES",
+      "CANOLA OIL",
+      "SUNFLOWER OIL",
+      "SUGAR",
+      "SALT",
+      "FOOD ACIDS (SODIUM DIACETATE",
+      "CITRIC ACID)",
+      "BUTTERMILK POWDER (MILK)"
+    ],
+    "response_time": 0.20910024642944336
+  },
+  {
+    "success": true,
+    "image_name": "potato chips.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.83,
+    "extracted_ingredients": [
+      "POTATOES",
+      "CANOLA OIL",
+      "SUNFLOWER OIL",
+      "SUGAR",
+      "SALT",
+      "FOOD ACIDS (SODIUM DIACETATE",
+      "CITRIC ACID)",
+      "BUTTERMILK POWDER (MILK)"
+    ],
+    "response_time": 0.17654061317443848
+  },
+  {
+    "success": true,
+    "image_name": "rice.png",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Rice",
+      "wild rice",
+      "salt",
+      "autolyzed yeast extract",
+      "dried parsley",
+      "onions",
+      "garlic",
+      "spices"
+    ],
+    "response_time": 0.12124156951904297
+  },
+  {
+    "success": true,
+    "image_name": "rice.png",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Rice",
+      "wild rice",
+      "salt",
+      "autolyzed yeast extract",
+      "dried parsley",
+      "onions",
+      "garlic",
+      "spices"
+    ],
+    "response_time": 0.16095328330993652
+  },
+  {
+    "success": true,
+    "image_name": "rice.png",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Rice",
+      "wild rice",
+      "salt",
+      "autolyzed yeast extract",
+      "dried parsley",
+      "onions",
+      "garlic",
+      "spices"
+    ],
+    "response_time": 0.13117361068725586
+  },
+  {
+    "success": true,
+    "image_name": "rice.png",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Rice",
+      "wild rice",
+      "salt",
+      "autolyzed yeast extract",
+      "dried parsley",
+      "onions",
+      "garlic",
+      "spices"
+    ],
+    "response_time": 0.1223909854888916
+  },
+  {
+    "success": true,
+    "image_name": "rice.png",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Rice",
+      "wild rice",
+      "salt",
+      "autolyzed yeast extract",
+      "dried parsley",
+      "onions",
+      "garlic",
+      "spices"
+    ],
+    "response_time": 0.1623554229736328
+  },
+  {
+    "success": true,
+    "image_name": "salt.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Vile SALT",
+      "CALCIUM SILICATE",
+      "SODIUM THIOSULPHATE",
+      "POTASSIUM IODIDE",
+      "SODIUM BICARBONATE"
+    ],
+    "response_time": 0.14754891395568848
+  },
+  {
+    "success": true,
+    "image_name": "salt.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Vile SALT",
+      "CALCIUM SILICATE",
+      "SODIUM THIOSULPHATE",
+      "POTASSIUM IODIDE",
+      "SODIUM BICARBONATE"
+    ],
+    "response_time": 0.12710189819335938
+  },
+  {
+    "success": true,
+    "image_name": "salt.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Vile SALT",
+      "CALCIUM SILICATE",
+      "SODIUM THIOSULPHATE",
+      "POTASSIUM IODIDE",
+      "SODIUM BICARBONATE"
+    ],
+    "response_time": 0.1577310562133789
+  },
+  {
+    "success": true,
+    "image_name": "salt.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Vile SALT",
+      "CALCIUM SILICATE",
+      "SODIUM THIOSULPHATE",
+      "POTASSIUM IODIDE",
+      "SODIUM BICARBONATE"
+    ],
+    "response_time": 0.16736912727355957
+  },
+  {
+    "success": true,
+    "image_name": "salt.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.77,
+    "extracted_ingredients": [
+      "Vile SALT",
+      "CALCIUM SILICATE",
+      "SODIUM THIOSULPHATE",
+      "POTASSIUM IODIDE",
+      "SODIUM BICARBONATE"
+    ],
+    "response_time": 0.11952686309814453
+  },
+  {
+    "success": true,
+    "image_name": "seitan.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.71,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "EN Organic seitan with teriayki marinade Seitan* 66% (water",
+      "WHEAT gluten\"",
+      "sunflower protein",
+      "SUY sauce\" (water",
+      "SOY beans\" WHEAT\"",
+      "salt",
+      "SUY *",
+      "ginger*"
+    ],
+    "response_time": 0.17525124549865723
+  },
+  {
+    "success": true,
+    "image_name": "seitan.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "caution",
+    "expected_score": 59,
+    "expected_binary": 1,
+    "predicted_risk": "caution",
+    "predicted_score": 39,
+    "predicted_binary": 1,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 20,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "EN Organic seitan with teriayki marinade Seitan* 66% (water",
+      "WHEAT gluten\"",
+      "sunflower protein",
+      "SUY sauce\" (water",
+      "SOY beans\" WHEAT\"",
+      "salt",
+      "SUY *",
+      "ginger*"
+    ],
+    "response_time": 0.17678380012512207
+  },
+  {
+    "success": true,
+    "image_name": "seitan.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "caution",
+    "expected_score": 49,
+    "expected_binary": 1,
+    "predicted_risk": "caution",
+    "predicted_score": 39,
+    "predicted_binary": 1,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "EN Organic seitan with teriayki marinade Seitan* 66% (water",
+      "WHEAT gluten\"",
+      "sunflower protein",
+      "SUY sauce\" (water",
+      "SOY beans\" WHEAT\"",
+      "salt",
+      "SUY *",
+      "ginger*"
+    ],
+    "response_time": 0.16606616973876953
+  },
+  {
+    "success": true,
+    "image_name": "seitan.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "caution",
+    "expected_score": 49,
+    "expected_binary": 1,
+    "predicted_risk": "caution",
+    "predicted_score": 39,
+    "predicted_binary": 1,
+    "confidence": 0.7,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "EN Organic seitan with teriayki marinade Seitan* 66% (water",
+      "WHEAT gluten\"",
+      "sunflower protein",
+      "SUY sauce\" (water",
+      "SOY beans\" WHEAT\"",
+      "salt",
+      "SUY *",
+      "ginger*"
+    ],
+    "response_time": 0.1653444766998291
+  },
+  {
+    "success": true,
+    "image_name": "seitan.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 70,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.71,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.76,
+    "extracted_ingredients": [
+      "EN Organic seitan with teriayki marinade Seitan* 66% (water",
+      "WHEAT gluten\"",
+      "sunflower protein",
+      "SUY sauce\" (water",
+      "SOY beans\" WHEAT\"",
+      "salt",
+      "SUY *",
+      "ginger*"
+    ],
+    "response_time": 0.1929619312286377
+  },
+  {
+    "success": true,
+    "image_name": "soy_sauce.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.76,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.66,
+    "extracted_ingredients": [
+      "080) Ments: Sugar 38%",
+      "Water 25%",
+      "Brown Sugar 17%",
+      "Glucose Syrup 15%",
+      "Soy Sauce (Salt Water",
+      "Soybean",
+      "Wheat Flour) 5% Alleroy A"
+    ],
+    "response_time": 0.12790203094482422
+  },
+  {
+    "success": true,
+    "image_name": "soy_sauce.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.66,
+    "extracted_ingredients": [
+      "080) Ments: Sugar 38%",
+      "Water 25%",
+      "Brown Sugar 17%",
+      "Glucose Syrup 15%",
+      "Soy Sauce (Salt Water",
+      "Soybean",
+      "Wheat Flour) 5% Alleroy A"
+    ],
+    "response_time": 0.11329841613769531
+  },
+  {
+    "success": true,
+    "image_name": "soy_sauce.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.66,
+    "extracted_ingredients": [
+      "080) Ments: Sugar 38%",
+      "Water 25%",
+      "Brown Sugar 17%",
+      "Glucose Syrup 15%",
+      "Soy Sauce (Salt Water",
+      "Soybean",
+      "Wheat Flour) 5% Alleroy A"
+    ],
+    "response_time": 0.12130904197692871
+  },
+  {
+    "success": true,
+    "image_name": "soy_sauce.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.66,
+    "extracted_ingredients": [
+      "080) Ments: Sugar 38%",
+      "Water 25%",
+      "Brown Sugar 17%",
+      "Glucose Syrup 15%",
+      "Soy Sauce (Salt Water",
+      "Soybean",
+      "Wheat Flour) 5% Alleroy A"
+    ],
+    "response_time": 0.10432004928588867
+  },
+  {
+    "success": true,
+    "image_name": "soy_sauce.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 70,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.77,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 10,
+    "ocr_confidence": 0.66,
+    "extracted_ingredients": [
+      "080) Ments: Sugar 38%",
+      "Water 25%",
+      "Brown Sugar 17%",
+      "Glucose Syrup 15%",
+      "Soy Sauce (Salt Water",
+      "Soybean",
+      "Wheat Flour) 5% Alleroy A"
+    ],
+    "response_time": 0.11184334754943848
+  },
+  {
+    "success": true,
+    "image_name": "whey protein.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Whey Protein Blend (Whey Protein Concentrate",
+      "Whey Protein Isolate) (milk)",
+      "Natural Vanilla Flavours",
+      "Xanthan Gum",
+      "Sunflower Lecithin (emulsifier)",
+      "Sodium Chlaride",
+      "Stevia (Leaf",
+      "Extract)"
+    ],
+    "response_time": 0.16760587692260742
+  },
+  {
+    "success": true,
+    "image_name": "whey protein.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Whey Protein Blend (Whey Protein Concentrate",
+      "Whey Protein Isolate) (milk)",
+      "Natural Vanilla Flavours",
+      "Xanthan Gum",
+      "Sunflower Lecithin (emulsifier)",
+      "Sodium Chlaride",
+      "Stevia (Leaf",
+      "Extract)"
+    ],
+    "response_time": 0.14616799354553223
+  },
+  {
+    "success": true,
+    "image_name": "whey protein.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Whey Protein Blend (Whey Protein Concentrate",
+      "Whey Protein Isolate) (milk)",
+      "Natural Vanilla Flavours",
+      "Xanthan Gum",
+      "Sunflower Lecithin (emulsifier)",
+      "Sodium Chlaride",
+      "Stevia (Leaf",
+      "Extract)"
+    ],
+    "response_time": 0.1535472869873047
+  },
+  {
+    "success": true,
+    "image_name": "whey protein.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Whey Protein Blend (Whey Protein Concentrate",
+      "Whey Protein Isolate) (milk)",
+      "Natural Vanilla Flavours",
+      "Xanthan Gum",
+      "Sunflower Lecithin (emulsifier)",
+      "Sodium Chlaride",
+      "Stevia (Leaf",
+      "Extract)"
+    ],
+    "response_time": 0.12109088897705078
+  },
+  {
+    "success": true,
+    "image_name": "whey protein.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.79,
+    "extracted_ingredients": [
+      "Whey Protein Blend (Whey Protein Concentrate",
+      "Whey Protein Isolate) (milk)",
+      "Natural Vanilla Flavours",
+      "Xanthan Gum",
+      "Sunflower Lecithin (emulsifier)",
+      "Sodium Chlaride",
+      "Stevia (Leaf",
+      "Extract)"
+    ],
+    "response_time": 0.13184618949890137
+  },
+  {
+    "success": true,
+    "image_name": "white sugar.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.67,
+    "extracted_ingredients": [
+      "Cane Sugar"
+    ],
+    "response_time": 0.09771537780761719
+  },
+  {
+    "success": true,
+    "image_name": "white sugar.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.67,
+    "extracted_ingredients": [
+      "Cane Sugar"
+    ],
+    "response_time": 0.11723995208740234
+  },
+  {
+    "success": true,
+    "image_name": "white sugar.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.67,
+    "extracted_ingredients": [
+      "Cane Sugar"
+    ],
+    "response_time": 0.09888339042663574
+  },
+  {
+    "success": true,
+    "image_name": "white sugar.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.67,
+    "extracted_ingredients": [
+      "Cane Sugar"
+    ],
+    "response_time": 0.11689400672912598
+  },
+  {
+    "success": true,
+    "image_name": "white sugar.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.67,
+    "extracted_ingredients": [
+      "Cane Sugar"
+    ],
+    "response_time": 0.09770059585571289
+  },
+  {
+    "success": true,
+    "image_name": "whole wheat bread.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.8,
+    "extracted_ingredients": [
+      "Whole Wheat Flour",
+      "Water",
+      "Unbleached Wheat Flour",
+      "Honey",
+      "Yeast",
+      "Sea Salt",
+      "Sunflower Seeds",
+      "Sesame Seeds"
+    ],
+    "response_time": 0.15762019157409668
+  },
+  {
+    "success": true,
+    "image_name": "whole wheat bread.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.8,
+    "extracted_ingredients": [
+      "Whole Wheat Flour",
+      "Water",
+      "Unbleached Wheat Flour",
+      "Honey",
+      "Yeast",
+      "Sea Salt",
+      "Sunflower Seeds",
+      "Sesame Seeds"
+    ],
+    "response_time": 0.1514911651611328
+  },
+  {
+    "success": true,
+    "image_name": "whole wheat bread.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.73,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.8,
+    "extracted_ingredients": [
+      "Whole Wheat Flour",
+      "Water",
+      "Unbleached Wheat Flour",
+      "Honey",
+      "Yeast",
+      "Sea Salt",
+      "Sunflower Seeds",
+      "Sesame Seeds"
+    ],
+    "response_time": 0.14104795455932617
+  },
+  {
+    "success": true,
+    "image_name": "whole wheat bread.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.72,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.8,
+    "extracted_ingredients": [
+      "Whole Wheat Flour",
+      "Water",
+      "Unbleached Wheat Flour",
+      "Honey",
+      "Yeast",
+      "Sea Salt",
+      "Sunflower Seeds",
+      "Sesame Seeds"
+    ],
+    "response_time": 0.12027812004089355
+  },
+  {
+    "success": true,
+    "image_name": "whole wheat bread.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 65,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.74,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 5,
+    "ocr_confidence": 0.8,
+    "extracted_ingredients": [
+      "Whole Wheat Flour",
+      "Water",
+      "Unbleached Wheat Flour",
+      "Honey",
+      "Yeast",
+      "Sea Salt",
+      "Sunflower Seeds",
+      "Sesame Seeds"
+    ],
+    "response_time": 0.11344671249389648
+  },
+  {
+    "success": true,
+    "image_name": "yogurt.jpg",
+    "profile_id": "TEST_PROFILE_1",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.65,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.75,
+    "extracted_ingredients": [
+      "tainer (170g) CULTURED PASTEURIZED GRADE A MILK",
+      "CREAM",
+      "PECTIN. MILK"
+    ],
+    "response_time": 0.11898088455200195
+  },
+  {
+    "success": true,
+    "image_name": "yogurt.jpg",
+    "profile_id": "TEST_PROFILE_2",
+    "profile_allergies": [
+      {
+        "id": "milk",
+        "severity": "high"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "shellfish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "unsafe",
+    "expected_score": 85,
+    "expected_binary": 1,
+    "predicted_risk": "unsafe",
+    "predicted_score": 60,
+    "predicted_binary": 1,
+    "confidence": 0.71,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 25,
+    "ocr_confidence": 0.75,
+    "extracted_ingredients": [
+      "tainer (170g) CULTURED PASTEURIZED GRADE A MILK",
+      "CREAM",
+      "PECTIN. MILK"
+    ],
+    "response_time": 0.11377787590026855
+  },
+  {
+    "success": true,
+    "image_name": "yogurt.jpg",
+    "profile_id": "TEST_PROFILE_3",
+    "profile_allergies": [
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "sesame",
+        "severity": "medium"
+      },
+      {
+        "id": "tree_nuts",
+        "severity": "high"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.65,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.75,
+    "extracted_ingredients": [
+      "tainer (170g) CULTURED PASTEURIZED GRADE A MILK",
+      "CREAM",
+      "PECTIN. MILK"
+    ],
+    "response_time": 0.10291337966918945
+  },
+  {
+    "success": true,
+    "image_name": "yogurt.jpg",
+    "profile_id": "TEST_PROFILE_4",
+    "profile_allergies": [
+      {
+        "id": "shellfish",
+        "severity": "high"
+      },
+      {
+        "id": "peanuts",
+        "severity": "high"
+      },
+      {
+        "id": "eggs",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.65,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.75,
+    "extracted_ingredients": [
+      "tainer (170g) CULTURED PASTEURIZED GRADE A MILK",
+      "CREAM",
+      "PECTIN. MILK"
+    ],
+    "response_time": 0.13252687454223633
+  },
+  {
+    "success": true,
+    "image_name": "yogurt.jpg",
+    "profile_id": "TEST_PROFILE_5",
+    "profile_allergies": [
+      {
+        "id": "eggs",
+        "severity": "medium"
+      },
+      {
+        "id": "fish",
+        "severity": "high"
+      },
+      {
+        "id": "soy",
+        "severity": "medium"
+      },
+      {
+        "id": "gluten",
+        "severity": "medium"
+      }
+    ],
+    "profile_dietary": [],
+    "expected_risk": "safe",
+    "expected_score": 0,
+    "expected_binary": 0,
+    "predicted_risk": "safe",
+    "predicted_score": 0,
+    "predicted_binary": 0,
+    "confidence": 0.65,
+    "binary_correct": true,
+    "exact_correct": true,
+    "score_error": 0,
+    "ocr_confidence": 0.75,
+    "extracted_ingredients": [
+      "tainer (170g) CULTURED PASTEURIZED GRADE A MILK",
+      "CREAM",
+      "PECTIN. MILK"
+    ],
+    "response_time": 0.18532156944274902
+  }
+]

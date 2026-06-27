@@ -1,36 +1,51 @@
-import cv2
-import pytesseract
-import numpy as np
-from PIL import Image
-import io
-import re
+# biteright_backend/services/ocr_service.py
+"""
+OCR Service for BiteRight - Enhanced for ingredient label extraction
+"""
+
 import os
-import shutil
+import re
+import cv2
+import numpy as np
+import pytesseract
+import requests
+from PIL import Image
 
 
 def _configure_tesseract():
-    """Locate Tesseract OCR binary across common install paths."""
+    """Locate Tesseract OCR binary."""
     env_path = os.environ.get('TESSERACT_CMD') or os.environ.get('TESSERACT_PATH')
+    
+    if env_path and os.path.exists(env_path):
+        print(f"✓ Using TESSERACT_CMD: {env_path}")
+        return env_path
+    
     candidates = [
-        env_path,
-        shutil.which('tesseract'),
         r'C:\Program Files\Tesseract-OCR\tesseract.exe',
         r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
         '/usr/bin/tesseract',
         '/usr/local/bin/tesseract',
         '/opt/homebrew/bin/tesseract',
     ]
+    
     for candidate in candidates:
-        if candidate and os.path.isfile(candidate):
-            pytesseract.pytesseract.tesseract_cmd = candidate
+        if os.path.exists(candidate):
+            print(f"✓ Found Tesseract at: {candidate}")
             return candidate
+    
+    print("✗ Tesseract not found!")
     return None
 
 
 TESSERACT_PATH = _configure_tesseract()
+if TESSERACT_PATH:
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
 
-def preprocess_image_multiple(image_bytes):
-    """Apply complementary preprocessing techniques for noisy package labels."""
+
+def preprocess_image_advanced(image_bytes):
+    """
+    Advanced preprocessing with multiple techniques for difficult images
+    """
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
@@ -38,264 +53,412 @@ def preprocess_image_multiple(image_bytes):
         return None, "Failed to decode image"
     
     height, width = img.shape[:2]
-    scale_factor = min(4.0, max(1.5, 1800 / max(min(height, width), 1)))
-    new_width = int(width * scale_factor)
-    new_height = int(height * scale_factor)
-    img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+    processed_versions = []
     
-    processed_images = []
+    # 1. Original size
+    original_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    processed_versions.append(("Original", original_gray))
+    
+    # 2. Upscaled version (2x)
+    if width < 1500:
+        new_width = int(width * 2)
+        new_height = int(height * 2)
+        upscaled = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+        upscaled_gray = cv2.cvtColor(upscaled, cv2.COLOR_BGR2GRAY)
+        processed_versions.append(("Upscaled 2x", upscaled_gray))
+    
+    # 3. Upscaled version (3x for very small text)
+    if width < 1000:
+        new_width = int(width * 3)
+        new_height = int(height * 3)
+        upscaled3 = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+        upscaled3_gray = cv2.cvtColor(upscaled3, cv2.COLOR_BGR2GRAY)
+        processed_versions.append(("Upscaled 3x", upscaled3_gray))
+    
+    # For each grayscale version, apply different enhancements
+    final_versions = []
+    
+    for name, gray in processed_versions:
+        # Version A: Denoised + Sharpened
+        denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
+        kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+        sharpened = cv2.filter2D(denoised, -1, kernel)
+        final_versions.append((f"{name}_Sharp", sharpened))
+        
+        # Version B: CLAHE for contrast
+        clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
+        enhanced = clahe.apply(gray)
+        final_versions.append((f"{name}_CLAHE", enhanced))
+        
+        # Version C: Binary threshold (Otsu)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        final_versions.append((f"{name}_Binary", binary))
+        
+        # Version D: Adaptive threshold
+        adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 8)
+        final_versions.append((f"{name}_Adaptive", adaptive))
+        
+        # Version E: Morphological cleaning
+        kernel_morph = np.ones((2, 2), np.uint8)
+        cleaned = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel_morph)
+        cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_OPEN, kernel_morph)
+        final_versions.append((f"{name}_Cleaned", cleaned))
+    
+    return final_versions, None
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.fastNlMeansDenoising(gray, None, 12, 7, 21)
-    clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(gray)
 
-    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-    sharpened = cv2.filter2D(clahe, -1, kernel)
+def extract_text_with_config(image, psm_mode):
+    """
+    Extract text with specific PSM mode
+    """
+    try:
+        # Different configs for different text types
+        configs = [
+            f'--oem 3 --psm {psm_mode}',
+            f'--oem 3 --psm {psm_mode} -c tessedit_char_whitelist="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ,.-/()%"',
+        ]
+        
+        best_text = ""
+        best_score = 0
+        
+        for config in configs:
+            text = pytesseract.image_to_string(image, config=config)
+            
+            # Score based on content
+            score = 0
+            text_lower = text.lower()
+            
+            if 'ingredient' in text_lower:
+                score += 200
+            if 'contains' in text_lower:
+                score += 150
+            if 'wheat' in text_lower or 'milk' in text_lower or 'soy' in text_lower:
+                score += 100
+            
+            # Count real words
+            words = re.findall(r'\b[a-z]{3,}\b', text_lower)
+            score += len(words) * 2
+            
+            # Count commas (ingredient separators)
+            score += text.count(',') * 10
+            
+            if score > best_score:
+                best_score = score
+                best_text = text
+        
+        return best_text, best_score
+    except Exception as e:
+        return "", 0
 
-    _, otsu = cv2.threshold(sharpened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    processed_images.append(("CLAHE + Otsu", otsu))
 
-    adaptive = cv2.adaptiveThreshold(
-        sharpened,
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        31,
-        9,
+def extract_with_ocr_space(image_bytes, api_key='4a3c5654e388957'):
+    """
+    Extract text using OCR.Space API
+    """
+    try:
+        response = requests.post(
+            'https://api.ocr.space/parse/image',
+            files={'filename': ('image.jpg', image_bytes, 'image/jpeg')},
+            data={
+                'apikey': api_key,
+                'language': 'eng',
+                'OCREngine': '2'
+            },
+            timeout=15
+        )
+        result = response.json()
+        if not result.get('IsErroredOnProcessing') and result.get('ParsedResults'):
+            text = result['ParsedResults'][0]['ParsedText']
+            return text, True
+        return "", False
+    except Exception as e:
+        print(f"OCR Space API error: {e}")
+        return "", False
+
+
+def _estimate_ocr_confidence(raw_text: str, parsed_ingredients: list) -> float:
+    """
+    Estimate real OCR extraction confidence from text quality signals.
+
+    Signals used (each contributes 0-1, weighted sum capped at 0.92):
+      1. Word quality  — fraction of tokens that are well-formed English words
+                         (3+ chars, not all digits, no run of unlikely chars)
+      2. Structure     — does the text contain an ingredients header?
+      3. Comma ratio   — fraction of ingredients separated by commas (good parsing signal)
+      4. Ingredient count — more parsed ingredients = more content extracted
+      5. Noise penalty — high rate of non-alpha characters lowers confidence
+    """
+    if not raw_text or not parsed_ingredients:
+        return 0.40
+
+    text_lower = raw_text.lower()
+    total_chars = max(len(raw_text), 1)
+
+    # 1. Well-formed word ratio
+    all_tokens = re.findall(r'\S+', raw_text)
+    if all_tokens:
+        good_tokens = [
+            t for t in all_tokens
+            if re.fullmatch(r"[a-zA-Z''\-]{3,}", t)
+        ]
+        word_quality = len(good_tokens) / len(all_tokens)
+    else:
+        word_quality = 0.0
+
+    # 2. Structural signal — ingredients header present
+    has_header = 1.0 if re.search(r'\b(ingredients?|contains)\b', text_lower) else 0.0
+
+    # 3. Comma ratio — commas per ingredient (up to 1.0 at ≥0.5 commas/ingredient)
+    comma_count = raw_text.count(',')
+    ing_count = max(len(parsed_ingredients), 1)
+    comma_ratio = min(1.0, (comma_count / ing_count) / 0.5)
+
+    # 4. Ingredient count signal (saturates at 15 ingredients)
+    ing_signal = min(1.0, ing_count / 15)
+
+    # 5. Noise penalty — fraction of chars that are clearly noise
+    noise_chars = len(re.findall(r'[^a-zA-Z0-9 ,.()\-/%\'\n]', raw_text))
+    noise_ratio = noise_chars / total_chars
+    noise_penalty = max(0.0, 1.0 - noise_ratio * 5)  # 20% noise → 0 penalty left
+
+    # Weighted combination
+    raw_conf = (
+        word_quality  * 0.35 +
+        has_header    * 0.20 +
+        comma_ratio   * 0.20 +
+        ing_signal    * 0.15 +
+        noise_penalty * 0.10
     )
-    processed_images.append(("Adaptive Gaussian", adaptive))
 
-    return processed_images, None
+    # Scale to [0.40, 0.92] — we never claim perfect confidence from OCR alone
+    confidence = 0.40 + raw_conf * 0.52
+    return round(min(0.92, max(0.40, confidence)), 2)
 
-def _ocr_score(text, avg_confidence):
-    cleaned = text.strip()
-    if not cleaned:
-        return 0
-
-    alpha_ratio = sum(ch.isalpha() for ch in cleaned) / max(len(cleaned), 1)
-    separator_bonus = cleaned.count(",") * 25 + cleaned.count(";") * 20
-    ingredient_bonus = 600 if re.search(r"\bingredients?\b", cleaned, re.IGNORECASE) else 0
-    allergen_bonus = 250 if re.search(r"\bcontains?\b", cleaned, re.IGNORECASE) else 0
-    readable_bonus = int(alpha_ratio * 300)
-    return len(cleaned) + separator_bonus + ingredient_bonus + allergen_bonus + readable_bonus + int(avg_confidence * 8)
-
-def _run_tesseract(image, config):
-    data = pytesseract.image_to_data(
-        image,
-        config=config,
-        output_type=pytesseract.Output.DICT,
-    )
-    words = []
-    confidences = []
-    for word, conf in zip(data.get("text", []), data.get("conf", [])):
-        word = str(word).strip()
-        try:
-            confidence = float(conf)
-        except (TypeError, ValueError):
-            confidence = -1
-        if word:
-            words.append(word)
-        if confidence >= 0:
-            confidences.append(confidence)
-    text = " ".join(words)
-    avg_confidence = sum(confidences) / len(confidences) if confidences else 0
-    return text, avg_confidence
-
-def extract_with_multiple_strategies(image_bytes):
-    """Try OCR strategies and return the best result (bounded for speed)."""
-    processed_images, error = preprocess_image_multiple(image_bytes)
-    
-    if error:
-        return {'success': False, 'error': error}
-    
-    best_result = None
-    best_score = 0
-    best_strategy = None
-    best_ocr_confidence = 0
-    
-    # Fewer PSM modes keeps extraction under mobile timeouts.
-    psm_modes = [6, 11]
-    early_exit_score = 1400
-    done = False
-
-    for strategy_name, processed_img in processed_images:
-        if done:
-            break
-        for psm in psm_modes:
-            try:
-                config = f"--oem 3 --psm {psm} -c preserve_interword_spaces=1"
-                text, avg_confidence = _run_tesseract(processed_img, config)
-                score = _ocr_score(text, avg_confidence)
-
-                if score > best_score:
-                    best_score = score
-                    best_result = text
-                    best_strategy = f"{strategy_name}, PSM {psm}"
-                    best_ocr_confidence = avg_confidence
-
-                if score >= early_exit_score and re.search(
-                    r"\bingredients?\b", text, re.IGNORECASE
-                ):
-                    done = True
-                    break
-            except Exception:
-                continue
-    
-    if not best_result:
-        return {
-            'success': False,
-            'error': "No text extracted from image"
-        }
-    
-    return {
-        'success': True,
-        'raw_text': best_result,
-        'strategy_used': best_strategy or 'Multiple strategies',
-        'ocr_confidence': round(best_ocr_confidence / 100, 2),
-    }
 
 def extract_ingredients(image_bytes):
-    """Enhanced extraction with multiple strategies"""
+    """
+    Main function - tries OCR API first, falls back to Tesseract strategies
+    """
     try:
-        if not TESSERACT_PATH:
-            return {
-                'success': False,
-                'error': (
-                    'Tesseract OCR is not installed. Install Tesseract and set '
-                    'TESSERACT_CMD to its executable path.'
-                ),
-            }
+        # 1. Try OCR Space API
+        best_text = ""
+        best_score = 0
+        best_strategy = ""
+        
+        api_text, api_success = extract_with_ocr_space(image_bytes)
+        
+        if api_success and api_text.strip():
+            score = 0
+            text_lower = api_text.lower()
+            if 'ingredient' in text_lower: score += 200
+            if 'contains' in text_lower: score += 150
+            if 'wheat' in text_lower or 'milk' in text_lower or 'soy' in text_lower: score += 100
+            words = re.findall(r'\b[a-z]{3,}\b', text_lower)
+            score += len(words) * 2
+            score += api_text.count(',') * 10
+            
+            best_text = api_text
+            best_score = score
+            best_strategy = "OCR Space API"
+            
+        # 2. If API text has a low score, try Tesseract as fallback
+        if best_score < 50:
+            if not TESSERACT_PATH:
+                if not best_text.strip():
+                    return {
+                        'success': False,
+                        'error': 'OCR API failed and Tesseract OCR not installed. Please install from: https://github.com/UB-Mannheim/tesseract/wiki'
+                    }
 
-        # First try multiple strategies
-        result = extract_with_multiple_strategies(image_bytes)
+            else:
+                # Tesseract fallback logic
+                processed_versions, error = preprocess_image_advanced(image_bytes)
+                
+                if not error:
+                    psm_modes = [6, 4, 11, 3]
+                    
+                    for version_name, processed_img in processed_versions:
+                        for psm in psm_modes:
+                            text, score = extract_text_with_config(processed_img, psm)
+                            
+                            if score > best_score:
+                                best_score = score
+                                best_text = text
+                                best_strategy = f"Tesseract: {version_name}, PSM {psm}"
+                    
+                    # One more Tesseract fallback with aggressive preprocessing
+                    if best_score < 20:
+                        nparr = np.frombuffer(image_bytes, np.uint8)
+                        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                        if img is not None:
+                            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                            gray = cv2.equalizeHist(gray)
+                            _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                            
+                            for psm in [6, 4]:
+                                text, score = extract_text_with_config(binary, psm)
+                                if score > best_score:
+                                    best_score = score
+                                    best_text = text
+                                    best_strategy = f"Tesseract: Extreme contrast, PSM {psm}"
         
-        if not result['success']:
-            return result
-        
-        extracted_text = result['raw_text']
-        
-        if not extracted_text.strip():
+        if not best_text.strip() or best_score < 10:
             return {
                 'success': False,
-                'error': "No text extracted from image"
+                'error': 'No readable text found. Please ensure the image shows an ingredient label clearly.'
             }
         
-        # Clean the text
-        cleaned_result = clean_extracted_text(extracted_text)
+        # Clean and parse the extracted text
+        cleaned_text = clean_extracted_text(best_text)
+        ingredients = parse_ingredients_list(cleaned_text)
+        
+        # Fallback: if no structured ingredients, extract words
+        if not ingredients:
+            words = re.findall(r'\b[a-z]{3,}\b', cleaned_text.lower())
+            skip_words = {'the', 'and', 'for', 'with', 'from', 'this', 'that', 'are', 'was', 'were',
+                         'nutrition', 'facts', 'serving', 'size', 'calories', 'daily', 'value',
+                         'distributed', 'by', 'keep', 'refrigerated', 'store', 'best', 'before',
+                         'product', 'of', 'inc', 'llc', 'copyright', 'www', 'http'}
+            ingredients = [w for w in words if w not in skip_words and len(w) > 3][:15]
+        
+        if not ingredients:
+            return {
+                'success': False,
+                'error': 'Could not identify ingredients. Please ensure the image shows an ingredient list.'
+            }
+        
+        # ── Real OCR confidence based on text quality ──────────────────────
+        # We measure the actual readability of what was extracted, not just
+        # the internal scoring variable (which was designed to pick the best
+        # strategy, not reflect extraction quality).
+        confidence = _estimate_ocr_confidence(best_text, ingredients)
         
         return {
             'success': True,
-            'raw_text': extracted_text.strip(),
-            'cleaned_text': cleaned_result['ingredients'],
-            'ingredients_list': cleaned_result['ingredients_list'],
-            'strategy_used': result.get('strategy_used'),
-            'ocr_confidence': result.get('ocr_confidence', 0.0),
-            'warning': cleaned_result.get('warning')
+            'raw_text': best_text[:1000],
+            'cleaned_text': ', '.join(ingredients),
+            'ingredients_list': ingredients,
+            'strategy_used': best_strategy,
+            'ocr_confidence': round(confidence, 2)
         }
+        
     except Exception as e:
         return {
             'success': False,
             'error': f"OCR processing failed: {str(e)}"
         }
 
-def clean_extracted_text(text):
-    """Enhanced cleaning for ingredient lists"""
-    result = {
-        'ingredients': [],
-        'ingredients_list': [],
-        'warning': None
-    }
-    
-    try:
-        text = fix_common_ocr_errors(text)
-        text = re.sub(r'\s+', ' ', text.strip())
-        
-        # Try to find the "INGREDIENTS:" section
-        ingredients_patterns = [
-            r'INGREDIENTS?:?\s*(.*?)(?=\n\n|\n[A-Z]|\Z)',
-            r'INGREDIENTS?:?\s*(.*?)(?=\.\s*[A-Z]|$)',
-            r'Contains:?\s*(.*?)(?=\.|$)',
-            r'^([A-Za-z\s,]+?)(?=\d|Nutrition|Calories|Serving)'
-        ]
-        
-        ingredients_text = None
-        for pattern in ingredients_patterns:
-            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
-            if match:
-                ingredients_text = match.group(1).strip()
-                break
-        
-        # If no specific section found, try to extract from full text
-        if not ingredients_text:
-            # Look for comma-separated lists that look like ingredients
-            comma_lists = re.findall(r'([A-Za-z\s,]+(?:, [A-Za-z\s]+)+)', text)
-            if comma_lists:
-                ingredients_text = max(comma_lists, key=len)
-            else:
-                ingredients_text = text
-                result['warning'] = "Could not identify ingredient section, using full text"
-        
-        # Clean the ingredient text
-        ingredients_text = re.sub(r'\([^)]*\)', '', ingredients_text)  # Remove parentheses
-        ingredients_text = re.sub(r'\d+%?', '', ingredients_text)  # Remove percentages
-        ingredients_text = re.sub(r'\d+\s*(g|ml|mg|oz|lb|tsp|tbsp)', '', ingredients_text, flags=re.IGNORECASE)
-        
-        # Split by commas
-        ingredients_list = [ing.strip() for ing in ingredients_text.split(',') if ing.strip()]
-        
-        # Clean each ingredient
-        cleaned_ingredients = []
-        for ingredient in ingredients_list:
-            # Remove common non-ingredient words
-            ingredient = re.sub(r'\b(contains|may contain|less than|and|or)\b.*$', '', ingredient, flags=re.IGNORECASE)
-            ingredient = ingredient.strip(' .,:;')
-            
-            # Only keep if it has letters and is longer than 2 characters
-            if ingredient and len(ingredient) > 2 and re.search(r'[a-zA-Z]', ingredient):
-                ingredient = ingredient.lower()
-                cleaned_ingredients.append(ingredient)
-        
-        # Remove duplicates while preserving order
-        seen = set()
-        unique_ingredients = []
-        for ing in cleaned_ingredients:
-            if ing not in seen:
-                seen.add(ing)
-                unique_ingredients.append(ing)
-        
-        result['ingredients'] = ', '.join(unique_ingredients)
-        result['ingredients_list'] = unique_ingredients
-        
-    except Exception as e:
-        result['warning'] = f"Text cleaning error: {str(e)}"
-        result['ingredients'] = text
-        result['ingredients_list'] = [text]
-    
-    return result
 
-def fix_common_ocr_errors(text):
+def clean_extracted_text(text):
+    """
+    Clean OCR extracted text
+    """
+    if not text:
+        return ""
+    
+    # Convert to lowercase
+    text = text.lower()
+    
+    # Remove common OCR garbage
+    garbage_patterns = [
+        r'[^a-z\s,.;:()%/-]',
+        r'\b[a-z]{1,2}\s+[a-z]{1,2}\s+[a-z]{1,2}\b',
+        r'\b(?:www|http|https|ftp|com|net|org)\S*',
+        r'\b[0-9]{5,}\b',
+        r'\.{3,}',
+    ]
+    
+    for pattern in garbage_patterns:
+        text = re.sub(pattern, ' ', text)
+    
+    # Fix common OCR errors
     fixes = {
-        "ingrediants": "ingredients",
-        "ingredlents": "ingredients",
-        "contalns": "contains",
-        "miik": "milk",
-        "mllk": "milk",
-        "wbeat": "wheat",
-        "wheaf": "wheat",
-        "soya bean": "soybean",
-        "peant": "peanut",
-        "peanutt": "peanut",
-        "seseme": "sesame",
-        "glulen": "gluten",
-        "sait": "salt",
-        "suger": "sugar",
+        '0': 'o', '1': 'i', '5': 's', '8': 'b', '@': 'a', '$': 's',
+        'wbeat': 'wheat', 'wheaf': 'wheat', 'wheet': 'wheat',
+        'miik': 'milk', 'mllk': 'milk', 'milc': 'milk',
+        'soya': 'soy', 'peant': 'peanut', 'peanutt': 'peanut',
+        'seseme': 'sesame', 'glulen': 'gluten', 'buter': 'butter',
+        'suger': 'sugar', 'flower': 'flour', 'yeest': 'yeast',
+        'creem': 'cream', 'chesse': 'cheese', 'yogurt': 'yogurt',
+        'cocnut': 'coconut', 'almod': 'almond', 'vegtable': 'vegetable',
+        'protien': 'protein', 'choclate': 'chocolate', 'vanila': 'vanilla'
     }
+    
     for wrong, correct in fixes.items():
-        text = re.sub(rf"\b{re.escape(wrong)}\b", correct, text, flags=re.IGNORECASE)
+        text = re.sub(rf'\b{re.escape(wrong)}\b', correct, text)
+    
+    # Normalize spaces
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip(' .,:;')
+    
     return text
 
+
+def parse_ingredients_list(text):
+    """
+    Parse individual ingredients from cleaned text
+    """
+    if not text:
+        return []
+    
+    # Try to find ingredients section
+    patterns = [
+        r'ingredients?:?\s*(.*?)(?=\n\s*\n|\n\s*contains|\n\s*allergy|$)',
+        r'contains?:?\s*(.*?)(?=\n\s*\n|$)',
+    ]
+    
+    ingredients_text = text
+    for pattern in patterns:
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            ingredients_text = match.group(1)
+            break
+    
+    # Remove parentheses content
+    ingredients_text = re.sub(r'\([^)]*\)', '', ingredients_text)
+    
+    # Remove percentages
+    ingredients_text = re.sub(r'\d+%', '', ingredients_text)
+    
+    # Split by commas or "and"
+    if ',' in ingredients_text:
+        parts = re.split(r',\s*', ingredients_text)
+    else:
+        parts = re.split(r'\s+and\s+', ingredients_text)
+    
+    # Clean each part
+    ingredients = []
+    skip_terms = {'contains', 'may', 'contain', 'and', 'or', 'with', 'less', 'than',
+                  'nutrition', 'facts', 'serving', 'size', 'calories', 'distributed',
+                  'keep', 'refrigerated', 'store', 'best', 'before', 'ingredients'}
+    
+    for part in parts:
+        part = part.strip().strip(' .,:;()[]{}')
+        
+        if len(part) < 2:
+            continue
+        if part in skip_terms:
+            continue
+        if part.isdigit():
+            continue
+        
+        # Must have at least one vowel (looks like a word)
+        if re.search(r'[aeiou]', part) and len(part) < 50:
+            ingredients.append(part)
+    
+    # Remove duplicates
+    seen = set()
+    unique = []
+    for ing in ingredients:
+        if ing not in seen:
+            seen.add(ing)
+            unique.append(ing)
+    
+    return unique[:25]
+
+
 def extract_ingredients_from_path(image_path):
-    """Extract ingredients from image file path"""
+    """Extract ingredients from image file path."""
     try:
         with open(image_path, 'rb') as f:
             image_bytes = f.read()

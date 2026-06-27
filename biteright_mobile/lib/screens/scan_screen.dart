@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
@@ -33,16 +34,64 @@ class _ScanScreenState extends State<ScanScreen> {
   List<String> _processedIngredients = [];
 
   @override
+  void initState() {
+    super.initState();
+    _retrieveLostData();
+  }
+
+  Future<void> _retrieveLostData() async {
+    try {
+      if (kIsWeb || !Platform.isAndroid) return;
+      final LostDataResponse response = await _picker.retrieveLostData();
+      if (response.isEmpty) {
+        return;
+      }
+      if (response.file != null) {
+        setState(() {
+          _selectedImage = File(response.file!.path);
+          _scanResult = null;
+          _errorMessage = null;
+          _editableIngredientsText = '';
+          _rawExtractedText = '';
+          _processedIngredients = [];
+          _ingredientsController.clear();
+        });
+        await _scanImage();
+      } else if (response.exception != null) {
+        setState(() {
+          _errorMessage = 'Error retrieving lost image: ${response.exception!.message}';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error retrieving lost image data: $e');
+    }
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     _ingredientsController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickImageFromGallery() async {
+  bool get _isDesktop {
+    try {
+      return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    if (source == ImageSource.camera && _isDesktop) {
+      setState(() {
+        _errorMessage = 'Camera capture is not supported on desktop. Please select an image from the gallery.';
+      });
+      return;
+    }
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 1600,
         maxHeight: 1600,
         imageQuality: 85,
@@ -62,10 +111,13 @@ class _ScanScreenState extends State<ScanScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error accessing image: $e';
+        _errorMessage = 'Error accessing ${source == ImageSource.camera ? 'camera' : 'gallery'}: $e';
       });
     }
   }
+
+  Future<void> _pickImageFromGallery() => _pickImage(ImageSource.gallery);
+  Future<void> _pickImageFromCamera() => _pickImage(ImageSource.camera);
 
   // Validate image before scanning
   Future<bool> _validateImage(File image) async {
@@ -207,14 +259,21 @@ class _ScanScreenState extends State<ScanScreen> {
         };
 
         // Save to history
-        final scanId = await _apiService.addScanToHistory(
+        final saveResult = await _apiService.addScanToHistory(
           widget.userId,
           scanDataToSave,
         );
 
-        if (scanId != null) {
-          data['id'] = scanId;
-          data['scan_id'] = scanId;
+        if (saveResult != null) {
+          final scanId = saveResult['scan_id']?.toString();
+          if (scanId != null) {
+            data['id'] = scanId;
+            data['scan_id'] = scanId;
+          }
+          final newBadges = saveResult['newly_unlocked_badges'] as List?;
+          if (newBadges != null && newBadges.isNotEmpty) {
+            _showNewBadgesDialog(newBadges);
+          }
         }
         data['was_edited'] = scanDataToSave['was_edited'];
 
@@ -251,31 +310,127 @@ class _ScanScreenState extends State<ScanScreen> {
     });
   }
 
-  // Get color based on risk level
-  Color _getRiskColor(String riskLevel) {
-    switch (riskLevel) {
-      case 'safe':
-        return AppTheme.safe;
-      case 'caution':
-        return AppTheme.caution;
-      case 'unsafe':
-        return AppTheme.unsafe;
-      default:
-        return Colors.grey;
-    }
-  }
+  void _showNewBadgesDialog(List<dynamic> badges) {
+    if (!mounted) return;
+    for (var badge in badges) {
+      final name = badge['name'] ?? 'New Badge';
+      final icon = badge['icon'] ?? '🏅';
+      final description = badge['description'] ?? '';
 
-  // Get icon based on risk level
-  IconData _getRiskIcon(String riskLevel) {
-    switch (riskLevel) {
-      case 'safe':
-        return Icons.check_circle_rounded;
-      case 'caution':
-        return Icons.warning_rounded;
-      case 'unsafe':
-        return Icons.dangerous_rounded;
-      default:
-        return Icons.help_outline_rounded;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.0),
+            ),
+            elevation: 16,
+            child: Container(
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24.0),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Badge icon container with drop shadow and premium style
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3EFE9),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1B4D3E).withValues(alpha: 0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      icon,
+                      style: const TextStyle(fontSize: 50),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    '🎉 Congratulations!',
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B4D3E),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                      children: [
+                        const TextSpan(text: 'You have earned the '),
+                        TextSpan(
+                          text: '"$name"',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B4D3E),
+                          ),
+                        ),
+                        const TextSpan(text: ' badge!'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1B4D3E),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                      ),
+                      child: const Text(
+                        'Awesome!',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
     }
   }
 
@@ -308,44 +463,49 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
         ],
       ),
-      body: _isLoading
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Reading ingredients from image...\nThis may take up to a minute.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: Color(0xFF9A9790)),
-                  ),
-                ],
-              ),
-            )
-          : _isAnalyzing
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                      ),
-                      SizedBox(height: 16),
-                      Text('Analyzing ingredients for allergens...'),
-                    ],
-                  ),
-                )
-              : _scanResult != null
-                  ? _buildResultView()
-                  : _editableIngredientsText.isNotEmpty
-                      ? _buildEditIngredientsView()
-                      : _selectedImage != null
-                          ? _buildPreviewView()
-                          : _buildInitialView(),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: _isLoading
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Reading ingredients from image...\nThis may take up to a minute.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Color(0xFF9A9790)),
+                    ),
+                  ],
+                ),
+              )
+            : _isAnalyzing
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                        ),
+                        SizedBox(height: 16),
+                        Text('Analyzing ingredients for allergens...'),
+                      ],
+                    ),
+                  )
+                : _scanResult != null
+                    ? _buildResultView()
+                    : _editableIngredientsText.isNotEmpty
+                        ? _buildEditIngredientsView()
+                        : _selectedImage != null
+                            ? _buildPreviewView()
+                            : _buildInitialView(),
+      ),
     );
   }
 
@@ -397,22 +557,59 @@ class _ScanScreenState extends State<ScanScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _pickImageFromGallery,
-                    icon: const Icon(Icons.upload_rounded, size: 20),
-                    label: const Text('Upload image'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                if (_isDesktop)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _pickImageFromGallery,
+                      icon: const Icon(Icons.photo_library_rounded, size: 18),
+                      label: const Text('From gallery'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _pickImageFromCamera,
+                          icon: const Icon(Icons.camera_alt_rounded, size: 18),
+                          label: const Text('Take photo'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _pickImageFromGallery,
+                          icon: const Icon(Icons.photo_library_rounded, size: 18),
+                          label: const Text('From gallery'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.primary,
+                            side: const BorderSide(color: AppTheme.primary),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
               ],
             ),
           ),
@@ -690,7 +887,10 @@ class _ScanScreenState extends State<ScanScreen> {
                   ),
                   child: TextFormField(
                     controller: _ingredientsController,
-                    maxLines: 20,
+                    minLines: 8,
+                    maxLines: 15,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
                     decoration: const InputDecoration(
                       hintText:
                           'Extracted text will appear here. Edit as needed...',
@@ -873,8 +1073,6 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget _buildResultView() {
     final riskLevel = _scanResult?['risk_level'] ?? 'unknown';
     final alerts = _scanResult?['alerts'] as List? ?? [];
-    final detectionMethod = _scanResult?['detection_method'] ?? 'AI Analysis';
-    final confidence = _scanResult?['confidence'] ?? 0.0;
     final ingredientDetails = List<Map<String, dynamic>>.from(
       _scanResult?['ingredient_details'] ?? [],
     );
@@ -888,72 +1086,226 @@ class _ScanScreenState extends State<ScanScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Risk Level Card
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  _getRiskColor(riskLevel),
-                  _getRiskColor(riskLevel).withValues(alpha: 0.8),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          Builder(builder: (context) {
+            final riskScore = (_scanResult?['risk_score'] as num?)?.toInt() ?? 0;
+            final confidenceRaw = _scanResult?['confidence'];
+            final double confidenceVal = confidenceRaw is num
+                ? (confidenceRaw > 1 ? confidenceRaw / 100 : confidenceRaw.toDouble())
+                : 0.0;
+
+            Color bgColor;
+            Color borderColor;
+            Color iconBg;
+            Color labelColor;
+            Color valueColor;
+            Color metricBg;
+            String headline;
+            String subline;
+            IconData icon;
+
+            switch (riskLevel) {
+              case 'safe':
+                bgColor = const Color(0xFFE9F5EE);
+                borderColor = const Color(0xFF7EC8A0);
+                iconBg = const Color(0xFF1D9E75);
+                labelColor = const Color(0xFF0F6E56);
+                valueColor = const Color(0xFF085041);
+                metricBg = const Color(0xFF1D9E75).withValues(alpha: 0.12);
+                headline = 'Recommended for you';
+                subline = 'No allergens detected in your profile';
+                icon = Icons.check_circle_outline_rounded;
+                break;
+              case 'caution':
+                bgColor = const Color(0xFFFEF7E6);
+                borderColor = const Color(0xFFF5C857);
+                iconBg = const Color(0xFFBA7517);
+                labelColor = const Color(0xFF854F0B);
+                valueColor = const Color(0xFF633806);
+                metricBg = const Color(0xFFBA7517).withValues(alpha: 0.12);
+                headline = 'Use with caution';
+                subline = 'Some ingredients may be of concern';
+                icon = Icons.warning_amber_rounded;
+                break;
+              default: // unsafe
+                bgColor = const Color(0xFFFDECEA);
+                borderColor = const Color(0xFFE57A75);
+                iconBg = const Color(0xFFD84040);
+                labelColor = const Color(0xFFA32D2D);
+                valueColor = const Color(0xFF791F1F);
+                metricBg = const Color(0xFFD84040).withValues(alpha: 0.12);
+                headline = 'Not recommended for you';
+                subline = 'Contains allergens matching your profile';
+                icon = Icons.dangerous_rounded;
+            }
+
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderColor),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  _getRiskIcon(riskLevel),
-                  size: 48,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  riskLevel.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon + headline row
+                  Row(
+                    children: [
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: iconBg,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              headline,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: labelColor,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subline,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: labelColor.withValues(alpha: 0.75),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
+
+                  const SizedBox(height: 14),
+
+                  // Metrics row: Risk Score + Confidence
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: metricBg,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'RISK SCORE',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                  color: labelColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '$riskScore / 100',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: valueColor,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                riskScore >= 80
+                                    ? 'Low — generally safe'
+                                    : riskScore >= 40
+                                        ? 'Moderate — exercise caution'
+                                        : 'High — avoid this product',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: labelColor.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        detectionMethod,
-                        style: const TextStyle(
-                            fontSize: 10, color: Colors.white70),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: metricBg,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'CONFIDENCE',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                  color: labelColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                confidenceVal > 0
+                                    ? '${(confidenceVal * 100).toStringAsFixed(0)}%'
+                                    : 'N/A',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: valueColor,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                confidenceVal >= 0.80
+                                    ? 'High — reliable result'
+                                    : confidenceVal >= 0.60
+                                        ? 'Medium — double-check labels'
+                                        : 'Low — review ingredients list',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: labelColor.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Thin risk progress bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      value: (riskScore / 100).clamp(0.0, 1.0),
+                      minHeight: 5,
+                      backgroundColor: iconBg.withValues(alpha: 0.18),
+                      valueColor: AlwaysStoppedAnimation<Color>(iconBg),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Confidence: ${(confidence * 100).toInt()}%',
-                        style: const TextStyle(
-                            fontSize: 10, color: Colors.white70),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+                  ),
+                ],
+              ),
+            );
+          }),
+
 
           const SizedBox(height: 20),
 

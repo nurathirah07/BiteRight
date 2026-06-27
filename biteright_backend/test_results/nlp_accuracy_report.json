@@ -1,0 +1,2999 @@
+{
+  "generated_at": "2026-06-19T19:47:46.620636",
+  "summary": {
+    "total_tests": 100,
+    "overall_accuracy": 0.97,
+    "binary_precision": 1.0,
+    "binary_recall": 0.926829268292683,
+    "binary_f1": 0.9620253164556963,
+    "allergen_precision": 0.8545454545454545,
+    "allergen_recall": 0.8867924528301887,
+    "allergen_f1": 0.8703703703703703,
+    "risk_level_accuracy": 1.0,
+    "avg_score_mae": 14.16,
+    "confusion_matrix": {
+      "tn": 59,
+      "fp": 0,
+      "fn": 3,
+      "tp": 38
+    }
+  },
+  "per_profile": {
+    "TEST_PROFILE_1": {
+      "correct": 20,
+      "total": 20,
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "accuracy": 1.0,
+      "allergen_precision": 1.0,
+      "allergen_recall": 1.0,
+      "allergen_f1": 1.0
+    },
+    "TEST_PROFILE_2": {
+      "correct": 19,
+      "total": 20,
+      "tp": 12,
+      "fp": 0,
+      "fn": 1,
+      "tn": 0,
+      "accuracy": 0.95,
+      "allergen_precision": 1.0,
+      "allergen_recall": 0.9230769230769231,
+      "allergen_f1": 0.9600000000000001
+    },
+    "TEST_PROFILE_3": {
+      "correct": 19,
+      "total": 20,
+      "tp": 8,
+      "fp": 0,
+      "fn": 1,
+      "tn": 0,
+      "accuracy": 0.95,
+      "allergen_precision": 1.0,
+      "allergen_recall": 0.8888888888888888,
+      "allergen_f1": 0.9411764705882353
+    },
+    "TEST_PROFILE_4": {
+      "correct": 19,
+      "total": 20,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "accuracy": 0.95,
+      "allergen_precision": 1.0,
+      "allergen_recall": 1.0,
+      "allergen_f1": 1.0
+    },
+    "TEST_PROFILE_5": {
+      "correct": 20,
+      "total": 20,
+      "tp": 14,
+      "fp": 8,
+      "fn": 4,
+      "tn": 0,
+      "accuracy": 1.0,
+      "allergen_precision": 0.6363636363636364,
+      "allergen_recall": 0.7777777777777778,
+      "allergen_f1": 0.7000000000000001
+    }
+  },
+  "product_errors": {
+    "seitan": [
+      {
+        "profile": "TEST_PROFILE_2",
+        "expected": [
+          "tree_nuts",
+          "milk"
+        ],
+        "detected": [
+          "milk"
+        ],
+        "exp_risk": "caution",
+        "pred_risk": "caution"
+      },
+      {
+        "profile": "TEST_PROFILE_3",
+        "expected": [
+          "tree_nuts",
+          "sesame"
+        ],
+        "detected": [
+          "sesame"
+        ],
+        "exp_risk": "caution",
+        "pred_risk": "caution"
+      },
+      {
+        "profile": "TEST_PROFILE_4",
+        "expected": [
+          "eggs"
+        ],
+        "detected": [
+          "eggs"
+        ],
+        "exp_risk": "caution",
+        "pred_risk": "caution"
+      }
+    ]
+  },
+  "details": [
+    {
+      "success": true,
+      "product_name": "almond milk",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "tree_nuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "almond milk",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "tree_nuts"
+      ],
+      "detected_allergens": [
+        "tree_nuts"
+      ],
+      "all_detected_allergens": [
+        "tree_nuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "almond milk",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "tree_nuts"
+      ],
+      "detected_allergens": [
+        "tree_nuts"
+      ],
+      "all_detected_allergens": [
+        "tree_nuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "almond milk",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "tree_nuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "almond milk",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "tree_nuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "biscuits",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "biscuits",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "biscuits",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "biscuits",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "biscuits",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 32,
+      "expected_allergens": [
+        "gluten"
+      ],
+      "detected_allergens": [
+        "wheat"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 1,
+        "false_negatives": 1,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "canned tuna",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "fish"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "canned tuna",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "fish"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "canned tuna",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 41,
+      "expected_allergens": [
+        "fish"
+      ],
+      "detected_allergens": [
+        "fish"
+      ],
+      "all_detected_allergens": [
+        "fish"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "canned tuna",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "fish"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "canned tuna",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 41,
+      "expected_allergens": [
+        "fish"
+      ],
+      "detected_allergens": [
+        "fish"
+      ],
+      "all_detected_allergens": [
+        "fish"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "cereal",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 37,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "gluten",
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "cereal",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "gluten",
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "cereal",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "gluten",
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "cereal",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "gluten",
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "cereal",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 70.0,
+      "predicted_score": 39,
+      "expected_allergens": [
+        "soy",
+        "gluten"
+      ],
+      "detected_allergens": [
+        "gluten",
+        "soy",
+        "wheat"
+      ],
+      "all_detected_allergens": [
+        "gluten",
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 2,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.6666666666666666,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "egg noodles",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 34,
+      "expected_allergens": [
+        "eggs"
+      ],
+      "detected_allergens": [
+        "eggs"
+      ],
+      "all_detected_allergens": [
+        "wheat",
+        "eggs"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "egg noodles",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "wheat",
+        "eggs"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "egg noodles",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "wheat",
+        "eggs"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "egg noodles",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 34,
+      "expected_allergens": [
+        "eggs"
+      ],
+      "detected_allergens": [
+        "eggs"
+      ],
+      "all_detected_allergens": [
+        "wheat",
+        "eggs"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "egg noodles",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 70.0,
+      "predicted_score": 36,
+      "expected_allergens": [
+        "eggs",
+        "gluten"
+      ],
+      "detected_allergens": [
+        "wheat",
+        "eggs"
+      ],
+      "all_detected_allergens": [
+        "wheat",
+        "eggs"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 1,
+        "false_negatives": 1,
+        "precision": 0.5,
+        "recall": 0.5
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "granola bar",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 35,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "gluten",
+        "tree_nuts",
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "granola bar",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 90.0,
+      "predicted_score": 45,
+      "expected_allergens": [
+        "tree_nuts",
+        "milk"
+      ],
+      "detected_allergens": [
+        "tree_nuts",
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "gluten",
+        "tree_nuts",
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "granola bar",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 43,
+      "expected_allergens": [
+        "tree_nuts"
+      ],
+      "detected_allergens": [
+        "tree_nuts"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "gluten",
+        "tree_nuts",
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "granola bar",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "soy",
+        "gluten",
+        "tree_nuts",
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "granola bar",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 70.0,
+      "predicted_score": 37,
+      "expected_allergens": [
+        "soy",
+        "gluten"
+      ],
+      "detected_allergens": [
+        "soy",
+        "gluten",
+        "wheat"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "gluten",
+        "tree_nuts",
+        "milk",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 2,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.6666666666666666,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "ice cream",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "tree_nuts",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "ice cream",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 90.0,
+      "predicted_score": 50,
+      "expected_allergens": [
+        "tree_nuts",
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk",
+        "tree_nuts"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "tree_nuts",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "ice cream",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 48,
+      "expected_allergens": [
+        "tree_nuts"
+      ],
+      "detected_allergens": [
+        "tree_nuts"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "tree_nuts",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "ice cream",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk",
+        "tree_nuts",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "ice cream",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "tree_nuts",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "instant noodles",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 38,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "instant noodles",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "instant noodles",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 38,
+      "expected_allergens": [
+        "sesame"
+      ],
+      "detected_allergens": [
+        "sesame"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "instant noodles",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "instant noodles",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 70.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "soy",
+        "gluten"
+      ],
+      "detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 1,
+        "false_negatives": 1,
+        "precision": 0.5,
+        "recall": 0.5
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "milk_chocolate",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 41,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "milk_chocolate",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 49,
+      "expected_allergens": [
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "milk_chocolate",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "milk_chocolate",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "milk_chocolate",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 41,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "milk",
+        "soy"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "olive oil",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "olive oil",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 41,
+      "expected_allergens": [
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "olive oil",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "olive oil",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "olive oil",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "peanut_butter",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "peanuts"
+      ],
+      "detected_allergens": [
+        "peanuts"
+      ],
+      "all_detected_allergens": [
+        "peanuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "peanut_butter",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "peanuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "peanut_butter",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "peanuts"
+      ],
+      "detected_allergens": [
+        "peanuts"
+      ],
+      "all_detected_allergens": [
+        "peanuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "peanut_butter",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 40,
+      "expected_allergens": [
+        "peanuts"
+      ],
+      "detected_allergens": [
+        "peanuts"
+      ],
+      "all_detected_allergens": [
+        "peanuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "peanut_butter",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "peanuts"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "potato chips",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "potato chips",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 45,
+      "expected_allergens": [
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "potato chips",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "potato chips",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "potato chips",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "rice",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "rice",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "rice",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "rice",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "rice",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "salt",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "salt",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "salt",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "salt",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "salt",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "seitan",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 36,
+      "expected_allergens": [
+        "soy",
+        "eggs"
+      ],
+      "detected_allergens": [
+        "soy",
+        "eggs"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "milk",
+        "eggs",
+        "gluten",
+        "sesame",
+        "celery",
+        "mustard"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 2,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "seitan",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": true,
+      "expected_risk": "caution",
+      "predicted_risk": "caution",
+      "expected_score": 59.0,
+      "predicted_score": 31,
+      "expected_allergens": [
+        "tree_nuts",
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "milk",
+        "eggs",
+        "gluten",
+        "sesame",
+        "celery",
+        "mustard"
+      ],
+      "correct": false,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "precision": 1.0,
+        "recall": 0.5
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "seitan",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": true,
+      "expected_risk": "caution",
+      "predicted_risk": "caution",
+      "expected_score": 49.0,
+      "predicted_score": 27,
+      "expected_allergens": [
+        "tree_nuts",
+        "sesame"
+      ],
+      "detected_allergens": [
+        "sesame"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "milk",
+        "eggs",
+        "gluten",
+        "sesame",
+        "celery",
+        "mustard"
+      ],
+      "correct": false,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "precision": 1.0,
+        "recall": 0.5
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "seitan",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": false,
+      "predicted_safe": true,
+      "expected_risk": "caution",
+      "predicted_risk": "caution",
+      "expected_score": 49.0,
+      "predicted_score": 27,
+      "expected_allergens": [
+        "eggs"
+      ],
+      "detected_allergens": [
+        "eggs"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "milk",
+        "eggs",
+        "gluten",
+        "sesame",
+        "celery",
+        "mustard"
+      ],
+      "correct": false,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "seitan",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 70.0,
+      "predicted_score": 38,
+      "expected_allergens": [
+        "soy",
+        "eggs",
+        "gluten"
+      ],
+      "detected_allergens": [
+        "soy",
+        "wheat",
+        "eggs",
+        "gluten"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat",
+        "milk",
+        "eggs",
+        "gluten",
+        "sesame",
+        "celery",
+        "mustard"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 3,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.75,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "soy_sauce",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 34,
+      "expected_allergens": [
+        "soy"
+      ],
+      "detected_allergens": [
+        "soy"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "soy_sauce",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "soy_sauce",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "soy_sauce",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "soy_sauce",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 70.0,
+      "predicted_score": 36,
+      "expected_allergens": [
+        "soy",
+        "gluten"
+      ],
+      "detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "all_detected_allergens": [
+        "soy",
+        "wheat"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 1,
+        "false_negatives": 1,
+        "precision": 0.5,
+        "recall": 0.5
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "whey protein",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whey protein",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 47,
+      "expected_allergens": [
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "whey protein",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whey protein",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whey protein",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "white sugar",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "white sugar",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "white sugar",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "white sugar",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "white sugar",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whole wheat bread",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "wheat",
+        "gluten",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whole wheat bread",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "wheat",
+        "gluten",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whole wheat bread",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 33,
+      "expected_allergens": [
+        "sesame"
+      ],
+      "detected_allergens": [
+        "sesame"
+      ],
+      "all_detected_allergens": [
+        "wheat",
+        "gluten",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "whole wheat bread",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "wheat",
+        "gluten",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "whole wheat bread",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 65.0,
+      "predicted_score": 33,
+      "expected_allergens": [
+        "gluten"
+      ],
+      "detected_allergens": [
+        "wheat",
+        "gluten"
+      ],
+      "all_detected_allergens": [
+        "wheat",
+        "gluten",
+        "sesame"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.5,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "yogurt",
+      "profile_id": "TEST_PROFILE_1",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "yogurt",
+      "profile_id": "TEST_PROFILE_2",
+      "expected_safe": false,
+      "predicted_safe": false,
+      "expected_risk": "unsafe",
+      "predicted_risk": "unsafe",
+      "expected_score": 85.0,
+      "predicted_score": 44,
+      "expected_allergens": [
+        "milk"
+      ],
+      "detected_allergens": [
+        "milk"
+      ],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "has_personal_allergens": true
+    },
+    {
+      "success": true,
+      "product_name": "yogurt",
+      "profile_id": "TEST_PROFILE_3",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "yogurt",
+      "profile_id": "TEST_PROFILE_4",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    },
+    {
+      "success": true,
+      "product_name": "yogurt",
+      "profile_id": "TEST_PROFILE_5",
+      "expected_safe": true,
+      "predicted_safe": true,
+      "expected_risk": "safe",
+      "predicted_risk": "safe",
+      "expected_score": 0.0,
+      "predicted_score": 0,
+      "expected_allergens": [],
+      "detected_allergens": [],
+      "all_detected_allergens": [
+        "milk"
+      ],
+      "correct": true,
+      "risk_match": true,
+      "metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "has_personal_allergens": false
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+============================================================
+BITERIGHT - ANNOTATION REFERENCE
+============================================================
+
+PROFILES AND THEIR ALLERGIES:
+----------------------------------------
+
+TEST_PROFILE_1:
+  Allergies: Peanuts, Soy, Eggs
+  IDs: ['peanuts', 'soy', 'eggs']
+
+TEST_PROFILE_2:
+  Allergies: Milk/Dairy, Tree Nuts, Shellfish
+  IDs: ['milk', 'tree_nuts', 'shellfish']
+
+TEST_PROFILE_3:
+  Allergies: Peanuts, Sesame, Tree Nuts, Fish
+  IDs: ['peanuts', 'sesame', 'tree_nuts', 'fish']
+
+TEST_PROFILE_4:
+  Allergies: Shellfish, Peanuts, Eggs
+  IDs: ['shellfish', 'peanuts', 'eggs']
+
+TEST_PROFILE_5:
+  Allergies: Eggs, Fish, Soy, Gluten
+  IDs: ['eggs', 'fish', 'soy', 'gluten']
+
+============================================================
+ALLERGEN SEVERITY SCORES:
+============================================================
+HIGH (70-100): peanuts, tree_nuts, fish, shellfish
+MEDIUM (30-60): milk, eggs, soy, wheat, gluten, sesame
+SAFE (0): no allergens match
+
+============================================================
+RISK LEVEL GUIDELINES:
+============================================================
+safe:     No matching allergens
+caution:  Medium severity allergen match OR low confidence
+unsafe:   High severity allergen match OR multiple matches

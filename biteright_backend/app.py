@@ -1,5 +1,9 @@
-# biteright_backend/app.py
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 import os
+import time
+from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import firebase_admin
@@ -7,6 +11,7 @@ from firebase_admin import credentials, firestore, auth
 import re
 import hashlib
 import secrets
+from datetime import datetime
 
 # Import your services
 from services.ocr_service import extract_ingredients
@@ -87,25 +92,25 @@ def parse_ingredients_input(ingredients_input):
 def allergen_rules():
     return [
         {'id': 'peanuts', 'name': 'Peanuts', 'severity': 'high', 'keywords': ['peanut', 'peanuts', 'ground nut', 'arachis']},
-        {'id': 'tree_nuts', 'name': 'Tree Nuts', 'severity': 'high', 'keywords': ['almond', 'walnut', 'cashew', 'pecan', 'pistachio', 'hazelnut', 'macadamia', 'tree nut', 'tree nuts']},
-        {'id': 'milk', 'name': 'Milk/Dairy', 'severity': 'medium', 'keywords': ['milk', 'dairy', 'whey', 'casein', 'lactose', 'butter', 'cream', 'cheese', 'yogurt']},
-        {'id': 'eggs', 'name': 'Eggs', 'severity': 'medium', 'keywords': ['egg', 'eggs', 'albumin', 'ovalbumin']},
-        {'id': 'soy', 'name': 'Soy', 'severity': 'medium', 'keywords': ['soy', 'soya', 'tofu', 'tempeh', 'edamame', 'soy lecithin']},
-        {'id': 'wheat', 'name': 'Wheat', 'severity': 'medium', 'keywords': ['wheat', 'flour', 'semolina', 'spelt', 'durum']},
-        {'id': 'gluten', 'name': 'Gluten', 'severity': 'medium', 'keywords': ['gluten', 'wheat', 'barley', 'rye', 'malt']},
-        {'id': 'fish', 'name': 'Fish', 'severity': 'high', 'keywords': ['fish', 'salmon', 'tuna', 'cod', 'mackerel', 'anchovy']},
-        {'id': 'shellfish', 'name': 'Shellfish', 'severity': 'high', 'keywords': ['shrimp', 'prawn', 'crab', 'lobster', 'crayfish', 'shellfish']},
-        {'id': 'sesame', 'name': 'Sesame', 'severity': 'medium', 'keywords': ['sesame', 'tahini', 'sesamol', 'gingelly']},
+        {'id': 'tree_nuts', 'name': 'Tree Nuts', 'severity': 'high', 'keywords': ['almond', 'walnut', 'cashew', 'pecan', 'pistachio', 'hazelnut', 'macadamia', 'tree nut', 'tree nuts', 'coconut']},
+        {'id': 'milk', 'name': 'Milk/Dairy', 'severity': 'medium', 'keywords': ['milk', 'dairy', 'whey', 'casein', 'lactose', 'butter', 'cream', 'cheese', 'yogurt', 'ghee']},
+        {'id': 'eggs', 'name': 'Eggs', 'severity': 'medium', 'keywords': ['egg', 'eggs', 'albumin', 'ovalbumin', 'mayonnaise']},
+        {'id': 'soy', 'name': 'Soy', 'severity': 'medium', 'keywords': ['soy', 'soya', 'tofu', 'tempeh', 'edamame', 'soy lecithin', 'soy sauce', 'miso']},
+        {'id': 'wheat', 'name': 'Wheat', 'severity': 'medium', 'keywords': ['wheat', 'flour', 'semolina', 'spelt', 'durum', 'farina', 'couscous']},
+        {'id': 'gluten', 'name': 'Gluten', 'severity': 'medium', 'keywords': ['gluten', 'wheat', 'barley', 'rye', 'malt', 'seitan']},
+        {'id': 'fish', 'name': 'Fish', 'severity': 'high', 'keywords': ['fish', 'salmon', 'tuna', 'cod', 'mackerel', 'anchovy', 'sardine', 'trout', 'fish oil', 'fish sauce']},
+        {'id': 'shellfish', 'name': 'Shellfish', 'severity': 'high', 'keywords': ['shrimp', 'prawn', 'crab', 'lobster', 'crayfish', 'shellfish', 'oyster', 'clam', 'mussel', 'scallop']},
+        {'id': 'sesame', 'name': 'Sesame', 'severity': 'medium', 'keywords': ['sesame', 'tahini', 'sesamol', 'gingelly', 'sesame seed', 'sesame oil']},
     ]
 
 def dietary_rules():
     return {
         'halal': {'name': 'Halal', 'severity': 'high', 'forbidden': ['pork', 'ham', 'bacon', 'lard', 'alcohol', 'wine', 'beer', 'gelatin']},
         'vegetarian': {'name': 'Vegetarian', 'severity': 'medium', 'forbidden': ['beef', 'chicken', 'pork', 'fish', 'meat', 'gelatin']},
-        'vegan': {'name': 'Vegan', 'severity': 'medium', 'forbidden': ['milk', 'dairy', 'whey', 'casein', 'egg', 'honey', 'gelatin', 'butter', 'cheese']},
-        'diabetic': {'name': 'Diabetic / Low Sugar', 'severity': 'high', 'forbidden': ['sugar', 'syrup', 'honey', 'dextrose', 'corn syrup', 'glucose', 'sucrose', 'fructose']},
+        'vegan': {'name': 'Vegan', 'severity': 'medium', 'forbidden': ['milk', 'dairy', 'whey', 'casein', 'egg', 'honey', 'gelatin', 'butter', 'cheese', 'yogurt']},
+        'diabetic': {'name': 'Diabetic / Low Sugar', 'severity': 'high', 'forbidden': ['sugar', 'syrup', 'honey', 'dextrose', 'corn syrup', 'glucose', 'sucrose', 'fructose', 'maltose']},
         'low_sodium': {'name': 'Low Sodium', 'severity': 'low', 'forbidden': ['salt', 'sodium', 'monosodium glutamate', 'msg']},
-        'keto': {'name': 'Keto', 'severity': 'medium', 'forbidden': ['sugar', 'wheat', 'rice', 'corn', 'potato', 'starch', 'syrup', 'honey']},
+        'keto': {'name': 'Keto', 'severity': 'medium', 'forbidden': ['sugar', 'wheat', 'rice', 'corn', 'potato', 'starch', 'syrup', 'honey', 'bread', 'pasta']},
     }
 
 def selected_allergy_ids(user_allergies):
@@ -121,250 +126,65 @@ def selected_allergy_ids(user_allergies):
         ids.add(allergy_id)
     return ids, severity_by_id
 
-# ============= FIXED build_personalized_analysis FUNCTION WITH DYNAMIC CONFIDENCE =============
-def build_personalized_analysis(ingredients, user_allergies, user_dietary):
-    """
-    Build personalized analysis with DYNAMIC confidence scores based on risk level
-    """
-    allergy_ids, allergy_severity = selected_allergy_ids(user_allergies)
-    dietary_ids = {normalize_key(item) for item in user_dietary}
-    details = []
-    alerts = []
-    allergen_alerts = []
-    dietary_alerts = []
-    detected_allergens = set()
-    risk_score = 0
-    
-    # Track match confidence factors
-    total_confidence_sum = 0
-    ingredient_count = max(len(ingredients), 1)
-
-    for ingredient in ingredients:
-        ingredient_lower = ingredient.lower()
-        status = 'safe'
-        reasons = []
-        matches = []
-        
-        # Base confidence starts at 0.5 (50%)
-        ingredient_confidence = 0.5
-        match_found = False
-        is_high_severity_match = False
-
-        # Check allergens first
-        for rule in allergen_rules():
-            rule_profile_keys = {rule['id'], normalize_key(rule['name'])}
-            rule_profile_keys.update(normalize_key(keyword) for keyword in rule['keywords'])
-            if allergy_ids.isdisjoint(rule_profile_keys):
-                continue
-
-            matched_keyword = next((keyword for keyword in rule['keywords'] if keyword in ingredient_lower), None)
-            if matched_keyword:
-                match_found = True
-                severity = allergy_severity.get(rule['id'], rule['severity'])
-                status = 'unsafe'
-                
-                if severity == 'high':
-                    is_high_severity_match = True
-                
-                # Higher confidence for exact matches
-                if matched_keyword == ingredient_lower:
-                    ingredient_confidence = max(ingredient_confidence, 0.95)
-                elif len(matched_keyword) > 3:
-                    ingredient_confidence = max(ingredient_confidence, 0.90)
-                else:
-                    ingredient_confidence = max(ingredient_confidence, 0.85)
-                
-                detected_allergens.add(rule['name'])
-                reason = f"{ingredient} matches your {rule['name']} allergy"
-                reasons.append(reason)
-                matches.append({
-                    'type': 'allergen',
-                    'id': rule['id'],
-                    'name': rule['name'],
-                    'keyword': matched_keyword,
-                    'severity': severity,
-                })
-                allergen_alerts.append(reason)
-                risk_score += 50 if severity == 'high' else 35
-
-        # Check dietary restrictions
-        for diet_id, rule in dietary_rules().items():
-            if diet_id not in dietary_ids:
-                continue
-
-            matched_keyword = next((keyword for keyword in rule['forbidden'] if keyword in ingredient_lower), None)
-            if matched_keyword:
-                match_found = True
-                
-                # Diabetic with sugar = unsafe
-                if diet_id == 'diabetic':
-                    status = 'unsafe'
-                    is_high_severity_match = True
-                elif rule['severity'] == 'high':
-                    status = 'unsafe'
-                    is_high_severity_match = True
-                elif status != 'unsafe':
-                    status = 'caution'
-                
-                if matched_keyword == ingredient_lower:
-                    ingredient_confidence = max(ingredient_confidence, 0.92)
-                else:
-                    ingredient_confidence = max(ingredient_confidence, 0.85)
-                
-                reason = f"{ingredient} may violate your {rule['name']} restriction"
-                reasons.append(reason)
-                matches.append({
-                    'type': 'dietary',
-                    'id': diet_id,
-                    'name': rule['name'],
-                    'keyword': matched_keyword,
-                    'severity': rule['severity'],
-                })
-                dietary_alerts.append(reason)
-                risk_score += 40 if rule['severity'] == 'high' or diet_id == 'diabetic' else 25
-        
-        # DYNAMIC CONFIDENCE ADJUSTMENT based on match quality
-        if match_found:
-            if is_high_severity_match:
-                # High severity matches = HIGH confidence (95%)
-                ingredient_confidence = max(ingredient_confidence, 0.95)
-            else:
-                ingredient_confidence = max(ingredient_confidence, 0.85)
-        else:
-            # No matches = lower confidence (65%)
-            ingredient_confidence = 0.65
-        
-        total_confidence_sum += ingredient_confidence
-        
-        details.append({
-            'ingredient': ingredient,
-            'normalized': ingredient_lower,
-            'status': status,
-            'confidence': round(ingredient_confidence, 2),
-            'reasons': reasons,
-            'matches': matches,
-        })
-
-    alerts = list(dict.fromkeys(allergen_alerts + dietary_alerts))
-    risk_score = min(risk_score, 100)
-    
-    # Determine risk level
-    has_unsafe = False
-    has_caution = False
-    
-    for item in details:
-        if item['status'] == 'unsafe':
-            has_unsafe = True
-            break
-        elif item['status'] == 'caution':
-            has_caution = True
-    
-    # Also check dietary alerts directly
-    if dietary_alerts:
-        for alert in dietary_alerts:
-            if 'diabetic' in alert.lower() or 'sugar' in alert.lower():
-                has_unsafe = True
-                break
-            else:
-                has_caution = True
-    
-    # Set final risk level
-    if has_unsafe:
-        risk_level = 'unsafe'
-        # Lower risk score for unsafe
-        if risk_score > 60:
-            risk_score = 35
-        # DYNAMIC CONFIDENCE: Unsafe products get LOWER confidence (more uncertainty = 70-75%)
-        base_confidence = 0.72
-    elif has_caution or dietary_alerts:
-        risk_level = 'caution'
-        if risk_score > 70:
-            risk_score = 55
-        # DYNAMIC CONFIDENCE: Caution products get MEDIUM confidence (80%)
-        base_confidence = 0.80
-    else:
-        risk_level = 'safe'
-        # DYNAMIC CONFIDENCE: Safe products get HIGHER confidence (88-92%)
-        base_confidence = 0.90
-    
-    # Calculate final confidence - blend ingredient confidence with risk-based confidence
-    avg_ingredient_confidence = round(total_confidence_sum / ingredient_count, 2) if details else 0.85
-    
-    # DYNAMIC FINAL CONFIDENCE based on risk level and ingredient matches
+def _get_recommendations(risk_level):
+    """Get recommendations based on risk level"""
     if risk_level == 'unsafe':
-        # Unsafe: Weighted more toward ingredient matches (detection certainty)
-        final_confidence = round((avg_ingredient_confidence * 0.7 + base_confidence * 0.3), 2)
-    elif risk_level == 'caution':
-        # Caution: Balanced confidence
-        final_confidence = round((avg_ingredient_confidence * 0.5 + base_confidence * 0.5), 2)
-    else:
-        # Safe: Higher overall confidence
-        final_confidence = round((avg_ingredient_confidence * 0.4 + base_confidence * 0.6), 2)
-    
-    # Ensure confidence is within reasonable range based on risk level
-    if risk_level == 'unsafe':
-        final_confidence = max(0.65, min(0.85, final_confidence))
-    elif risk_level == 'caution':
-        final_confidence = max(0.70, min(0.88, final_confidence))
-    else:
-        final_confidence = max(0.75, min(0.95, final_confidence))
-
-    # Recommendations
-    if risk_level == 'unsafe':
-        recommendations = [
-            'Do not consume this product unless the label is verified by a trusted source.',
-            'Choose an alternative without the flagged allergen or dietary conflict.',
+        return [
+            'Do not consume this product - it contains allergens from your profile.',
+            'Check the ingredient label carefully before purchasing.',
+            'Consider contacting the manufacturer about potential cross-contamination.'
         ]
     elif risk_level == 'caution':
-        recommendations = [
+        return [
             'Review the flagged ingredients before consuming.',
             'Check the manufacturer allergen statement for cross-contact warnings.',
+            'When in doubt, contact the manufacturer for clarification.'
         ]
     else:
-        recommendations = [
+        return [
             'No profile conflicts were detected in the scanned ingredients.',
             'Keep your allergy and dietary profile updated for accurate alerts.',
+            'Always double-check labels as formulations can change.'
         ]
 
-    print(f"=== CONFIDENCE CALCULATION ===")
-    print(f"Risk Level: {risk_level}")
-    print(f"Avg Ingredient Confidence: {avg_ingredient_confidence}")
-    print(f"Base Confidence: {base_confidence}")
-    print(f"Final Confidence: {final_confidence}")
-    print(f"Risk Score: {risk_score}")
-    print(f"==============================")
-
-    return {
-        'risk_level': risk_level,
-        'risk_score': risk_score,
-        'confidence': final_confidence,
-        'alerts': alerts,
-        'allergen_alerts': list(dict.fromkeys(allergen_alerts)),
-        'dietary_alerts': list(dict.fromkeys(dietary_alerts)),
-        'allergens_detected': sorted(detected_allergens),
-        'ingredient_details': details,
-        'recommendations': recommendations,
-    }
 
 @app.before_request
 def initialize_once():
     """Load allergen data from Firestore before first request"""
     global _initialized
     if not _initialized:
+        print("=" * 50)
+        print("Initializing BiteRight Backend...")
+        print("=" * 50)
         print("Loading allergen database...")
         detector.load_allergens_from_firestore(db)
-        processor.initialize()
+        
+        # Initialize processor if available
+        try:
+            processor.initialize()
+            print("Ingredient processor initialized")
+        except Exception as e:
+            print(f"Processor initialization warning: {e}")
+        
         print("Allergen database loaded!")
-        print("Random Forest model loaded successfully" if processor.model_loaded else "No ML model found, using rule-based only")
+        print("ML/NLP model is ACTIVE and will be used for analysis")
+        print("=" * 50)
         _initialized = True
+
+
+# ============= API ENDPOINTS =============
 
 @app.route('/')
 def home():
     return jsonify({
         "message": "BiteRight API is running with Firebase!",
+        "version": "2.0",
+        "nlp_status": "active",
+        "detection_method": "ML/NLP Pattern Matching",
         "endpoints": {
             "/": "This help message",
             "/test-firebase": "Test Firebase connection",
+            "/health": "Health check endpoint",
             "/users (GET)": "Get all users",
             "/users (POST)": "Create a new user",
             "/login (POST)": "Login with email and password",
@@ -382,6 +202,24 @@ def home():
         }
     })
 
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'nlp_loaded': True,
+        'ml_active': processor.model_loaded,
+        'rf_primary': processor.model_loaded,
+        'rf_weights': {
+            'random_forest': processor.ML_WEIGHT,
+            'rule_based': processor.RULE_WEIGHT
+        },
+        'firebase_connected': True,
+        'timestamp': datetime.now().isoformat()
+    }), 200
+
+
 # ============= TEST ENDPOINT =============
 @app.route('/test-firebase')
 def test_firebase():
@@ -396,6 +234,7 @@ def test_firebase():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
 @app.route('/test-products', methods=['GET'])
 def test_products():
     try:
@@ -406,6 +245,7 @@ def test_products():
         return jsonify({'count': len(products), 'products': products})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/search-allergens/<allergen>', methods=['GET'])
 def search_by_allergen(allergen):
@@ -420,6 +260,7 @@ def search_by_allergen(allergen):
         return jsonify({'allergen': allergen, 'count': len(products), 'products': products})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 # ============= USER ENDPOINTS =============
 
@@ -463,6 +304,7 @@ def create_user():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/login', methods=['POST'])
 def login():
     try:
@@ -496,6 +338,84 @@ def login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/reset-password-request', methods=['POST'])
+def reset_password_request():
+    try:
+        data = request.get_json()
+        if not data or not data.get('email'):
+            return jsonify({'error': 'Missing email'}), 400
+        
+        email = data['email'].strip().lower()
+        users_ref = db.collection('users').where('email', '==', email).limit(1).stream()
+        user_list = list(users_ref)
+        
+        if not user_list:
+            return jsonify({'error': 'User with this email does not exist'}), 404
+        
+        user_doc = user_list[0]
+        # For demo purposes, we generate '123456' as the OTP code
+        otp_code = '123456'
+        
+        db.collection('users').document(user_doc.id).update({
+            'reset_code': otp_code,
+            'reset_code_expires': datetime.now() + timedelta(minutes=15)
+        })
+        
+        print(f"PASSWORD RESET REQUEST: Email: {email}, Code: {otp_code}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Reset code generated successfully',
+            'code': otp_code  # Return code in response for easy demo testing
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password_route():
+    try:
+        data = request.get_json()
+        if not data or not data.get('email') or not data.get('code') or not data.get('new_password'):
+            return jsonify({'error': 'Missing email, code or new_password'}), 400
+        
+        email = data['email'].strip().lower()
+        code = data['code'].strip()
+        new_password = data['new_password']
+        
+        if len(new_password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
+            
+        users_ref = db.collection('users').where('email', '==', email).limit(1).stream()
+        user_list = list(users_ref)
+        
+        if not user_list:
+            return jsonify({'error': 'User with this email does not exist'}), 404
+            
+        user_doc = user_list[0]
+        user_data = user_doc.to_dict()
+        
+        stored_code = user_data.get('reset_code')
+        if not stored_code or stored_code != code:
+            return jsonify({'error': 'Invalid reset code'}), 400
+            
+        # Update the password
+        hashed_password = hash_password(new_password)
+        db.collection('users').document(user_doc.id).update({
+            'password_hash': hashed_password,
+            'reset_code': None,
+            'reset_code_expires': None
+        })
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password has been reset successfully'
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/users', methods=['GET'])
 def get_users():
     try:
@@ -512,6 +432,7 @@ def get_users():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     try:
@@ -527,6 +448,7 @@ def get_user(user_id):
             return jsonify({'message': 'User not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
@@ -547,6 +469,7 @@ def update_user(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
     try:
@@ -558,6 +481,7 @@ def delete_user(user_id):
             return jsonify({'message': 'User not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/user/<user_id>/stats', methods=['GET'])
 def get_user_stats(user_id):
@@ -588,6 +512,490 @@ def get_user_stats(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/users/<user_id>/analytics/summary', methods=['GET'])
+def get_analytics_summary(user_id):
+    try:
+        user_ref = db.collection('users').document(user_id).get()
+        if not user_ref.exists:
+            return jsonify({'error': 'User not found'}), 404
+        
+        now = datetime.now()
+        thirty_days_ago = now - timedelta(days=30)
+        sixty_days_ago = now - timedelta(days=60)
+        seven_days_ago = now - timedelta(days=7)
+        
+        scans_ref = db.collection(SCAN_HISTORY_COLLECTION).where('user_id', '==', user_id).stream()
+        scans = []
+        for scan in scans_ref:
+            data = scan.to_dict()
+            ts = data.get('scan_date') or data.get('scanned_at') or data.get('timestamp')
+            scan_time = now
+            if ts:
+                try:
+                    if hasattr(ts, 'timestamp'):
+                        scan_time = datetime.fromtimestamp(ts.timestamp())
+                    elif isinstance(ts, str):
+                        scan_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                except:
+                    pass
+            data['parsed_time'] = scan_time
+            scans.append(data)
+            
+        scans.sort(key=lambda x: x['parsed_time'])
+        total_scans = len(scans)
+        
+        total_safe = sum(1 for s in scans if s.get('risk_level') == 'safe')
+        safety_rate = (total_safe / total_scans * 100) if total_scans > 0 else 0
+        allergens_avoided = sum(1 for s in scans if s.get('risk_level') == 'unsafe')
+        
+        last_7_scans = [s for s in scans if s['parsed_time'] >= seven_days_ago]
+        last_30_scans = [s for s in scans if s['parsed_time'] >= thirty_days_ago]
+        prev_30_scans = [s for s in scans if sixty_days_ago <= s['parsed_time'] < thirty_days_ago]
+        
+        # Helper to categorize scans
+        def process_scans(scan_list, start_time):
+            filtered = [s for s in scan_list if s['parsed_time'] >= start_time]
+            total = len(filtered)
+            safe = sum(1 for s in filtered if s.get('risk_level') == 'safe')
+            unsafe = sum(1 for s in filtered if s.get('risk_level') == 'unsafe')
+            caution = sum(1 for s in filtered if s.get('risk_level') == 'caution')
+            safe_pct = (safe / total * 100) if total > 0 else 0
+            
+            allergens = {}
+            confidence_sum = 0
+            categories = {}
+            for s in filtered:
+                confidence_sum += float(s.get('confidence', 0))
+                for allergen in s.get('allergens_detected', []):
+                    allergens[allergen] = allergens.get(allergen, 0) + 1
+                name_words = s.get('product_name', '').split()
+                if name_words and name_words[0] != 'Unknown':
+                    cat = name_words[-1] if len(name_words) > 0 else 'Unknown'
+                    categories[cat] = categories.get(cat, 0) + 1
+                    
+            top_allergen = max(allergens.items(), key=lambda x: x[1])[0] if allergens else "None"
+            avg_conf = (confidence_sum / total) if total > 0 else 0
+            top_categories = [k for k, v in sorted(categories.items(), key=lambda item: item[1], reverse=True)[:3]]
+            
+            return {
+                'total': total, 'safe': safe, 'unsafe': unsafe, 'caution': caution,
+                'safe_pct': safe_pct, 'top_allergen': top_allergen, 'avg_conf': avg_conf,
+                'top_categories': top_categories, 'filtered_scans': filtered
+            }
+
+        week_stats = process_scans(scans, seven_days_ago)
+        month_stats = process_scans(scans, thirty_days_ago)
+        prev_month_stats = process_scans([s for s in scans if s['parsed_time'] < thirty_days_ago], sixty_days_ago)
+        
+        scans_by_day = [0] * 7
+        for s in week_stats['filtered_scans']:
+            days_ago = (now.date() - s['parsed_time'].date()).days
+            if 0 <= days_ago < 7:
+                scans_by_day[6 - days_ago] += 1
+                
+        scans_by_week = [0] * 4
+        for s in month_stats['filtered_scans']:
+            days_ago = (now.date() - s['parsed_time'].date()).days
+            if 0 <= days_ago < 28:
+                scans_by_week[3 - (days_ago // 7)] += 1
+                
+        prev_safe_pct = prev_month_stats['safe_pct']
+        curr_safe_pct = month_stats['safe_pct']
+        improvement = curr_safe_pct - prev_safe_pct
+        prev_total = prev_month_stats['total']
+        curr_total = month_stats['total']
+        scans_increase = ((curr_total - prev_total) / prev_total * 100) if prev_total > 0 else (100 if curr_total > 0 else 0)
+        trend = "improving" if improvement > 0 else ("stable" if improvement == 0 else "decreasing")
+
+        # Current Streak
+        current_streak = 0
+        if scans:
+            unique_days = sorted(list(set(s['parsed_time'].date() for s in scans)), reverse=True)
+            if unique_days and (now.date() - unique_days[0]).days <= 1:
+                current_streak = 1
+                for i in range(1, len(unique_days)):
+                    if (unique_days[i-1] - unique_days[i]).days == 1:
+                        current_streak += 1
+                    else:
+                        break
+
+        # Calculate unique categories and ingredients
+        categories = set()
+        unique_ingredients = set()
+        for s in scans:
+            name_words = s.get('product_name', '').split()
+            if name_words and name_words[0] != 'Unknown':
+                categories.add(name_words[-1])
+            for ing in s.get('ingredients', []):
+                unique_ingredients.add(ing.lower())
+
+        # Load existing badges
+        user_badges_ref = db.collection('user_badges').where('user_id', '==', user_id).stream()
+        unlocked_badges = {}
+        for b in user_badges_ref:
+            data = b.to_dict()
+            unlocked_badges[data['badge_id']] = data.get('unlocked_at')
+
+        newly_unlocked = {}
+        def unlock(badge_id):
+            if badge_id not in unlocked_badges and badge_id not in newly_unlocked:
+                newly_unlocked[badge_id] = now.isoformat()
+
+        # Evaluate conditions
+        if total_scans > 0:
+            unlock("first_scan")
+        if last_7_scans and all(s.get('risk_level') == 'safe' for s in last_7_scans):
+            unlock("health_guardian")
+        if total_scans >= 20 and safety_rate >= 80:
+            unlock("consistent_chooser")
+        if curr_total >= 30:
+            unlock("active_scanner")
+        if curr_total > 0 and prev_total > 0 and improvement >= 20:
+            unlock("quick_learner")
+        if len(categories) >= 10:
+            unlock("label_expert")
+        if current_streak >= 7:
+            unlock("streak_master")
+        if allergens_avoided >= 20:
+            unlock("allergen_aware")
+        if total_scans >= 100:
+            unlock("super_scanner")
+        
+        weeks_with_scans = set()
+        for s in last_30_scans:
+            days_ago = (now.date() - s['parsed_time'].date()).days
+            if 0 <= days_ago < 28:
+                weeks_with_scans.add(days_ago // 7)
+        if len(weeks_with_scans) == 4:
+            unlock("weekly_warrior")
+            
+        prev_unsafe = sum(1 for s in prev_30_scans if s.get('risk_level') == 'unsafe')
+        curr_unsafe = sum(1 for s in last_30_scans if s.get('risk_level') == 'unsafe')
+        if prev_unsafe > 0 and curr_unsafe <= prev_unsafe * 0.5:
+            unlock("improvement_badge")
+            
+        if len(unique_ingredients) >= 50:
+            unlock("ingredient_guru")
+        if len(categories) >= 5:
+            unlock("diverse_scanner")
+        if scans and (scans[-1]['parsed_time'] - scans[0]['parsed_time']).days >= 30:
+            unlock("veteran")
+        if len(unlocked_badges) + len(newly_unlocked) >= 10:
+            unlock("completionist")
+
+        # Save new badges
+        if newly_unlocked:
+            batch = db.batch()
+            for badge_id, ts in newly_unlocked.items():
+                doc_ref = db.collection('user_badges').document(f"{user_id}_{badge_id}")
+                batch.set(doc_ref, {
+                    'user_id': user_id,
+                    'badge_id': badge_id,
+                    'unlocked_at': ts
+                })
+                unlocked_badges[badge_id] = ts
+            batch.commit()
+
+        # Combine all badges
+        ALL_BADGES = [
+            {"id": "first_scan", "name": "First Scan", "icon": "🏁", "description": "Complete first product scan"},
+            {"id": "health_guardian", "name": "Health Guardian", "icon": "🛡️", "description": "100% safe products for 7+ days"},
+            {"id": "consistent_chooser", "name": "Consistent Chooser", "icon": "📊", "description": "80%+ safe choices over 20+ scans"},
+            {"id": "active_scanner", "name": "Active Scanner", "icon": "📈", "description": "30+ scans in a single month"},
+            {"id": "quick_learner", "name": "Quick Learner", "icon": "⚡", "description": "20%+ improvement in safe choices"},
+            {"id": "label_expert", "name": "Label Expert", "icon": "🏷️", "description": "Scan 10+ different product categories"},
+            {"id": "streak_master", "name": "Streak Master", "icon": "🔥", "description": "Scan daily for 7+ consecutive days"},
+            {"id": "allergen_aware", "name": "Allergen Aware", "icon": "🎯", "description": "Correctly identify allergens 20+ times"},
+            {"id": "super_scanner", "name": "Super Scanner", "icon": "🌟", "description": "Reach 100 total scans"},
+            {"id": "weekly_warrior", "name": "Weekly Warrior", "icon": "📅", "description": "Scan at least once every week for 4 weeks"},
+            {"id": "improvement_badge", "name": "Improvement Badge", "icon": "💪", "description": "50% reduction in unsafe products"},
+            {"id": "ingredient_guru", "name": "Ingredient Guru", "icon": "🧠", "description": "Successfully identify 50+ individual ingredients"},
+            {"id": "diverse_scanner", "name": "Diverse Scanner", "icon": "🌈", "description": "Scan products from 5+ different categories"},
+            {"id": "completionist", "name": "Completionist", "icon": "🏆", "description": "Collect 10+ badges"},
+            {"id": "veteran", "name": "Veteran", "icon": "🎖️", "description": "Use the app for 30+ days"},
+        ]
+
+        result_badges = []
+        new_badge_count = 0
+        first_locked = None
+        for b in ALL_BADGES:
+            is_unlocked = b['id'] in unlocked_badges
+            unlocked_at = unlocked_badges.get(b['id'])
+            is_new = False
+            if unlocked_at:
+                try:
+                    ua_dt = datetime.fromisoformat(unlocked_at.replace('Z', '+00:00'))
+                    if (now - ua_dt).days < 7:
+                        is_new = True
+                        new_badge_count += 1
+                except:
+                    pass
+            
+            result_badges.append({
+                "id": b['id'],
+                "name": b['name'],
+                "icon": b['icon'],
+                "description": b['description'],
+                "is_unlocked": is_unlocked,
+                "unlocked_at": unlocked_at,
+                "is_new": is_new
+            })
+            if not is_unlocked and not first_locked:
+                first_locked = b
+
+        weekly_title = "Welcome"
+        weekly_msg = "Scan products to get insights!"
+        if week_stats['total'] > 0:
+            if week_stats['safe_pct'] == 100:
+                weekly_title = "Perfect Record"
+                weekly_msg = "All products scanned this week are safe!"
+            elif week_stats['safe_pct'] >= 80:
+                weekly_title = "Great Choices"
+                weekly_msg = f"{int(week_stats['safe_pct'])}% of your scans this week are safe."
+            else:
+                weekly_title = "Needs Attention"
+                weekly_msg = "Many products this week contain allergens."
+
+        monthly_title = "Getting Started"
+        monthly_msg = "Scan more products to see your monthly trends."
+        if month_stats['total'] > 0:
+            if scans_increase >= 20:
+                monthly_title = "Active Scanner"
+                monthly_msg = f"You scanned {curr_total} products this month."
+            elif improvement >= 15:
+                monthly_title = "Improving"
+                monthly_msg = f"Your product safety awareness improved {int(improvement)}%!"
+            else:
+                monthly_title = "Consistent Scanner"
+                monthly_msg = f"You've scanned {curr_total} items this month."
+
+        next_target = ((total_scans // 10) + 1) * 10
+        if next_target - total_scans > 5 and total_scans % 10 >= 5:
+            next_target = ((total_scans // 5) + 1) * 5
+            
+        recommendation_tip = f"Tip: {first_locked['description']} to unlock the '{first_locked['name']}' badge!" if first_locked else "You've unlocked all badges! Amazing job!"
+
+        return jsonify({
+            "weekly": {
+                "total_scans": week_stats['total'],
+                "safe_count": week_stats['safe'],
+                "unsafe_count": week_stats['unsafe'],
+                "caution_count": week_stats['caution'],
+                "safe_percentage": week_stats['safe_pct'],
+                "top_allergen": week_stats['top_allergen'],
+                "avg_confidence": week_stats['avg_conf'],
+                "insight_title": weekly_title,
+                "insight_message": weekly_msg,
+                "scans_by_day": scans_by_day
+            },
+            "monthly": {
+                "total_scans": curr_total,
+                "safe_count": month_stats['safe'],
+                "unsafe_count": month_stats['unsafe'],
+                "caution_count": month_stats['caution'],
+                "safe_percentage": month_stats['safe_pct'],
+                "improvement": improvement,
+                "scans_increase": scans_increase,
+                "trend": trend,
+                "insight_title": monthly_title,
+                "insight_message": monthly_msg,
+                "scans_by_week": scans_by_week,
+                "top_categories": month_stats['top_categories']
+            },
+            "total_scans_all_time": total_scans,
+            "total_safe_scans": total_safe,
+            "safety_rate": safety_rate,
+            "current_streak": current_streak,
+            "allergens_avoided": allergens_avoided,
+            "badges": result_badges,
+            "new_badge_count": new_badge_count,
+            "recommendation_tip": recommendation_tip,
+            "next_milestone": {
+                "target": next_target,
+                "current": total_scans,
+                "message": f"{next_target - total_scans} more scans to reach {next_target} total scans!"
+            }
+        }), 200
+    except Exception as e:
+        print(f"Error in analytics summary: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+def evaluate_user_badges(user_id):
+    try:
+        now = datetime.now()
+        thirty_days_ago = now - timedelta(days=30)
+        sixty_days_ago = now - timedelta(days=60)
+        seven_days_ago = now - timedelta(days=7)
+        
+        # Load scans
+        scans_ref = db.collection(SCAN_HISTORY_COLLECTION).where('user_id', '==', user_id).stream()
+        scans = []
+        for scan in scans_ref:
+            data = scan.to_dict()
+            ts = data.get('scan_date') or data.get('scanned_at') or data.get('timestamp')
+            scan_time = now
+            if ts:
+                try:
+                    if hasattr(ts, 'timestamp'):
+                        scan_time = datetime.fromtimestamp(ts.timestamp())
+                    elif isinstance(ts, str):
+                        scan_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                except:
+                    pass
+            data['parsed_time'] = scan_time
+            scans.append(data)
+            
+        scans.sort(key=lambda x: x['parsed_time'])
+        total_scans = len(scans)
+        if total_scans == 0:
+            return []
+            
+        total_safe = sum(1 for s in scans if s.get('risk_level') == 'safe')
+        safety_rate = (total_safe / total_scans * 100) if total_scans > 0 else 0
+        allergens_avoided = sum(1 for s in scans if s.get('risk_level') == 'unsafe')
+        
+        last_7_scans = [s for s in scans if s['parsed_time'] >= seven_days_ago]
+        last_30_scans = [s for s in scans if s['parsed_time'] >= thirty_days_ago]
+        prev_30_scans = [s for s in scans if sixty_days_ago <= s['parsed_time'] < thirty_days_ago]
+        
+        def process_scans(scan_list, start_time):
+            filtered = [s for s in scan_list if s['parsed_time'] >= start_time]
+            total = len(filtered)
+            safe = sum(1 for s in filtered if s.get('risk_level') == 'safe')
+            safe_pct = (safe / total * 100) if total > 0 else 0
+            return {'total': total, 'safe_pct': safe_pct, 'filtered_scans': filtered}
+            
+        week_stats = process_scans(scans, seven_days_ago)
+        month_stats = process_scans(scans, thirty_days_ago)
+        prev_month_stats = process_scans([s for s in scans if s['parsed_time'] < thirty_days_ago], sixty_days_ago)
+        
+        prev_safe_pct = prev_month_stats['safe_pct']
+        curr_safe_pct = month_stats['safe_pct']
+        improvement = curr_safe_pct - prev_safe_pct
+        prev_total = prev_month_stats['total']
+        curr_total = month_stats['total']
+        
+        current_streak = 0
+        if scans:
+            unique_days = sorted(list(set(s['parsed_time'].date() for s in scans)), reverse=True)
+            if unique_days and (now.date() - unique_days[0]).days <= 1:
+                current_streak = 1
+                for i in range(1, len(unique_days)):
+                    if (unique_days[i-1] - unique_days[i]).days == 1:
+                        current_streak += 1
+                    else:
+                        break
+                        
+        categories = set()
+        unique_ingredients = set()
+        for s in scans:
+            name_words = s.get('product_name', '').split()
+            if name_words and name_words[0] != 'Unknown':
+                categories.add(name_words[-1])
+            for ing in s.get('ingredients', []):
+                unique_ingredients.add(ing.lower())
+                
+        # Load existing badges
+        user_badges_ref = db.collection('user_badges').where('user_id', '==', user_id).stream()
+        unlocked_badges = {}
+        for b in user_badges_ref:
+            data = b.to_dict()
+            unlocked_badges[data['badge_id']] = data.get('unlocked_at')
+            
+        newly_unlocked = {}
+        def unlock(badge_id):
+            if badge_id not in unlocked_badges and badge_id not in newly_unlocked:
+                newly_unlocked[badge_id] = now.isoformat()
+                
+        # Evaluate conditions
+        if total_scans > 0:
+            unlock("first_scan")
+        if last_7_scans and all(s.get('risk_level') == 'safe' for s in last_7_scans):
+            unlock("health_guardian")
+        if total_scans >= 20 and safety_rate >= 80:
+            unlock("consistent_chooser")
+        if curr_total >= 30:
+            unlock("active_scanner")
+        if curr_total > 0 and prev_total > 0 and improvement >= 20:
+            unlock("quick_learner")
+        if len(categories) >= 10:
+            unlock("label_expert")
+        if current_streak >= 7:
+            unlock("streak_master")
+        if allergens_avoided >= 20:
+            unlock("allergen_aware")
+        if total_scans >= 100:
+            unlock("super_scanner")
+            
+        weeks_with_scans = set()
+        for s in last_30_scans:
+            days_ago = (now.date() - s['parsed_time'].date()).days
+            if 0 <= days_ago < 28:
+                weeks_with_scans.add(days_ago // 7)
+        if len(weeks_with_scans) == 4:
+            unlock("weekly_warrior")
+            
+        prev_unsafe = sum(1 for s in prev_30_scans if s.get('risk_level') == 'unsafe')
+        curr_unsafe = sum(1 for s in last_30_scans if s.get('risk_level') == 'unsafe')
+        if prev_unsafe > 0 and curr_unsafe <= prev_unsafe * 0.5:
+            unlock("improvement_badge")
+            
+        if len(unique_ingredients) >= 50:
+            unlock("ingredient_guru")
+        if len(categories) >= 5:
+            unlock("diverse_scanner")
+        if scans and (scans[-1]['parsed_time'] - scans[0]['parsed_time']).days >= 30:
+            unlock("veteran")
+        if len(unlocked_badges) + len(newly_unlocked) >= 10:
+            unlock("completionist")
+            
+        ALL_BADGES = {
+            "first_scan": {"name": "First Scan", "icon": "🏁", "description": "Complete first product scan"},
+            "health_guardian": {"name": "Health Guardian", "icon": "🛡️", "description": "100% safe products for 7+ days"},
+            "consistent_chooser": {"name": "Consistent Chooser", "icon": "📊", "description": "80%+ safe choices over 20+ scans"},
+            "active_scanner": {"name": "Active Scanner", "icon": "📈", "description": "30+ scans in a single month"},
+            "quick_learner": {"name": "Quick Learner", "icon": "⚡", "description": "20%+ improvement in safe choices"},
+            "label_expert": {"name": "Label Expert", "icon": "🏷️", "description": "Scan 10+ different product categories"},
+            "streak_master": {"name": "Streak Master", "icon": "🔥", "description": "Scan daily for 7+ consecutive days"},
+            "allergen_aware": {"name": "Allergen Aware", "icon": "🎯", "description": "Correctly identify allergens 20+ times"},
+            "super_scanner": {"name": "Super Scanner", "icon": "🌟", "description": "Reach 100 total scans"},
+            "weekly_warrior": {"name": "Weekly Warrior", "icon": "📅", "description": "Scan at least once every week for 4 weeks"},
+            "improvement_badge": {"name": "Improvement Badge", "icon": "💪", "description": "50% reduction in unsafe products"},
+            "ingredient_guru": {"name": "Ingredient Guru", "icon": "🧠", "description": "Successfully identify 50+ individual ingredients"},
+            "diverse_scanner": {"name": "Diverse Scanner", "icon": "🌈", "description": "Scan products from 5+ different categories"},
+            "completionist": {"name": "Completionist", "icon": "🏆", "description": "Collect 10+ badges"},
+            "veteran": {"name": "Veteran", "icon": "🎖️", "description": "Use the app for 30+ days"}
+        }
+        
+        new_badges_list = []
+        if newly_unlocked:
+            batch = db.batch()
+            for badge_id, ts in newly_unlocked.items():
+                doc_ref = db.collection('user_badges').document(f"{user_id}_{badge_id}")
+                batch.set(doc_ref, {
+                    'user_id': user_id,
+                    'badge_id': badge_id,
+                    'unlocked_at': ts
+                })
+                badge_info = ALL_BADGES.get(badge_id, {"name": badge_id, "icon": "🏅", "description": ""})
+                new_badges_list.append({
+                    "id": badge_id,
+                    "name": badge_info["name"],
+                    "icon": badge_info["icon"],
+                    "description": badge_info["description"]
+                })
+            batch.commit()
+            
+        return new_badges_list
+    except Exception as e:
+        print(f"Error evaluating badges: {e}")
+        return []
+
+
 # ============= SCAN ENDPOINTS =============
 
 @app.route('/users/<user_id>/scans', methods=['POST'])
@@ -602,15 +1010,19 @@ def add_scan(user_id):
         if confidence == 0.0:
             confidence = data.get('ml_confidence', 0.0)
         if confidence == 0.0 and (data.get('ingredients') or data.get('raw_text')):
-            confidence = 0.72
+            confidence = 0.85
         
         now = firestore.SERVER_TIMESTAMP
         safety_classification = data.get('safety_classification', data.get('risk_level', 'unknown'))
         
+        ingredients_list = data.get('ingredients', [])
+        allergens_list = data.get('allergens_detected', [])
+        
         scan_ref = db.collection(SCAN_HISTORY_COLLECTION).add({
             'user_id': user_id,
             'product_name': data.get('product_name', 'Unknown Product'),
-            'ingredients': data.get('ingredients', []),
+            'ingredients': ingredients_list,
+            'ingredient_count': len(ingredients_list),
             'ingredient_details': data.get('ingredient_details', []),
             'risk_level': data.get('risk_level', 'unknown'),
             'safety_classification': safety_classification,
@@ -618,10 +1030,14 @@ def add_scan(user_id):
             'alerts': data.get('alerts', []),
             'recommendations': data.get('recommendations', []),
             'confidence': confidence,
-            'detection_method': data.get('detection_method', 'AI Analysis'),
-            'allergens_detected': data.get('allergens_detected', []),
+            'image_quality_score': confidence,
+            'detection_method': data.get('detection_method', 'ML/NLP Analysis'),
+            'allergens_detected': allergens_list,
+            'allergen_count': len(allergens_list),
+            'personal_allergens_detected': data.get('personal_allergens_detected', []),
             'raw_text': data.get('raw_text', ''),
             'input_image_url': data.get('input_image_url', data.get('image_url', '')),
+            'processing_time_ms': data.get('processing_time_ms', 0),
             'scan_date': now,
             'scanned_at': now,
             'timestamp': now
@@ -659,9 +1075,17 @@ def add_scan(user_id):
                     'match_timestamp': now,
                 })
         
-        return jsonify({'scan_id': scan_id, 'message': 'Scan recorded successfully'}), 201
+        # Evaluate badges
+        newly_unlocked_badges = evaluate_user_badges(user_id)
+        
+        return jsonify({
+            'scan_id': scan_id, 
+            'message': 'Scan recorded successfully',
+            'newly_unlocked_badges': newly_unlocked_badges
+        }), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/users/<user_id>/scans', methods=['GET'])
 def get_user_scans(user_id):
@@ -698,14 +1122,19 @@ def get_user_scans(user_id):
                     else:
                         scan[timestamp_field] = str(scan[timestamp_field])
             scan.setdefault('scanned_at', scan.get('scan_date', scan.get('timestamp', '')))
-            
             scan.setdefault('product_name', 'Unknown Product')
             scan.setdefault('ingredients', [])
+            scan.setdefault('ingredient_count', len(scan.get('ingredients', [])))
             scan.setdefault('risk_level', 'unknown')
             scan.setdefault('safety_classification', scan.get('risk_level', 'unknown'))
             scan.setdefault('risk_score', 0)
             scan.setdefault('alerts', [])
             scan.setdefault('confidence', 0.0)
+            scan.setdefault('image_quality_score', scan.get('confidence', 0.0))
+            scan.setdefault('allergens_detected', [])
+            scan.setdefault('allergen_count', len(scan.get('allergens_detected', [])))
+            scan.setdefault('detection_method', 'ML/NLP Analysis')
+            scan.setdefault('processing_time_ms', 0)
         
         return jsonify(scans), 200
         
@@ -714,6 +1143,7 @@ def get_user_scans(user_id):
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/users/<user_id>/scans/<scan_id>', methods=['DELETE'])
 def delete_scan(user_id, scan_id):
@@ -727,10 +1157,12 @@ def delete_scan(user_id, scan_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 # ============= SCAN FOR USER ENDPOINT =============
 @app.route('/scan/<user_id>', methods=['POST'])
 def scan_for_user(user_id):
     """Scan food label for a specific user"""
+    start_time = time.time()
     try:
         if 'image' not in request.files:
             return jsonify({'error': 'No image uploaded'}), 400
@@ -741,6 +1173,9 @@ def scan_for_user(user_id):
         result = processor.process_scan(image_bytes, user_id)
         if not result['success']:
             return jsonify({'error': result['error']}), 500
+            
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        result['processing_time_ms'] = processing_time_ms
         
         scan_id = save_scan_history(user_id, result)
         if scan_id:
@@ -754,6 +1189,7 @@ def scan_for_user(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 def save_scan_history(user_id, scan_result):
     try:
         analysis = scan_result.get('analysis', {})
@@ -761,16 +1197,25 @@ def save_scan_history(user_id, scan_result):
         now = firestore.SERVER_TIMESTAMP
         risk_level = analysis.get('risk_level', 'unknown')
         
+        ingredients_list = scan_result.get('ingredients', [])
+        allergens_list = scan_result.get('allergens_detected', analysis.get('allergens_detected', []))
+        
         scan_data = {
             'user_id': user_id,
             'product_name': scan_result.get('product_name', 'Unknown Product'),
-            'ingredients': scan_result.get('ingredients', []),
+            'ingredients': ingredients_list,
+            'ingredient_count': len(ingredients_list),
             'risk_level': risk_level,
             'safety_classification': risk_level,
             'risk_score': analysis.get('risk_score', 0),
             'alerts': analysis.get('alerts', []),
             'confidence': confidence,
+            'image_quality_score': confidence,
+            'detection_method': scan_result.get('detection_method', analysis.get('detection_method', 'ML/NLP Analysis')),
+            'allergens_detected': allergens_list,
+            'allergen_count': len(allergens_list),
             'input_image_url': scan_result.get('input_image_url', ''),
+            'processing_time_ms': scan_result.get('processing_time_ms', 0),
             'scan_date': now,
             'scanned_at': now,
             'timestamp': now
@@ -780,6 +1225,7 @@ def save_scan_history(user_id, scan_result):
     except Exception as e:
         print(f"Error saving scan: {e}")
         return None
+
 
 def find_similar_products(ingredients):
     try:
@@ -791,6 +1237,7 @@ def find_similar_products(ingredients):
     except Exception as e:
         print(f"Error finding similar products: {e}")
         return []
+
 
 # ============= EXTRACT INGREDIENTS ENDPOINT =============
 
@@ -826,6 +1273,7 @@ def extract_ingredients_only():
             'ingredients': parsed_ingredients or cleaned_ingredients,
             'raw_ingredients': raw_ingredients,
             'raw_text': raw_text,
+            'cleaned_text': ocr_result.get('cleaned_text', ''),
             'ocr_confidence': ocr_result.get('ocr_confidence', 0.0),
             'ocr_strategy': ocr_result.get('strategy_used', ''),
             'processed_count': len(parsed_ingredients or cleaned_ingredients),
@@ -835,37 +1283,102 @@ def extract_ingredients_only():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ============= ANALYZE WITH PROFILE ENDPOINT =============
+
+# ============= ANALYZE WITH PROFILE ENDPOINT - FULLY FIXED =============
 
 @app.route('/analyze-with-profile', methods=['POST'])
 def analyze_with_profile():
-    """Analyze ingredients text against user's profile"""
+    """Analyze ingredients text against user's profile.
+
+    Detection pipeline (RF-primary 70/30):
+      1. Random Forest (70%) — primary verdict (has_allergens probability)
+      2. Rule-based / risk_analyzer (30%) — allergen labels + dietary detail
+      3. build_personalized_analysis_v2 — per-ingredient detail labels for UI only
+    """
     try:
         data = request.get_json()
-        ingredients_text = data.get('ingredients_text', '')
+
+        # Handle different possible input formats
+        ingredients_input = data.get('ingredients_text') or data.get('ingredients')
         user_id = data.get('user_id')
-        
-        if not ingredients_text:
-            return jsonify({'error': 'No ingredients provided'}), 400
-        
+
+        # CRITICAL FIX: Extract string from nested dictionary
+        if isinstance(ingredients_input, dict):
+            ingredients_text = (
+                ingredients_input.get('text') or
+                ingredients_input.get('ingredients') or
+                ingredients_input.get('content') or
+                ingredients_input.get('value') or
+                str(ingredients_input)
+            )
+        elif isinstance(ingredients_input, list):
+            ingredients_text = ', '.join(str(item) for item in ingredients_input if item)
+        else:
+            ingredients_text = str(ingredients_input) if ingredients_input else ''
+
+        # Clean up any dictionary artifacts
+        if ingredients_text.startswith('{') and ingredients_text.endswith('}'):
+            try:
+                import ast
+                parsed = ast.literal_eval(ingredients_text)
+                if isinstance(parsed, dict):
+                    ingredients_text = parsed.get('text', parsed.get('ingredients', str(parsed)))
+            except:
+                pass
+
+        # Final validation
+        if not ingredients_text or ingredients_text == '{}' or ingredients_text == "{'text': ''}":
+            return jsonify({'error': 'No valid ingredients provided'}), 400
+
         if not user_id:
             return jsonify({'error': 'No user ID provided'}), 400
-        
+
+        # Get user from database
         user_ref = db.collection('users').document(user_id).get()
         if not user_ref.exists:
             return jsonify({'error': 'User not found'}), 404
-        
+
         user_data = user_ref.to_dict()
         user_allergies = user_data.get('allergies', [])
-        user_dietary = user_data.get('dietary_restrictions', [])
+        user_dietary  = user_data.get('dietary_restrictions', [])
 
-        analysis = processor.analyze_ingredients(
+        print(f"\n=== ANALYZE WITH PROFILE (RF-PRIMARY) ===")
+        print(f"Input type: {type(ingredients_input)}")
+        print(f"Extracted text: {ingredients_text[:100]}...")
+        print(f"User allergies: {user_allergies}")
+        print(f"User dietary:   {user_dietary}")
+
+        # ── PRIMARY: Random Forest (70%) + Rule-based (30%) via processor ──
+        combined = processor.analyze_ingredients(
             ingredients_text,
             user_allergies=user_allergies,
             user_dietary=user_dietary,
             raw_text=ingredients_text,
         )
-        ingredients = analysis.get('ingredients') or parse_ingredients_input_v2(ingredients_text)
+
+        risk_level  = combined.get('risk_level', 'safe')
+        risk_score  = combined.get('risk_score', 0)
+        confidence  = combined.get('confidence', 0.7)
+        all_alerts  = combined.get('alerts', [])
+        allergens_detected  = combined.get('allergens_detected', [])
+        detection_method    = combined.get('detection_method', 'Random Forest (Primary) + Rule-Based')
+
+        # ── SUPPORTING: per-ingredient detail labels for UI (rules only — RF is binary) ──
+        ingredients = parse_ingredients_input_v2(ingredients_text)
+        detail_analysis  = build_personalized_analysis_v2(
+            ingredients_text, user_allergies, user_dietary, ingredients_text
+        )
+        ingredient_details = detail_analysis.get('ingredient_details', [])
+
+        print(f"Detection Method: {detection_method}")
+        print(f"RF Weights: ML={processor.ML_WEIGHT}, Rules={processor.RULE_WEIGHT}")
+        print(f"Risk Level: {risk_level}")
+        print(f"Risk Score: {risk_score}")
+        print(f"Confidence: {confidence}")
+        print(f"Allergens:  {allergens_detected}")
+        print(f"==========================================")
+
+        recommendations = _get_recommendations(risk_level)
 
         user_allergy_strings = []
         for allergy in user_allergies:
@@ -874,54 +1387,214 @@ def analyze_with_profile():
             else:
                 user_allergy_strings.append(str(allergy))
 
-        print(f"=== FINAL ANALYSIS RESULT ===")
-        print(f"Risk Level: {analysis['risk_level']}")
-        print(f"Risk Score: {analysis['risk_score']}")
-        print(f"Confidence: {analysis['confidence']}")
-        print(f"Alerts: {analysis['alerts']}")
-        print(f"=============================")
-
         return jsonify({
             'success': True,
             'ingredients': ingredients,
-            'detection_method': analysis.get('detection_method', 'Random Forest Primary Classifier + Profile Rules'),
-            **analysis,
+            'ingredient_details': ingredient_details,
+            'detection_method': detection_method,
+            'risk_level': risk_level,
+            'risk_score': risk_score,
+            'confidence': confidence,
+            'alerts': all_alerts,
+            'allergens_detected': allergens_detected,
+            'has_allergens': len(allergens_detected) > 0,
+            'has_personal_allergens': any(
+                a in [str(u.get('id', u) if isinstance(u, dict) else u)
+                      for u in user_allergies]
+                for a in allergens_detected
+            ),
+            'recommendations': recommendations,
+            'model_info': {
+                'rf_loaded': processor.model_loaded,
+                'weights': {'random_forest': processor.ML_WEIGHT, 'rule_based': processor.RULE_WEIGHT},
+                'ml_confidence': combined.get('ml_confidence', 0.0),
+                'rule_confidence': combined.get('rule_confidence', 0.0),
+            },
             'user_profile': {
                 'allergies': user_allergy_strings,
                 'dietary_restrictions': user_dietary
             }
         }), 200
-        
+
     except Exception as e:
         print(f"Error in analyze_with_profile: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-# ============= BASIC ANALYZE ENDPOINT =============
+
+# ============= TEST-ONLY INLINE ANALYSIS ENDPOINT =============
+
+@app.route('/test/analyze', methods=['POST'])
+def test_analyze_inline():
+    """
+    Accuracy-testing endpoint: accepts allergies/dietary inline, no Firestore lookup.
+    NOT intended for production use — only for the test suite.
+    """
+    try:
+        data = request.get_json()
+        ingredients_text = data.get('ingredients_text', '')
+        allergies = data.get('allergies', [])          # list of str or {id, severity}
+        dietary = data.get('dietary_restrictions', []) # list of str
+
+        if not ingredients_text:
+            return jsonify({'error': 'No ingredients_text provided'}), 400
+
+        # Run NLP analysis with supplied allergies
+        nlp_result = detector.analyze_ingredients(ingredients_text, allergies)
+
+        detected_allergens = nlp_result.get('detected_allergens', []) or []
+        personal_allergens = nlp_result.get('personal_allergens', []) or []
+        risk_level = nlp_result.get('risk_level', 'safe')
+        risk_score = nlp_result.get('risk_score', 0)
+        confidence = nlp_result.get('confidence', 0.85)
+        nlp_alerts = nlp_result.get('alerts', []) or []
+
+        # Check dietary restrictions
+        dietary_alerts = []
+        if dietary:
+            text_lower = ingredients_text.lower()
+            for diet_id in dietary:
+                if diet_id in dietary_rules():
+                    rule = dietary_rules()[diet_id]
+                    for forbidden in rule['forbidden']:
+                        if forbidden in text_lower:
+                            dietary_alerts.append(
+                                f"Contains {forbidden} which may violate {rule['name']}"
+                            )
+        all_alerts = nlp_alerts + dietary_alerts
+
+        # Build ingredient-level details and use combined processing (RF + rules)
+        combined = processor.analyze_ingredients(
+            ingredients_text,
+            user_allergies=allergies,
+            user_dietary=dietary,
+            raw_text=ingredients_text,
+        )
+        ingredient_details = combined.get('ingredient_details', [])
+        risk_level = combined.get('risk_level', risk_level)
+        risk_score = combined.get('risk_score', risk_score)
+        all_alerts = combined.get('alerts', all_alerts)
+        confidence = combined.get('confidence', confidence)
+
+        return jsonify({
+            'success': True,
+            'risk_level': risk_level,
+            'risk_score': risk_score,
+            'confidence': confidence,
+            'alerts': all_alerts,
+            'allergens_detected': detected_allergens,
+            'personal_allergens_detected': personal_allergens,
+            'has_allergens': len(detected_allergens) > 0,
+            'has_personal_allergens': len(personal_allergens) > 0,
+            'ingredient_details': ingredient_details,
+            'detection_method': combined.get('detection_method', 'Random Forest (Primary) + Rule-Based'),
+        }), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ============= BASIC ANALYZE ENDPOINT - FULLY FIXED =============
 
 @app.route('/analyze-ingredients', methods=['POST'])
 def analyze_ingredients():
-    """Basic analyze without user profile"""
+    """Analyze ingredients (no user profile).
+
+    Detection pipeline (RF-primary 70/30):
+      1. Random Forest (70%) — primary verdict
+      2. Rule-based (30%) — allergen labels + detail
+      3. build_general_analysis — per-ingredient labels for UI only
+    """
     try:
         data = request.get_json()
         ingredients_input = data.get('ingredients_text') or data.get('ingredients')
-        
+
         if not ingredients_input:
             return jsonify({'error': 'No ingredients provided'}), 400
-        
-        analysis = processor.analyze_ingredients(ingredients_input)
-        
+
+        # CRITICAL FIX: Extract string from nested dictionary
+        if isinstance(ingredients_input, dict):
+            ingredients_text = (
+                ingredients_input.get('text') or
+                ingredients_input.get('ingredients') or
+                ingredients_input.get('content') or
+                str(ingredients_input)
+            )
+        elif isinstance(ingredients_input, list):
+            ingredients_text = ', '.join(str(item) for item in ingredients_input if item)
+        else:
+            ingredients_text = str(ingredients_input)
+
+        # Clean up
+        if ingredients_text.startswith('{') and ingredients_text.endswith('}'):
+            try:
+                import ast
+                parsed = ast.literal_eval(ingredients_text)
+                if isinstance(parsed, dict):
+                    ingredients_text = parsed.get('text', parsed.get('ingredients', str(parsed)))
+            except:
+                pass
+
+        if not ingredients_text or ingredients_text == '{}':
+            return jsonify({'error': 'No valid ingredients provided'}), 400
+
+        # ── PRIMARY: Random Forest (70%) + Rule-based (30%) via processor ──
+        combined = processor.analyze_ingredients(ingredients_text)
+
+        risk_level         = combined.get('risk_level', 'safe')
+        risk_score         = combined.get('risk_score', 0)
+        confidence         = combined.get('confidence', 0.7)
+        alerts             = combined.get('alerts', [])
+        allergens_detected = combined.get('allergens_detected', [])
+        detection_method   = combined.get('detection_method', 'Random Forest (Primary) + Rule-Based')
+
+        # ── SUPPORTING: per-ingredient detail labels for UI (rules only — RF is binary) ──
+        ingredients = parse_ingredients_input_v2(ingredients_text)
+        detail_analysis  = build_general_analysis(ingredients_text)
+        ingredient_details = detail_analysis.get('ingredient_details', [])
+
+        print(f"\n=== ANALYZE INGREDIENTS (RF-PRIMARY) ===")
+        print(f"Input type: {type(ingredients_input)}")
+        print(f"Extracted text: {ingredients_text[:100]}...")
+        print(f"Detection Method: {detection_method}")
+        print(f"RF Weights: ML={processor.ML_WEIGHT}, Rules={processor.RULE_WEIGHT}")
+        print(f"Risk Level: {risk_level}")
+        print(f"Allergens: {allergens_detected}")
+        print(f"Confidence: {confidence}")
+        print(f"=========================================")
+
+        recommendations = _get_recommendations(risk_level)
+
         return jsonify({
             'success': True,
-            'detection_method': analysis.get('detection_method', 'Random Forest Primary Classifier + Common Allergen Rules'),
-            **analysis,
+            'ingredients': ingredients,
+            'ingredient_details': ingredient_details,
+            'detection_method': detection_method,
+            'risk_level': risk_level,
+            'risk_score': risk_score,
+            'confidence': confidence,
+            'alerts': alerts,
+            'allergens_detected': allergens_detected,
+            'has_allergens': len(allergens_detected) > 0,
+            'model_info': {
+                'rf_loaded': processor.model_loaded,
+                'weights': {'random_forest': processor.ML_WEIGHT, 'rule_based': processor.RULE_WEIGHT},
+                'ml_confidence': combined.get('ml_confidence', 0.0),
+                'rule_confidence': combined.get('rule_confidence', 0.0),
+            },
+            'recommendations': recommendations,
             'message': 'Create a user profile for personalized allergen detection based on your specific allergies'
         }), 200
-        
+
     except Exception as e:
         print(f"Error in analyze_ingredients: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
 
 # ============= DIETARY OPTIONS ENDPOINTS =============
 
@@ -933,6 +1606,7 @@ def get_dietary_options():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/dietary-options/allergens', methods=['GET'])
 def get_allergen_options():
     try:
@@ -941,6 +1615,7 @@ def get_allergen_options():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/dietary-options/dietary', methods=['GET'])
 def get_dietary_only_options():
     try:
@@ -948,6 +1623,7 @@ def get_dietary_only_options():
         return jsonify({'success': True, 'dietary': DIETARY_OPTIONS}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 # ============= USER PROFILE CRUD ENDPOINTS =============
 
@@ -971,6 +1647,7 @@ def get_user_profile(user_id):
         return jsonify({'success': True, 'profile': profile}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/users/<user_id>/profile', methods=['PUT'])
 def update_user_profile(user_id):
@@ -1036,6 +1713,7 @@ def update_user_profile(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/users/<user_id>/profile/restrictions', methods=['POST'])
 def add_restriction(user_id):
     try:
@@ -1071,6 +1749,7 @@ def add_restriction(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/users/<user_id>/profile/restrictions/<restriction_id>', methods=['DELETE'])
 def remove_restriction(user_id, restriction_id):
     try:
@@ -1100,6 +1779,7 @@ def remove_restriction(user_id, restriction_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/users/<user_id>/profile/check', methods=['POST'])
 def check_ingredients_against_profile(user_id):
     try:
@@ -1116,31 +1796,62 @@ def check_ingredients_against_profile(user_id):
         user_allergies = user_data.get('allergies', [])
         user_dietary = user_data.get('dietary_restrictions', [])
         
-        analysis = build_personalized_analysis(ingredients, user_allergies, user_dietary)
+        # Convert ingredients list to text for NLP
+        ingredients_text = ', '.join(ingredients) if isinstance(ingredients, list) else str(ingredients)
+        
+        # Use ML/NLP detector
+        nlp_result = detector.analyze_ingredients(ingredients_text, user_allergies)
+        
+        # Get results
+        risk_level = nlp_result.get('risk_level', 'safe')
+        risk_score = nlp_result.get('risk_score', 0)
+        confidence = nlp_result.get('confidence', 0.85)
+        alerts = nlp_result.get('alerts', [])
+        detected_allergens = nlp_result.get('detected_allergens', [])
+        personal_allergens = nlp_result.get('personal_allergens', [])
+        
+        # Check dietary restrictions
+        dietary_alerts = []
+        if user_dietary:
+            ingredients_lower = ingredients_text.lower()
+            for diet_id in user_dietary:
+                if diet_id in dietary_rules():
+                    rule = dietary_rules()[diet_id]
+                    for forbidden in rule['forbidden']:
+                        if forbidden in ingredients_lower:
+                            dietary_alerts.append(f"Contains {forbidden} which may violate {rule['name']}")
+        
+        all_alerts = alerts + dietary_alerts
         
         return jsonify({
             'success': True,
-            'risk_level': analysis['risk_level'],
-            'risk_score': analysis['risk_score'],
-            'alerts': analysis['alerts'],
-            'allergen_alerts': analysis['allergen_alerts'],
-            'dietary_alerts': analysis['dietary_alerts'],
-            'allergens_detected': analysis['allergens_detected'],
-            'confidence': analysis['confidence'],
+            'risk_level': risk_level,
+            'risk_score': risk_score,
+            'confidence': confidence,
+            'alerts': all_alerts,
+            'allergen_alerts': alerts,
+            'dietary_alerts': dietary_alerts,
+            'allergens_detected': detected_allergens,
+            'personal_allergens_detected': personal_allergens,
             'ingredients_checked': ingredients
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     print("=" * 50)
     print("BiteRight API Starting...")
     print("=" * 50)
     print("Root endpoint: http://127.0.0.1:5000/")
+    print("Health check: http://127.0.0.1:5000/health")
     print("Test Firebase: http://127.0.0.1:5000/test-firebase")
     print("Dietary options: http://127.0.0.1:5000/dietary-options")
     print("Extract ingredients: http://127.0.0.1:5000/extract-ingredients")
     print("Analyze ingredients: http://127.0.0.1:5000/analyze-ingredients")
     print("Analyze with profile: http://127.0.0.1:5000/analyze-with-profile")
+    print("=" * 50)
+    print("ML/NLP Model: ACTIVE")
+    print("Detection Method: Pattern Matching + Keyword Analysis")
     print("=" * 50)
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -12,7 +12,7 @@ class ApiService {
       return 'http://localhost:5000';
     } else if (Platform.isAndroid) {
       // YOUR COMPUTER'S ACTUAL IP ADDRESS
-      return 'http://192.168.0.4:5000';
+      return 'http://172.20.10.4:5000';
     } else if (Platform.isIOS) {
       // iOS simulator can use localhost directly
       return 'http://localhost:5000';
@@ -24,7 +24,7 @@ class ApiService {
 
   // Alternative URLs to try if connection fails
   static List<String> get _alternativeUrls => [
-        'http://192.168.0.4:5000', // YOUR IP - MUST BE FIRST
+        'http://172.20.10.4:5000', // YOUR IP - MUST BE FIRST
         'http://10.0.2.2:5000', // Android emulator
         'http://localhost:5000', // Web / iOS simulator
         'http://127.0.0.1:5000', // Web / iOS simulator (IP loopback)
@@ -66,6 +66,9 @@ class ApiService {
 
   /// Normalizes backend/legacy scan payloads for UI (safety score + confidence).
   Map<String, dynamic> normalizeScanAnalysis(Map<String, dynamic> raw) {
+    if (raw['isNormalized'] == true) {
+      return Map<String, dynamic>.from(raw);
+    }
     final merged = Map<String, dynamic>.from(raw);
     if (merged['analysis'] is Map) {
       merged.addAll(Map<String, dynamic>.from(merged['analysis'] as Map));
@@ -80,14 +83,9 @@ class ApiService {
     final rawText = (merged['raw_text'] ?? '').toString().trim();
     final alerts = List<String>.from(merged['alerts'] ?? []);
 
-    // Legacy hazard scores: safe products were often stored as 0.
-    if (riskLevel == 'safe' && riskScore < 70) {
-      riskScore = riskScore == 0 ? 100 : (100 - riskScore).clamp(85, 100);
-    } else if (riskLevel == 'caution' && riskScore > 75) {
-      riskScore = (100 - riskScore).clamp(40, 75);
-    } else if (riskLevel == 'unsafe' && riskScore > 39) {
-      riskScore = (100 - riskScore).clamp(0, 39);
-    }
+    // Convert backend Risk Score (0 = safest, 100 = most dangerous) to frontend Safety Score (100 = safest, 0 = most dangerous)
+    // without forcing the score into fixed, arbitrary ranges.
+    riskScore = (100 - riskScore).clamp(0, 100);
 
     if (confidence <= 0 && (ingredients.isNotEmpty || rawText.isNotEmpty)) {
       confidence = 0.72;
@@ -112,12 +110,30 @@ class ApiService {
       }
     }
 
+    // Align Safety Score (stored in riskScore) with the verbal riskLevel to prevent contradictory UI displays
+    // (e.g. displaying Safety Score: 70% but calling the product Unsafe).
+    if (riskLevel == 'unsafe') {
+      final unsafeAlertsCount = alerts.where((a) {
+        final lower = a.toLowerCase();
+        return lower.contains('matches your') || lower.contains('contains');
+      }).length;
+      final int maxUnsafeScore = (35 - (unsafeAlertsCount > 1 ? (unsafeAlertsCount - 1) * 5 : 0)).clamp(10, 35);
+      if (riskScore > maxUnsafeScore) {
+        riskScore = maxUnsafeScore;
+      }
+    } else if (riskLevel == 'caution') {
+      riskScore = riskScore.clamp(50, 74);
+    } else if (riskLevel == 'safe') {
+      riskScore = riskScore.clamp(75, 100);
+    }
+
     merged['risk_level'] = riskLevel;
     merged['risk_score'] = riskScore;
     merged['confidence'] = confidence;
     if (ingredients.isNotEmpty) {
       merged['ingredients'] = ingredients;
     }
+    merged['isNormalized'] = true;
     return merged;
   }
 
@@ -433,6 +449,70 @@ class ApiService {
     }
   }
 
+  Future<bool> requestPasswordReset(String email) async {
+    try {
+      _log('Requesting password reset for: $email');
+
+      final response = await http
+          .post(
+            Uri.parse('$_currentBaseUrl/reset-password-request'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'email': email,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      _log('Reset request response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        _log('Password reset code generated successfully');
+        return true;
+      } else {
+        final data = json.decode(response.body);
+        final errorMsg = data['error'] ?? 'Unknown error';
+        _log('Password reset request failed: $errorMsg');
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      _log('Error in requestPasswordReset: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> resetPassword(String email, String code, String newPassword) async {
+    try {
+      _log('Resetting password for: $email with code: $code');
+
+      final response = await http
+          .post(
+            Uri.parse('$_currentBaseUrl/reset-password'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'email': email,
+              'code': code,
+              'new_password': newPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      _log('Reset password response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        _log('Password reset successfully');
+        return true;
+      } else {
+        final data = json.decode(response.body);
+        final errorMsg = data['error'] ?? 'Unknown error';
+        _log('Password reset failed: $errorMsg');
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      _log('Error in resetPassword: $e');
+      rethrow;
+    }
+  }
+
   Future<bool> updateUserProfileWithSeverity(
     String userId,
     List<Map<String, String>> allergiesList,
@@ -616,7 +696,7 @@ class ApiService {
     }
   }
 
-  Future<String?> addScanToHistory(
+  Future<Map<String, dynamic>?> addScanToHistory(
     String userId,
     Map<String, dynamic> scanData,
   ) async {
@@ -678,13 +758,42 @@ class ApiService {
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
         _log('✅ Scan saved successfully with risk level: $riskLevel');
-        return data['scan_id']?.toString();
+        return {
+          'scan_id': data['scan_id']?.toString(),
+          'newly_unlocked_badges': data['newly_unlocked_badges'] ?? [],
+        };
       } else {
         _log('❌ Failed to save scan history: ${response.body}');
         return null;
       }
     } catch (e) {
       _log('Error saving scan history: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getAnalyticsSummary(String userId) async {
+    try {
+      _log('Fetching analytics summary for user: $userId');
+
+      final response = await http
+          .get(
+            Uri.parse('$_currentBaseUrl/users/$userId/analytics/summary'),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      _log('Analytics summary response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _log('Successfully fetched analytics summary');
+        return data;
+      } else {
+        _log('Failed to fetch analytics summary: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      _log('Error fetching analytics summary: $e');
       return null;
     }
   }

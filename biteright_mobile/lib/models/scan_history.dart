@@ -12,6 +12,13 @@ class ScanHistory {
   final DateTime scannedAt;
   final bool userEdited;
   
+  // Analytics fields
+  final int ingredientCount;
+  final int allergenCount;
+  final String detectionMethod;
+  final int processingTimeMs;
+  final double imageQualityScore;
+  
   ScanHistory({
     required this.id,
     required this.productName,
@@ -22,6 +29,11 @@ class ScanHistory {
     required this.alerts,
     required this.scannedAt,
     this.userEdited = false,
+    this.ingredientCount = 0,
+    this.allergenCount = 0,
+    this.detectionMethod = 'ML/NLP Analysis',
+    this.processingTimeMs = 0,
+    this.imageQualityScore = 0.0,
   });
   
   factory ScanHistory.fromJson(Map<String, dynamic> json, String id) {
@@ -37,6 +49,11 @@ class ScanHistory {
           ? DateTime.parse(json['scanned_at'])
           : DateTime.now(),
       userEdited: json['user_edited'] ?? false,
+      ingredientCount: json['ingredient_count'] ?? (json['ingredients'] != null ? (json['ingredients'] as List).length : 0),
+      allergenCount: json['allergen_count'] ?? (json['allergens_detected'] != null ? (json['allergens_detected'] as List).length : 0),
+      detectionMethod: json['detection_method'] ?? 'ML/NLP Analysis',
+      processingTimeMs: json['processing_time_ms'] ?? 0,
+      imageQualityScore: (json['image_quality_score'] ?? json['confidence'] ?? 0.0).toDouble(),
     );
   }
   
