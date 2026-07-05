@@ -71,7 +71,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
         final scannedAtStr = scan['scanned_at'];
         if (scannedAtStr == null) return false;
         try {
-          final scannedAt = DateTime.parse(scannedAtStr);
+          final scannedAt = DateTime.parse(scannedAtStr).toLocal();
           final diffDays = now.difference(scannedAt).inDays;
           if (_dateFilter == 'week') {
             return diffDays <= 7;
@@ -220,7 +220,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                               final productName = scan['product_name'] ?? 'Unknown Product';
                               final ingredients = List<String>.from(scan['ingredients'] ?? []);
                               final scannedAt = scan['scanned_at'] != null
-                                  ? DateTime.parse(scan['scanned_at'])
+                                  ? DateTime.parse(scan['scanned_at']).toLocal()
                                   : DateTime.now();
                               
                               return Dismissible(

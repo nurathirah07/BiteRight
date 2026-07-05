@@ -159,7 +159,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
   }
 
   int _normalizeDisplayRiskScore(String riskLevel, int score) {
-    // Return score as-is since it has already been converted to Safety Score format.
+    // Return score as-is since it has already been converted to Risk Score format.
     return score;
   }
 
@@ -170,10 +170,10 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     required List<String> alerts,
     required List<String> extractedAllergensFromAlerts,
   }) {
-    // Start with perfect score
-    int riskScore = 100;
+    // Start with 0 (safest)
+    int riskScore = 0;
 
-    // Severity weights for deductions
+    // Severity weights for risk
     final Map<String, int> severityScores = {
       'high': 35,
       'medium': 20,
@@ -194,22 +194,22 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
       }
     }
 
-    // DEDUCT FOR ALLERGENS FROM ALERTS (CRITICAL FIX)
+    // ADD RISK FOR ALLERGENS FROM ALERTS (CRITICAL FIX)
     // Each "matches your" alert is a direct allergen match
     if (extractedAllergensFromAlerts.isNotEmpty) {
-      // Severe deduction for direct allergen matches in alerts
-      int alertDeduction = extractedAllergensFromAlerts.length * 30;
-      riskScore -= alertDeduction;
+      // Severe risk for direct allergen matches in alerts
+      int alertRisk = extractedAllergensFromAlerts.length * 30;
+      riskScore += alertRisk;
     }
 
     // Check alerts for "may violate" patterns (dietary issues)
     for (var alert in alerts) {
       if (alert.toLowerCase().contains('may violate')) {
-        riskScore -= 15;
+        riskScore += 15;
       }
     }
 
-    // Deduct points for each allergen found in allergens_found array
+    // Add risk points for each allergen found in allergens_found array
     for (var allergen in allergensFound) {
       String allergenId;
       String severity = 'medium';
@@ -228,13 +228,13 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
         }
       }
 
-      int deduction = severityScores[severity] ?? 20;
-      riskScore -= deduction;
+      int addition = severityScores[severity] ?? 20;
+      riskScore += addition;
     }
 
-    // Deduct points for dietary issues
-    int dietaryDeduction = dietaryIssues.length * 15;
-    riskScore -= dietaryDeduction > 50 ? 50 : dietaryDeduction;
+    // Add risk points for dietary issues
+    int dietaryRisk = dietaryIssues.length * 15;
+    riskScore += dietaryRisk > 50 ? 50 : dietaryRisk;
 
     // Ensure score stays within 0-100 range
     return riskScore.clamp(0, 100);
@@ -285,9 +285,9 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     }
 
     // SECOND: Check score-based determination
-    if (riskScore >= 70) {
+    if (riskScore <= 25) {
       return 'safe';
-    } else if (riskScore >= 40) {
+    } else if (riskScore <= 59) {
       return 'caution';
     } else {
       return 'unsafe';
@@ -414,13 +414,13 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
   }
 
   String _getRiskScoreDescription(int score) {
-    if (score >= 80) {
+    if (score <= 25) {
       return 'Low Risk - Safe to consume';
-    } else if (score >= 60) {
+    } else if (score <= 40) {
       return 'Mild Risk - Minor concerns';
-    } else if (score >= 40) {
+    } else if (score <= 59) {
       return 'Moderate Risk - Exercise caution';
-    } else if (score >= 20) {
+    } else if (score <= 80) {
       return 'High Risk - Not recommended';
     } else {
       return 'Severe Risk - Avoid completely';
@@ -492,7 +492,7 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
         List<String>.from(_scanData['recommendations'] ?? []);
     final productName = _scanData['product_name'] ?? 'Unknown Product';
     final scannedAt = _scanData['scanned_at'] != null
-        ? DateTime.parse(_scanData['scanned_at'] as String)
+        ? DateTime.parse(_scanData['scanned_at'] as String).toLocal()
         : DateTime.now();
 
     final riskFraction = (riskScore.toDouble() / 100).clamp(0.0, 1.0);

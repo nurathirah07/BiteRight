@@ -46,7 +46,7 @@ class ScanHistory {
       confidence: (json['confidence'] ?? 0.0).toDouble(),
       alerts: List<String>.from(json['alerts'] ?? []),
       scannedAt: json['scanned_at'] != null
-          ? DateTime.parse(json['scanned_at'])
+          ? DateTime.parse(json['scanned_at']).toLocal()
           : DateTime.now(),
       userEdited: json['user_edited'] ?? false,
       ingredientCount: json['ingredient_count'] ?? (json['ingredients'] != null ? (json['ingredients'] as List).length : 0),

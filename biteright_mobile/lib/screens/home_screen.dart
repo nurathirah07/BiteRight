@@ -945,9 +945,9 @@ class _ScanTile extends StatelessWidget {
     try {
       DateTime dt;
       if (dateValue is DateTime) {
-        dt = dateValue;
+        dt = dateValue.toLocal();
       } else if (dateValue is String) {
-        dt = DateTime.parse(dateValue);
+        dt = DateTime.parse(dateValue).toLocal();
       } else {
         dt = DateTime.now();
       }

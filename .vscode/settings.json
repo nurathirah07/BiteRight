@@ -3,5 +3,6 @@
     "python-envs.defaultPackageManager": "ms-python.python:pip",
     "python.analysis.extraPaths": [],
     "java.configuration.updateBuildConfiguration": "interactive",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "firebridge.oauthProjectId": "biteright-app"
 }

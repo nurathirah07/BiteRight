@@ -12,7 +12,7 @@ class ApiService {
       return 'http://localhost:5000';
     } else if (Platform.isAndroid) {
       // YOUR COMPUTER'S ACTUAL IP ADDRESS
-      return 'http://172.20.10.4:5000';
+      return 'http://10.50.216.97:5000';
     } else if (Platform.isIOS) {
       // iOS simulator can use localhost directly
       return 'http://localhost:5000';
@@ -24,7 +24,7 @@ class ApiService {
 
   // Alternative URLs to try if connection fails
   static List<String> get _alternativeUrls => [
-        'http://172.20.10.4:5000', // YOUR IP - MUST BE FIRST
+        'http://10.50.216.97:5000', // YOUR IP - MUST BE FIRST
         'http://10.0.2.2:5000', // Android emulator
         'http://localhost:5000', // Web / iOS simulator
         'http://127.0.0.1:5000', // Web / iOS simulator (IP loopback)
@@ -83,9 +83,8 @@ class ApiService {
     final rawText = (merged['raw_text'] ?? '').toString().trim();
     final alerts = List<String>.from(merged['alerts'] ?? []);
 
-    // Convert backend Risk Score (0 = safest, 100 = most dangerous) to frontend Safety Score (100 = safest, 0 = most dangerous)
-    // without forcing the score into fixed, arbitrary ranges.
-    riskScore = (100 - riskScore).clamp(0, 100);
+    // Keep backend Risk Score (0 = safest, 100 = most dangerous) directly
+    riskScore = riskScore.clamp(0, 100);
 
     if (confidence <= 0 && (ingredients.isNotEmpty || rawText.isNotEmpty)) {
       confidence = 0.72;
@@ -100,31 +99,31 @@ class ApiService {
       );
       if (hasUnsafe) {
         riskLevel = 'unsafe';
-        if (riskScore >= 70) riskScore = 25;
+        if (riskScore <= 30) riskScore = 75;
       } else if (hasCaution) {
         riskLevel = 'caution';
-        if (riskScore >= 70) riskScore = 55;
+        if (riskScore <= 30) riskScore = 45;
       } else {
         riskLevel = 'safe';
-        if (riskScore < 70) riskScore = 100;
+        if (riskScore > 30) riskScore = 0;
       }
     }
 
-    // Align Safety Score (stored in riskScore) with the verbal riskLevel to prevent contradictory UI displays
-    // (e.g. displaying Safety Score: 70% but calling the product Unsafe).
+    // Align Risk Score with the verbal riskLevel to prevent contradictory UI displays
+    // (e.g. displaying Risk Score: 70% but calling the product Safe).
     if (riskLevel == 'unsafe') {
       final unsafeAlertsCount = alerts.where((a) {
         final lower = a.toLowerCase();
         return lower.contains('matches your') || lower.contains('contains');
       }).length;
-      final int maxUnsafeScore = (35 - (unsafeAlertsCount > 1 ? (unsafeAlertsCount - 1) * 5 : 0)).clamp(10, 35);
-      if (riskScore > maxUnsafeScore) {
-        riskScore = maxUnsafeScore;
+      final int minUnsafeScore = (60 + (unsafeAlertsCount > 1 ? (unsafeAlertsCount - 1) * 5 : 0)).clamp(60, 90);
+      if (riskScore < minUnsafeScore) {
+        riskScore = minUnsafeScore;
       }
     } else if (riskLevel == 'caution') {
-      riskScore = riskScore.clamp(50, 74);
+      riskScore = riskScore.clamp(26, 59);
     } else if (riskLevel == 'safe') {
-      riskScore = riskScore.clamp(75, 100);
+      riskScore = riskScore.clamp(0, 25);
     }
 
     merged['risk_level'] = riskLevel;
@@ -347,7 +346,7 @@ class ApiService {
               'dietary_restrictions': diets,
             }),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 25));
 
       _log('Create user response: ${response.statusCode}');
 
@@ -578,7 +577,7 @@ class ApiService {
             headers: {'Content-Type': 'application/json'},
             body: json.encode(body),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 25));
 
       _log('Update account response status: ${response.statusCode}');
 
@@ -751,7 +750,7 @@ class ApiService {
             headers: {'Content-Type': 'application/json'},
             body: json.encode(dataToSave),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 25));
 
       _log('Add scan history response: ${response.statusCode}');
 

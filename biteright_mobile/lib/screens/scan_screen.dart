@@ -122,8 +122,7 @@ class _ScanScreenState extends State<ScanScreen> {
   // Validate image before scanning
   Future<bool> _validateImage(File image) async {
     try {
-      final bytes = await image.readAsBytes();
-      final imageSize = bytes.length;
+      final imageSize = await image.length();
 
       if (imageSize < 10000) {
         setState(() {
@@ -961,12 +960,14 @@ class _ScanScreenState extends State<ScanScreen> {
                 if (_processedIngredients.isNotEmpty)
                   Container(
                     margin: const EdgeInsets.only(top: 20),
-                    decoration: BoxDecoration(
+                    child: Material(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE5E0D8)),
-                    ),
-                    child: ExpansionTile(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(color: Color(0xFFE5E0D8)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: ExpansionTile(
                       title: const Text(
                         'Processed Ingredients Preview',
                         style: TextStyle(
@@ -1011,6 +1012,7 @@ class _ScanScreenState extends State<ScanScreen> {
                       ],
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -1224,9 +1226,9 @@ class _ScanScreenState extends State<ScanScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                riskScore >= 80
+                                riskScore <= 25
                                     ? 'Low — generally safe'
-                                    : riskScore >= 40
+                                    : riskScore <= 59
                                         ? 'Moderate — exercise caution'
                                         : 'High — avoid this product',
                                 style: TextStyle(
