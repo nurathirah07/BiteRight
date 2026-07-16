@@ -42,6 +42,37 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUserData();
     _loadAllScans();
     _loadBadges();
+    _loadSavedTabIndex();
+  }
+
+  Future<void> _loadSavedTabIndex() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedIndex = prefs.getInt('selectedTabIndex');
+      if (savedIndex != null && savedIndex >= 0 && savedIndex <= 3) {
+        if (mounted) {
+          setState(() {
+            _selectedIndex = savedIndex;
+          });
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error loading saved tab index: $e');
+    }
+  }
+
+  void _updateSelectedIndex(int index) async {
+    if (mounted) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('selectedTabIndex', index);
+    } catch (e) {
+      if (kDebugMode) print('Error saving tab index: $e');
+    }
   }
 
   Future<void> _loadBadges() async {
@@ -137,8 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
             badges: _badges,
             onScanTap: _navigateToScanDetails,
             onViewAllTap: _navigateToScanHistory,
-            onScanButtonTap: () => setState(() => _selectedIndex = 1),
-            onProfileButtonTap: () => setState(() => _selectedIndex = 3),
+            onScanButtonTap: () => _updateSelectedIndex(1),
+            onProfileButtonTap: () => _updateSelectedIndex(3),
             onRefresh: () async {
               await _loadUserData();
               await _loadAllScans();
@@ -147,12 +178,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ScanScreen(
             userId: widget.userId,
-            onBack: () => setState(() => _selectedIndex = 0),
+            onBack: () => _updateSelectedIndex(0),
           ),
           AnalyticsScreen(
             userId: widget.userId,
             isActive: _selectedIndex == 2,
-            onBack: () => setState(() => _selectedIndex = 0),
+            onBack: () => _updateSelectedIndex(0),
           ),
           _ProfilePage(
             userId: widget.userId,
@@ -168,12 +199,12 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _selectedIndex,
         hasNewBadges: _hasNewBadges,
         onTap: (i) {
-          setState(() {
-            _selectedIndex = i;
-            if (i == 2) {
+          _updateSelectedIndex(i);
+          if (i == 2) {
+            setState(() {
               _hasNewBadges = false;
-            }
-          });
+            });
+          }
         },
       ),
     );

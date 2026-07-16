@@ -221,7 +221,7 @@ class IngredientProcessor:
         ingredients_text = ocr_result.get('cleaned_text', '')
         raw_text = ocr_result.get('raw_text', '')
         raw_ingredients = ocr_result.get('ingredients_list', [])
-        ingredients = parse_ingredients_input(raw_text or ingredients_text or raw_ingredients)
+        ingredients = parse_ingredients_input(raw_ingredients or ingredients_text or raw_text)
         
         analysis = self.analyze_ingredients(
             ingredients or raw_ingredients or ingredients_text,

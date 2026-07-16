@@ -48,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId', response['user']['id'].toString());
         await prefs.setString('username', response['user']['username']?.toString() ?? 'User');
+        await prefs.setInt('selectedTabIndex', 0);
 
         if (!mounted) return;
 

@@ -57,6 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId', response['user']['id'].toString());
         await prefs.setString('username', response['user']['username']?.toString() ?? 'User');
+        await prefs.setInt('selectedTabIndex', 0);
 
         if (!mounted) return;
 
@@ -71,7 +72,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Navigator.pushReplacementNamed(
           context,
           '/profile-setup',
-          arguments: {'userId': response['user']['id']},
+          arguments: {
+            'userId': response['user']['id'],
+            'isSignUp': true,
+          },
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

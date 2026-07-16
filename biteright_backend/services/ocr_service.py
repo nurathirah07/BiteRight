@@ -401,10 +401,10 @@ def parse_ingredients_list(text):
     if not text:
         return []
     
-    # Try to find ingredients section
+    # Try to find ingredients section using lookahead boundaries for flattened text
     patterns = [
-        r'ingredients?:?\s*(.*?)(?=\n\s*\n|\n\s*contains|\n\s*allergy|$)',
-        r'contains?:?\s*(.*?)(?=\n\s*\n|$)',
+        r'ingredients?:?\s*(.*?)(?=\s+(?:contains(?::?\s+)(?!2%|2\s*%|less|or\s+less|percent|\d)\w+|allergy|allergen|nutrition|facts|serving|distributed|manufactured|warning|may\s+contain|packaged|produced|store|keep|refrigerated)\b|$)',
+        r'contains?:?\s*(.*?)(?=\s+(?:nutrition|facts|serving|distributed|manufactured|warning|store|keep|refrigerated)\b|$)',
     ]
     
     ingredients_text = text

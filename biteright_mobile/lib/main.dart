@@ -92,6 +92,7 @@ class _MyAppState extends State<MyApp> {
         return MaterialPageRoute(
           builder: (_) => ProfileSetupScreen(
             userId: args['userId']?.toString() ?? '',
+            isSignUp: args['isSignUp'] as bool? ?? false,
           ),
           settings: settings,
         );

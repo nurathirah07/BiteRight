@@ -5,8 +5,13 @@ import '../theme/app_theme.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   final String userId;
+  final bool isSignUp;
 
-  const ProfileSetupScreen({super.key, required this.userId});
+  const ProfileSetupScreen({
+    super.key,
+    required this.userId,
+    this.isSignUp = false,
+  });
 
   @override
   State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
@@ -309,7 +314,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           ),
         );
 
-        if (Navigator.canPop(context)) {
+        if (!widget.isSignUp && Navigator.canPop(context)) {
           Navigator.pop(context, true);
         } else {
           final profile = await _apiService.getUserProfile(widget.userId);
@@ -342,7 +347,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Future<void> _goHome() async {
-    if (Navigator.canPop(context)) {
+    if (!widget.isSignUp && Navigator.canPop(context)) {
       Navigator.pop(context);
       return;
     }
@@ -406,7 +411,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canPop = Navigator.canPop(context);
+    final canPop = !widget.isSignUp && Navigator.canPop(context);
     return PopScope(
       canPop: canPop,
       onPopInvokedWithResult: (didPop, result) {

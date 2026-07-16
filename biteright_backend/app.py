@@ -1257,8 +1257,10 @@ def extract_ingredients_only():
         raw_text = ocr_result.get('raw_text', '')
         raw_ingredients = ocr_result.get('ingredients_list', [])
         
-        ingredients_text = raw_text or ' '.join(raw_ingredients)
-        parsed_ingredients = parse_ingredients_input_v2(ingredients_text)
+        if raw_ingredients:
+            parsed_ingredients = raw_ingredients
+        else:
+            parsed_ingredients = parse_ingredients_input_v2(raw_text)
         processed_tokens = detector.preprocess_ingredient_text(' '.join(parsed_ingredients))
         
         seen = set()

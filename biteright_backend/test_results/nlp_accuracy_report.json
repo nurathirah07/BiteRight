@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T19:47:46.620636",
+  "generated_at": "2026-07-17T03:14:43.155169",
   "summary": {
     "total_tests": 100,
     "overall_accuracy": 0.97,
@@ -85,8 +85,8 @@
       {
         "profile": "TEST_PROFILE_2",
         "expected": [
-          "tree_nuts",
-          "milk"
+          "milk",
+          "tree_nuts"
         ],
         "detected": [
           "milk"
@@ -884,8 +884,8 @@
       "expected_score": 90.0,
       "predicted_score": 45,
       "expected_allergens": [
-        "tree_nuts",
-        "milk"
+        "milk",
+        "tree_nuts"
       ],
       "detected_allergens": [
         "tree_nuts",
@@ -1053,8 +1053,8 @@
       "expected_score": 90.0,
       "predicted_score": 50,
       "expected_allergens": [
-        "tree_nuts",
-        "milk"
+        "milk",
+        "tree_nuts"
       ],
       "detected_allergens": [
         "milk",
@@ -2130,8 +2130,8 @@
       "expected_score": 65.0,
       "predicted_score": 36,
       "expected_allergens": [
-        "soy",
-        "eggs"
+        "eggs",
+        "soy"
       ],
       "detected_allergens": [
         "soy",
@@ -2169,8 +2169,8 @@
       "expected_score": 59.0,
       "predicted_score": 31,
       "expected_allergens": [
-        "tree_nuts",
-        "milk"
+        "milk",
+        "tree_nuts"
       ],
       "detected_allergens": [
         "milk"

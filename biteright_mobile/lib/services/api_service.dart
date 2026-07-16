@@ -12,7 +12,7 @@ class ApiService {
       return 'http://localhost:5000';
     } else if (Platform.isAndroid) {
       // YOUR COMPUTER'S ACTUAL IP ADDRESS
-      return 'http://10.50.216.97:5000';
+      return 'http://172.20.10.4:5000';
     } else if (Platform.isIOS) {
       // iOS simulator can use localhost directly
       return 'http://localhost:5000';
@@ -24,7 +24,7 @@ class ApiService {
 
   // Alternative URLs to try if connection fails
   static List<String> get _alternativeUrls => [
-        'http://10.50.216.97:5000', // YOUR IP - MUST BE FIRST
+        'http://172.20.10.4:5000', // YOUR IP - MUST BE FIRST
         'http://10.0.2.2:5000', // Android emulator
         'http://localhost:5000', // Web / iOS simulator
         'http://127.0.0.1:5000', // Web / iOS simulator (IP loopback)
