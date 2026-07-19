@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -98,8 +99,61 @@ class _ScanScreenState extends State<ScanScreen> {
       );
 
       if (image != null) {
+        if (!mounted) return;
+        File finalImageFile = File(image.path);
+        
+        try {
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: image.path,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Ingredient List',
+                toolbarColor: AppTheme.primary,
+                toolbarWidgetColor: Colors.white,
+                initAspectRatio: CropAspectRatioPreset.original,
+                lockAspectRatio: false,
+                activeControlsWidgetColor: AppTheme.primary,
+                aspectRatioPresets: [
+                  CropAspectRatioPreset.original,
+                  CropAspectRatioPreset.square,
+                  CropAspectRatioPreset.ratio3x2,
+                  CropAspectRatioPreset.ratio4x3,
+                  CropAspectRatioPreset.ratio16x9,
+                ],
+              ),
+              IOSUiSettings(
+                title: 'Crop Ingredient List',
+                aspectRatioPresets: [
+                  CropAspectRatioPreset.original,
+                  CropAspectRatioPreset.square,
+                  CropAspectRatioPreset.ratio3x2,
+                  CropAspectRatioPreset.ratio4x3,
+                  CropAspectRatioPreset.ratio16x9,
+                ],
+              ),
+              WebUiSettings(
+                context: context,
+                presentStyle: WebPresentStyle.dialog,
+                size: const CropperSize(
+                  width: 520,
+                  height: 520,
+                ),
+              ),
+            ],
+          );
+
+          if (croppedFile != null) {
+            finalImageFile = File(croppedFile.path);
+          } else {
+            // Revert/proceed with original image, per user comment
+            debugPrint('Cropping cancelled, proceeding with original image');
+          }
+        } catch (cropError) {
+          debugPrint('Error cropping image: $cropError, falling back to original image');
+        }
+
         setState(() {
-          _selectedImage = File(image.path);
+          _selectedImage = finalImageFile;
           _scanResult = null;
           _errorMessage = null;
           _editableIngredientsText = '';
