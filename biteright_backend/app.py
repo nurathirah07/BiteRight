@@ -347,6 +347,50 @@ def login():
         return jsonify({'error': str(e)}), 500
 
 
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_reset_email(to_email, otp_code):
+    smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.environ.get('SMTP_PORT', 587))
+    sender_email = os.environ.get('SENDER_EMAIL', '')
+    sender_password = os.environ.get('SENDER_PASSWORD', '')
+
+    if not sender_email or not sender_password:
+        print(f"SMTP Info: SENDER_EMAIL or SENDER_PASSWORD not set. Code logged: {otp_code}")
+        return False
+
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = '🔑 BiteRight — Password Reset Code'
+        msg['From'] = f"BiteRight <{sender_email}>"
+        msg['To'] = to_email
+
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; padding: 24px; color: #1A1814; max-width: 500px; margin: 0 auto; border: 1px solid #E5E0D8; border-radius: 16px;">
+            <h2 style="color: #2A6E54; margin-top: 0;">BiteRight Security</h2>
+            <p style="font-size: 15px; color: #5A5754;">You requested a password reset for your BiteRight account.</p>
+            <div style="background: #F4F8F6; padding: 18px; border-radius: 12px; text-align: center; margin: 20px 0; border: 1px solid #2A6E54;">
+                <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #2A6E54;">{otp_code}</span>
+            </div>
+            <p style="font-size: 13px; color: #7A7771;">This code expires in 15 minutes. If you did not request a password reset, please ignore this email.</p>
+        </div>
+        """
+        msg.attach(MIMEText(html_content, 'html'))
+
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, to_email, msg.as_string())
+        server.quit()
+        print(f"✓ Reset email sent successfully to {to_email}")
+        return True
+    except Exception as e:
+        print(f"✗ Failed to send reset email: {e}")
+        return False
+
+
 @app.route('/reset-password-request', methods=['POST'])
 def reset_password_request():
     try:
@@ -372,10 +416,13 @@ def reset_password_request():
         
         print(f"PASSWORD RESET REQUEST: Email: {email}, Code: {otp_code}")
         
+        # Send actual email if SMTP credentials are configured
+        email_sent = send_reset_email(email, otp_code)
+        
         return jsonify({
             'success': True,
-            'message': 'Reset code generated successfully',
-            'code': otp_code  # Return code in response for easy demo testing
+            'message': 'Reset code sent to your email' if email_sent else 'Reset code generated successfully',
+            'code': otp_code
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
