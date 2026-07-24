@@ -14,7 +14,7 @@ import secrets
 from datetime import datetime
 
 # Import your services
-from services.ocr_service import extract_ingredients
+from services.ocr_service import extract_ingredients, _estimate_ocr_confidence
 from services.nlp_service import detector, AllergenDetector
 from services.processing_service import IngredientProcessor
 from services.risk_analyzer import (
@@ -354,8 +354,8 @@ def reset_password_request():
             return jsonify({'error': 'User with this email does not exist'}), 404
         
         user_doc = user_list[0]
-        # For demo purposes, we generate '123456' as the OTP code
-        otp_code = '123456'
+        # Generate a random 6-digit OTP code using secrets
+        otp_code = f"{secrets.randbelow(1000000):06d}"
         
         db.collection('users').document(user_doc.id).update({
             'reset_code': otp_code,
@@ -1389,6 +1389,11 @@ def analyze_with_profile():
             else:
                 user_allergy_strings.append(str(allergy))
 
+        ocr_conf = float(data.get('ocr_confidence') or combined.get('ocr_confidence') or 0.0)
+        if ocr_conf <= 0.0 and ingredients_text:
+            ocr_conf = _estimate_ocr_confidence(ingredients_text, ingredients)
+        ocr_eng = data.get('ocr_engine') or data.get('ocr_strategy') or combined.get('ocr_engine') or 'OCR.Space API'
+
         return jsonify({
             'success': True,
             'ingredients': ingredients,
@@ -1411,6 +1416,8 @@ def analyze_with_profile():
                 'weights': {'random_forest': processor.ML_WEIGHT, 'rule_based': processor.RULE_WEIGHT},
                 'ml_confidence': combined.get('ml_confidence', 0.0),
                 'rule_confidence': combined.get('rule_confidence', 0.0),
+                'ocr_engine': ocr_eng,
+                'ocr_confidence': round(ocr_conf, 2),
             },
             'user_profile': {
                 'allergies': user_allergy_strings,
@@ -1570,6 +1577,11 @@ def analyze_ingredients():
 
         recommendations = _get_recommendations(risk_level)
 
+        ocr_conf = float(data.get('ocr_confidence') or combined.get('ocr_confidence') or 0.0)
+        if ocr_conf <= 0.0 and ingredients_text:
+            ocr_conf = _estimate_ocr_confidence(ingredients_text, ingredients)
+        ocr_eng = data.get('ocr_engine') or data.get('ocr_strategy') or combined.get('ocr_engine') or 'OCR.Space API'
+
         return jsonify({
             'success': True,
             'ingredients': ingredients,
@@ -1586,6 +1598,8 @@ def analyze_ingredients():
                 'weights': {'random_forest': processor.ML_WEIGHT, 'rule_based': processor.RULE_WEIGHT},
                 'ml_confidence': combined.get('ml_confidence', 0.0),
                 'rule_confidence': combined.get('rule_confidence', 0.0),
+                'ocr_engine': ocr_eng,
+                'ocr_confidence': round(ocr_conf, 2),
             },
             'recommendations': recommendations,
             'message': 'Create a user profile for personalized allergen detection based on your specific allergies'

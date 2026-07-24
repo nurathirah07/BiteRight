@@ -409,6 +409,302 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
+  void _showSeverityGuideModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.shield_outlined,
+                    color: AppTheme.primary,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Allergen Severity Level Guide',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A1814),
+                        ),
+                      ),
+                      Text(
+                        'Learn how severity levels protect your health',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF7A7771),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // High Severity Card
+                    _buildSeverityExplanationCard(
+                      title: 'HIGH SEVERITY',
+                      subtitle: 'Severe / Life-Threatening Reactions',
+                      color: const Color(0xFFA32D2D),
+                      bgColor: const Color(0xFFFDECEA),
+                      icon: Icons.warning_amber_rounded,
+                      description:
+                          'Select HIGH if you have severe reactions, history of anaphylaxis, throat or lip swelling, breathing difficulty, or carry an EpiPen.',
+                      appEffect:
+                          'App Behavior: Strict zero-tolerance detection. Flags products as UNSAFE even for trace amounts or cross-contact warnings.',
+                    ),
+                    const SizedBox(height: 12),
+                    // Medium Severity Card
+                    _buildSeverityExplanationCard(
+                      title: 'MEDIUM SEVERITY',
+                      subtitle: 'Moderate / Standard Avoidance',
+                      color: const Color(0xFFE67E22),
+                      bgColor: const Color(0xFFFFF3E0),
+                      icon: Icons.error_outline_rounded,
+                      description:
+                          'Select MEDIUM if exposure causes noticeable symptoms like hives, skin rashes, stomach cramps, vomiting, or noticeable discomfort.',
+                      appEffect:
+                          'App Behavior: Standard protection. Flags direct allergen ingredients as UNSAFE / CAUTION.',
+                    ),
+                    const SizedBox(height: 12),
+                    // Low Severity Card
+                    _buildSeverityExplanationCard(
+                      title: 'LOW SEVERITY',
+                      subtitle: 'Mild / Intolerance / Sensitivity',
+                      color: const Color(0xFF2A6E54),
+                      bgColor: const Color(0xFFE8F5E9),
+                      icon: Icons.info_outline_rounded,
+                      description:
+                          'Select LOW if you experience mild bloating, light indigestion, or minor sensitivity to the allergen.',
+                      appEffect:
+                          'App Behavior: Mild advisory warnings without blocking your overall food safety assessment.',
+                    ),
+                    const SizedBox(height: 16),
+                    // Fallback Advice Box
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F8FB),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFF2B7CD3).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.help_outline_rounded,
+                                color: Color(0xFF2B7CD3),
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Don't know your severity level?",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E406D),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'If you are unsure which severity level applies to you, follow these steps:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF334E68),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildAdviceBullet(
+                            '1. Default to Medium Severity',
+                            'Select MEDIUM as a safe starting point. It provides reliable protection without generating unnecessary false alarms.',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildAdviceBullet(
+                            '2. Select High if History of Severe Symptoms',
+                            'If you have EVER experienced facial swelling, hives, throat tightness, or breathing trouble, select HIGH for safety.',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildAdviceBullet(
+                            '3. Consult a Medical Professional',
+                            'When in doubt, consult a healthcare practitioner or certified allergist for formal diagnosis and personalized advice.',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Got It',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeverityExplanationCard({
+    required String title,
+    required String subtitle,
+    required Color color,
+    required Color bgColor,
+    required IconData icon,
+    required String description,
+    required String appEffect,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            description,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF333333)),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            appEffect,
+            style: TextStyle(
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+              color: color.withValues(alpha: 0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdviceBullet(String title, String body) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('• ',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Color(0xFF2B7CD3))),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 12, color: Color(0xFF334E68)),
+              children: [
+                TextSpan(
+                  text: '$title: ',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextSpan(text: body),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final canPop = !widget.isSignUp && Navigator.canPop(context);
@@ -503,60 +799,95 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFFF3E2), Color(0xFFE9F7D8)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                        GestureDetector(
+                          onTap: _showSeverityGuideModal,
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFFF3E2), Color(0xFFE9F7D8)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFCE8C5),
-                                  borderRadius: BorderRadius.circular(10),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFCE8C5),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.help_outline_rounded,
+                                    size: 20,
+                                    color: Color(0xFF854F0B),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.info_outline_rounded,
-                                  size: 18,
-                                  color: Color(0xFF854F0B),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Select all that apply',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF1A1814),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Allergen Severity & Help Guide',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF1A1814),
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      'Allergies can be set with severity levels',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Color(0xFF9A9790),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        'Set Low, Medium, or High severity for each allergen. Tap for guide & fallback advice.',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xFF5A5754),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF854F0B)
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Text(
+                                        'Guide',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF854F0B),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 16,
+                                        color: Color(0xFF854F0B),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-
-
 
                         const SizedBox(height: 20),
 
@@ -660,6 +991,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             selectedSeverity:
                 _selectedAllergiesWithSeverity[item['id']] ?? 'medium',
             isLast: isLast,
+            onShowGuide: _showSeverityGuideModal,
             onToggle: (id) {
               setState(() {
                 if (_selectedAllergiesWithSeverity.containsKey(id)) {
@@ -787,6 +1119,7 @@ class _AllergenTile extends StatelessWidget {
   final bool isSelected;
   final String selectedSeverity;
   final bool isLast;
+  final VoidCallback? onShowGuide;
   final Function(String) onToggle;
   final Function(String, String) onSeverityChange;
 
@@ -797,6 +1130,7 @@ class _AllergenTile extends StatelessWidget {
     required this.isSelected,
     required this.selectedSeverity,
     required this.isLast,
+    this.onShowGuide,
     required this.onToggle,
     required this.onSeverityChange,
   });
@@ -871,58 +1205,78 @@ class _AllergenTile extends StatelessWidget {
             ),
           ),
           if (isSelected)
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color:
-                    _getSeverityColor(selectedSeverity).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _getSeverityColor(selectedSeverity)
-                      .withValues(alpha: 0.3),
-                ),
-              ),
-              child: DropdownButton<String>(
-                value: selectedSeverity,
-                underline: const SizedBox(),
-                icon: Icon(
-                  Icons.arrow_drop_down,
-                  color: _getSeverityColor(selectedSeverity),
-                  size: 18,
-                ),
-                items: _severityOptions.map((severity) {
-                  return DropdownMenuItem(
-                    value: severity,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: _getSeverityColor(severity),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          severity.toUpperCase(),
-                          style: TextStyle(
-                            color: _getSeverityColor(severity),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onShowGuide != null)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(
+                      Icons.help_outline_rounded,
+                      size: 16,
+                      color: Color(0xFF9A9790),
                     ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    onSeverityChange(item['id'], value);
-                  }
-                },
-              ),
+                    tooltip: 'Severity Info & Guidance',
+                    onPressed: onShowGuide,
+                  ),
+                const SizedBox(width: 4),
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getSeverityColor(selectedSeverity)
+                        .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _getSeverityColor(selectedSeverity)
+                          .withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: DropdownButton<String>(
+                    value: selectedSeverity,
+                    underline: const SizedBox(),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: _getSeverityColor(selectedSeverity),
+                      size: 18,
+                    ),
+                    items: _severityOptions.map((severity) {
+                      return DropdownMenuItem(
+                        value: severity,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: _getSeverityColor(severity),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              severity.toUpperCase(),
+                              style: TextStyle(
+                                color: _getSeverityColor(severity),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        onSeverityChange(item['id'], value);
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
         ],
       ),

@@ -179,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               textInputAction: TextInputAction.next,
                               decoration: const InputDecoration(
                                 labelText: 'Username',
-                                hintText: 'Nur',
+                                hintText: 'Enter your username (e.g., Nur)',
                                 prefixIcon: Icon(Icons.person_outline_rounded,
                                     color: AppTheme.primary),
                               ),
@@ -200,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               textInputAction: TextInputAction.next,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
-                                hintText: 'you@example.com',
+                                hintText: 'Enter your email (e.g., you@example.com)',
                                 prefixIcon: Icon(Icons.email_outlined,
                                     color: AppTheme.primary),
                               ),
@@ -222,6 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
                                 labelText: 'Password',
+                                hintText: 'Enter your password',
                                 prefixIcon: const Icon(
                                     Icons.lock_outline_rounded,
                                     color: AppTheme.primary),
@@ -258,6 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _isLoading ? null : _register(),
                               decoration: InputDecoration(
                                 labelText: 'Confirm Password',
+                                hintText: 'Enter your password again',
                                 prefixIcon: const Icon(
                                     Icons.verified_user_outlined,
                                     color: AppTheme.primary),

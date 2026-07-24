@@ -232,14 +232,24 @@ class IngredientProcessor:
         
         processing_time = time.time() - start_time
         
+        ocr_engine = ocr_result.get('strategy_used', 'OCR.Space API')
+        ocr_confidence = ocr_result.get('ocr_confidence', 0.0)
+
         return {
             'success': True,
             'user_id': user_id,
             'ingredients': ingredients or raw_ingredients,
-            'analysis': {**analysis, 'user_profile': {
-                'allergies': user_allergy_strings,
-                'dietary_restrictions': user_dietary
-            }},
+            'ocr_engine': ocr_engine,
+            'ocr_confidence': ocr_confidence,
+            'analysis': {
+                **analysis,
+                'ocr_engine': ocr_engine,
+                'ocr_confidence': ocr_confidence,
+                'user_profile': {
+                    'allergies': user_allergy_strings,
+                    'dietary_restrictions': user_dietary
+                }
+            },
             'raw_text': raw_text,
             'processing_time': f"{processing_time:.2f}s"
         }

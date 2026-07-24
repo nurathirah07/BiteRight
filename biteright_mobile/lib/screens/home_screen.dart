@@ -286,7 +286,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Home Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Home Page ─────────────────────────────────────────────────────────────────
 
 class _HomePage extends StatelessWidget {
   final String username;
@@ -386,7 +386,7 @@ class _HomePage extends StatelessWidget {
 
                       const SizedBox(height: 24),
 
-                      // â”€â”€ Hero Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                      // ── Hero Card ───────────────────────────────────────────
                       _HeroCard(
                         userProfile: userProfile,
                         totalScans: totalScans,
@@ -395,7 +395,7 @@ class _HomePage extends StatelessWidget {
 
                       const SizedBox(height: 24),
 
-                      // â”€â”€ Preferences chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                      // ── Preferences chips ───────────────────────────────────
                       if (userProfile != null &&
                           (userProfile!['allergies']?.isNotEmpty == true ||
                               userProfile!['dietary_restrictions']

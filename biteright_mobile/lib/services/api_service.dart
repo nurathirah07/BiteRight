@@ -448,7 +448,7 @@ class ApiService {
     }
   }
 
-  Future<bool> requestPasswordReset(String email) async {
+  Future<String?> requestPasswordReset(String email) async {
     try {
       _log('Requesting password reset for: $email');
 
@@ -466,7 +466,8 @@ class ApiService {
 
       if (response.statusCode == 200) {
         _log('Password reset code generated successfully');
-        return true;
+        final data = json.decode(response.body);
+        return (data['code'] ?? '').toString();
       } else {
         final data = json.decode(response.body);
         final errorMsg = data['error'] ?? 'Unknown error';
@@ -679,6 +680,15 @@ class ApiService {
         _log('Risk Score: ${analysisResult['risk_score']}');
         _log('Confidence: ${analysisResult['confidence']}');
         _log('Alerts: ${analysisResult['alerts']}');
+        if (analysisResult['model_info'] != null) {
+          final info = analysisResult['model_info'];
+          _log('Model Info: ${json.encode(info)}');
+          if (info['ocr_engine'] != null) {
+            _log('OCR Engine Used: ${info['ocr_engine']}');
+            _log('OCR Confidence: ${info['ocr_confidence']}');
+          }
+        }
+        _log('Raw Body: ${response.body}');
         _log('===============================');
 
         return analysisResult;

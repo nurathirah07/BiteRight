@@ -356,20 +356,20 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
     });
 
     try {
-      final success = await widget.apiService.requestPasswordReset(
+      final resetCode = await widget.apiService.requestPasswordReset(
         _emailController.text.trim(),
       );
 
       if (!mounted) return;
 
-      if (success) {
+      if (resetCode != null) {
         setState(() {
           _step = 'verify';
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Reset code sent! Use 123456 for testing.'),
+            content: Text('Reset code has been sent successfully.'),
             backgroundColor: AppTheme.teal,
           ),
         );
@@ -513,7 +513,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                 maxLength: 6,
                 decoration: const InputDecoration(
                   labelText: 'Verification Code',
-                  hintText: '123456',
+                  hintText: 'Enter 6-digit code',
                   prefixIcon: Icon(Icons.pin_outlined, color: AppTheme.primary),
                   counterText: '',
                 ),
@@ -562,30 +562,6 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                 },
               ),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppTheme.teal.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.teal.withValues(alpha: 0.2)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline_rounded, color: AppTheme.teal, size: 18),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Demo Mode: The verification code is 123456.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppTheme.teal,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
             const SizedBox(height: 24),
             SizedBox(
