@@ -159,26 +159,30 @@ def _get_recommendations(risk_level):
 
 @app.before_request
 def initialize_once():
-    """Load allergen data from Firestore before first request"""
+    """Load allergen data from Firestore before first analysis request"""
     global _initialized
+    if request.path in ['/', '/health']:
+        return
     if not _initialized:
-        print("=" * 50)
-        print("Initializing BiteRight Backend...")
-        print("=" * 50)
-        print("Loading allergen database...")
-        detector.load_allergens_from_firestore(db)
-        
-        # Initialize processor if available
         try:
-            processor.initialize()
-            print("Ingredient processor initialized")
+            print("=" * 50)
+            print("Initializing BiteRight Backend...")
+            print("=" * 50)
+            print("Loading allergen database...")
+            detector.load_allergens_from_firestore(db)
+            
+            try:
+                processor.initialize()
+                print("Ingredient processor initialized")
+            except Exception as e:
+                print(f"Processor initialization warning: {e}")
+            
+            print("Allergen database loaded!")
+            print("ML/NLP model is ACTIVE and will be used for analysis")
+            print("=" * 50)
+            _initialized = True
         except Exception as e:
-            print(f"Processor initialization warning: {e}")
-        
-        print("Allergen database loaded!")
-        print("ML/NLP model is ACTIVE and will be used for analysis")
-        print("=" * 50)
-        _initialized = True
+            print(f"Initialization warning: {e}")
 
 
 # ============= API ENDPOINTS =============
