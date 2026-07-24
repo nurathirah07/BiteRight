@@ -419,7 +419,7 @@ class ApiService {
               'password': password,
             }),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 60));
 
       _log('Login response: ${response.statusCode}');
 
@@ -452,7 +452,7 @@ class ApiService {
               'email': email,
             }),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 60));
 
       _log('Reset request response: ${response.statusCode}');
 
@@ -486,7 +486,7 @@ class ApiService {
               'new_password': newPassword,
             }),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 60));
 
       _log('Reset password response: ${response.statusCode}');
 
