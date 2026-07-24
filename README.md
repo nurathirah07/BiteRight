@@ -12,18 +12,20 @@
 ## 📱 Key Features
 
 ### Core Functionality
-- **Personalized Dietary Profiles**: Users can select from 10 allergens and 6 dietary restrictions (Halal, Vegan, Diabetic, Low Sodium, Vegetarian, Keto) with severity levels
-- **OCR-Based Ingredient Extraction**: Dual-engine approach with OCR.Space API (primary) and Tesseract OCR (fallback)
-- **NLP Allergen Detection**: Context-aware parsing with negation detection and safe-term filtering
-- **AI/ML Risk Classification**: Hybrid ensemble (60% Random Forest + 40% rules)
-- **Editable Ingredient List**: Users can correct OCR errors before analysis
+- **Personalized Food Safety Profiles**: Choose from 10 allergens and 6 dietary restrictions (Halal, Vegan, Diabetic, Low Sodium, Vegetarian, Keto).
+- **Allergen Severity Level Customization**: Set custom severity levels (**High**, **Medium**, **Low**) for each selected allergen to tune alert sensitivity.
+- **Interactive Severity Level Guide & Fallback Advice**: Built-in interactive guide explaining High (severe/anaphylaxis), Medium (moderate/hives), and Low (mild intolerance) levels, including step-by-step guidance for users unsure of their severity.
+- **OCR-Based Ingredient Extraction**: Dual-engine approach using OCR.Space API (primary) and Tesseract OCR (fallback).
+- **NLP Allergen Detection**: Context-aware parsing with negation detection, safe-term filtering, and ingredient synonym matching.
+- **AI/ML Risk Classification**: Hybrid ensemble model combining 60% Random Forest Classifier + 40% rule-based safety verification.
+- **Editable Ingredient List**: Users can review and edit extracted OCR text before running risk analysis.
 
 ### User Features
-- **Real-Time Risk Alerts**: Color-coded indicators (Safe/Caution/Unsafe)
-- **Scan History**: View, filter, and delete past scans
-- **Gamification Badges**: 15 achievement badges with unlock animations
-- **Analytics Dashboard**: Track scan statistics and safety trends
-- **Password Reset**: OTP-based password recovery
+- **Real-Time Risk Alerts**: Color-coded risk indicators (Safe / Caution / Unsafe) with detailed ingredient breakdown.
+- **Scan History**: View, filter, search, and delete past product scans.
+- **Gamification & Achievement Badges**: 15 unlockable badges celebrating food safety milestones and scan streaks.
+- **Analytics Dashboard**: Comprehensive charts tracking daily, weekly, and monthly scan trends and safety stats.
+- **Password Reset**: Secure OTP-based email password recovery.
 
 ---
 
@@ -115,7 +117,7 @@ python app.py
 ### Mobile App Setup
 
 ```bash
-cd biteright/biteright_app
+cd biteright/biteright_mobile
 
 # Install Flutter dependencies
 flutter pub get
@@ -130,10 +132,10 @@ flutter run
 
 ```
 biteright/
-├── biteright_app/                # Flutter mobile application
+├── biteright_mobile/                # Flutter mobile application
 │   ├── lib/
-│   │   ├── screens/              # UI screens (login, scan, history, etc.)
-│   │   ├── models/               # Data models (UserProfile, ScanHistory, etc.)
+│   │   ├── screens/              # UI screens (login, scan, profile setup, analytics, etc.)
+│   │   ├── models/               # Data models (UserProfile, ScanHistory, AnalyticsSummary, etc.)
 │   │   └── services/             # API service (ApiService)
 │   └── pubspec.yaml
 │
