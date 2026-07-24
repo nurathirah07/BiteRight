@@ -352,8 +352,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def send_reset_email(to_email, otp_code):
-    sender_email = os.environ.get('SENDER_EMAIL', 'biteright.app@gmail.com')
-    api_key = os.environ.get('BREVO_API_KEY') or os.environ.get('MAIL_API_KEY')
+    sender_email = os.environ.get('SENDER_EMAIL', 'athirahazmi77@gmail.com').strip()
+    api_key = (os.environ.get('BREVO_API_KEY') or os.environ.get('MAIL_API_KEY') or '').strip().strip('"').strip("'")
 
     # Method 1: HTTPS REST API (Port 443 - Never blocked by Render firewall)
     if api_key:
