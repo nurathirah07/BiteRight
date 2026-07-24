@@ -11,6 +11,9 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+serviceAccountKey.json
+*.key
+*.pem
 
 # IntelliJ related
 *.iml

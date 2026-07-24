@@ -34,12 +34,7 @@ try:
 except ValueError:
     key_path = os.environ.get('FIREBASE_KEY_PATH', 'serviceAccountKey.json')
     if os.path.exists(key_path):
-        import json
-        with open(key_path, 'r', encoding='utf-8') as f:
-            cred_dict = json.load(f)
-        if 'private_key' in cred_dict and isinstance(cred_dict['private_key'], str):
-            cred_dict['private_key'] = cred_dict['private_key'].replace('\\n', '\n')
-        cred = credentials.Certificate(cred_dict)
+        cred = credentials.Certificate(key_path)
         firebase_admin.initialize_app(cred)
     else:
         print(f"Warning: {key_path} not found!")
