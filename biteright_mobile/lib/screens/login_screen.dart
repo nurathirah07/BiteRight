@@ -363,16 +363,16 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
       if (!mounted) return;
 
       if (resetCode != null) {
-        _codeController.text = resetCode;
+        _codeController.clear();
         setState(() {
           _step = 'verify';
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Reset code generated: $resetCode (Auto-filled below)'),
+          const SnackBar(
+            content: Text('A 6-digit verification code has been sent to your email.'),
             backgroundColor: AppTheme.teal,
-            duration: const Duration(seconds: 6),
+            duration: Duration(seconds: 5),
           ),
         );
       }
