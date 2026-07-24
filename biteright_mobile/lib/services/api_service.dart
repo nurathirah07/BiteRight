@@ -6,28 +6,20 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart'; // For kDebugMode, kIsWeb
 
 class ApiService {
-  // Dynamically determine the base URL based on platform
+  // Live Render Production Backend URL
+  static const String _liveProductionUrl = 'https://biteright-g7sm.onrender.com';
+
+  // Dynamically determine the base URL (defaults to live production backend)
   static String get _defaultBaseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5000';
-    } else if (Platform.isAndroid) {
-      // YOUR COMPUTER'S ACTUAL IP ADDRESS
-      return 'http://172.20.10.4:5000';
-    } else if (Platform.isIOS) {
-      // iOS simulator can use localhost directly
-      return 'http://localhost:5000';
-    } else {
-      // Fallback for other platforms
-      return 'http://localhost:5000';
-    }
+    return _liveProductionUrl;
   }
 
   // Alternative URLs to try if connection fails
   static List<String> get _alternativeUrls => [
-        'http://172.20.10.4:5000', // YOUR IP - MUST BE FIRST
-        'http://10.0.2.2:5000', // Android emulator
-        'http://localhost:5000', // Web / iOS simulator
-        'http://127.0.0.1:5000', // Web / iOS simulator (IP loopback)
+        _liveProductionUrl, // Live Render Cloud Backend
+        'http://172.20.10.4:5000', // Local computer IP fallback
+        'http://10.0.2.2:5000', // Android emulator fallback
+        'http://localhost:5000', // Web / iOS simulator fallback
       ];
 
   late String _currentBaseUrl;
