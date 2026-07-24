@@ -207,7 +207,7 @@ class ApiService {
         Uri.parse('$_currentBaseUrl/dietary-options'),
       )
           .timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 45),
         onTimeout: () {
           _log('Connection timeout');
           throw Exception('Connection timeout');
@@ -245,7 +245,7 @@ class ApiService {
         Uri.parse('$_currentBaseUrl/users/$userId/profile'),
       )
           .timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 45),
         onTimeout: () {
           _log('Connection timeout');
           throw Exception('Connection timeout');
@@ -280,7 +280,7 @@ class ApiService {
           .get(
             Uri.parse('$_currentBaseUrl/users/$userId/scans'),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 45));
 
       _log('Scan history response: ${response.statusCode}');
 
@@ -310,7 +310,7 @@ class ApiService {
           .delete(
             Uri.parse('$_currentBaseUrl/users/$userId/scans/$scanId'),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 45));
 
       return response.statusCode == 200;
     } catch (e) {
@@ -384,7 +384,7 @@ class ApiService {
         }),
       )
           .timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 45),
         onTimeout: () {
           _log('Connection timeout');
           throw Exception('Connection timeout');
@@ -525,7 +525,7 @@ class ApiService {
         }),
       )
           .timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 45),
         onTimeout: () {
           _log('Connection timeout');
           throw Exception('Connection timeout');
@@ -781,7 +781,7 @@ class ApiService {
           .get(
             Uri.parse('$_currentBaseUrl/users/$userId/analytics/summary'),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 45));
 
       _log('Analytics summary response: ${response.statusCode}');
 
