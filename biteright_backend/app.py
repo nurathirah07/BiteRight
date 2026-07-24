@@ -358,6 +358,7 @@ def send_reset_email(to_email, otp_code):
     # Method 1: HTTPS REST API (Port 443 - Never blocked by Render firewall)
     if api_key:
         try:
+            import json
             import urllib.request
             url = "https://api.brevo.com/v3/smtp/email"
             headers = {
