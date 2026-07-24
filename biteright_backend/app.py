@@ -352,9 +352,45 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def send_reset_email(to_email, otp_code):
+    sender_email = os.environ.get('SENDER_EMAIL', 'biteright.app@gmail.com')
+    api_key = os.environ.get('BREVO_API_KEY') or os.environ.get('MAIL_API_KEY')
+
+    # Method 1: HTTPS REST API (Port 443 - Never blocked by Render firewall)
+    if api_key:
+        try:
+            import urllib.request
+            url = "https://api.brevo.com/v3/smtp/email"
+            headers = {
+                "accept": "application/json",
+                "api-key": api_key,
+                "content-type": "application/json"
+            }
+            payload = {
+                "sender": {"name": "BiteRight Security", "email": sender_email},
+                "to": [{"email": to_email}],
+                "subject": "🔑 BiteRight — Password Reset Code",
+                "htmlContent": f"""
+                <div style="font-family: Arial, sans-serif; padding: 24px; color: #1A1814; max-width: 500px; margin: 0 auto; border: 1px solid #E5E0D8; border-radius: 16px;">
+                    <h2 style="color: #2A6E54; margin-top: 0;">BiteRight Security</h2>
+                    <p style="font-size: 15px; color: #5A5754;">You requested a password reset for your BiteRight account.</p>
+                    <div style="background: #F4F8F6; padding: 18px; border-radius: 12px; text-align: center; margin: 20px 0; border: 1px solid #2A6E54;">
+                        <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #2A6E54;">{otp_code}</span>
+                    </div>
+                    <p style="font-size: 13px; color: #7A7771;">This code expires in 15 minutes. If you did not request a password reset, please ignore this email.</p>
+                </div>
+                """
+            }
+            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
+            with urllib.request.urlopen(req) as resp:
+                if resp.status in (200, 201):
+                    print(f"✓ Reset email sent successfully via HTTPS API to {to_email}")
+                    return True
+        except Exception as e:
+            print(f"HTTP Email API failed: {e}")
+
+    # Method 2: Standard SMTP (Port 587)
     smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     smtp_port = int(os.environ.get('SMTP_PORT', 587))
-    sender_email = os.environ.get('SENDER_EMAIL', '')
     sender_password = os.environ.get('SENDER_PASSWORD', '')
 
     if not sender_email or not sender_password:
