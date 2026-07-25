@@ -798,4 +798,82 @@ class ApiService {
       return null;
     }
   }
+
+  Future<void> preWarmBackend() async {
+    try {
+      _log('Pre-warming backend...');
+      await http.get(Uri.parse('$_currentBaseUrl/health')).timeout(const Duration(seconds: 15));
+      _log('Backend pre-warmed');
+    } catch (e) {
+      _log('Pre-warm ping warning: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> lookupBarcode(String barcode, String userId) async {
+    try {
+      _log('Looking up barcode: $barcode for user: $userId');
+
+      final response = await http
+          .get(
+            Uri.parse('$_currentBaseUrl/barcode/$barcode?user_id=$userId'),
+          )
+          .timeout(const Duration(seconds: 45));
+
+      _log('Barcode response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        final data = json.decode(response.body);
+        return {
+          'found': false,
+          'message': data['message'] ?? 'Product not found in Open Food Facts database.'
+        };
+      } else {
+        return null;
+      }
+    } catch (e) {
+      _log('Error looking up barcode: $e');
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUserPantry(String userId) async {
+    try {
+      _log('Fetching pantry for user: $userId');
+
+      final response = await http
+          .get(
+            Uri.parse('$_currentBaseUrl/users/$userId/pantry'),
+          )
+          .timeout(const Duration(seconds: 45));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      _log('Error fetching pantry: $e');
+      return [];
+    }
+  }
+
+  Future<bool> deletePantryItem(String userId, String itemId) async {
+    try {
+      _log('Deleting pantry item: $itemId');
+
+      final response = await http
+          .delete(
+            Uri.parse('$_currentBaseUrl/users/$userId/pantry/$itemId'),
+          )
+          .timeout(const Duration(seconds: 45));
+
+      return response.statusCode == 200;
+    } catch (e) {
+      _log('Error deleting pantry item: $e');
+      return false;
+    }
+  }
 }

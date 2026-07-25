@@ -500,10 +500,152 @@ def reset_password_route():
             'reset_code_expires': None
         })
         
-        return jsonify({
-            'success': True,
-            'message': 'Password has been reset successfully'
-        }), 200
+# ============= BARCODE & PANTRY ENDPOINTS =============
+
+@app.route('/barcode/<barcode_code>', methods=['GET'])
+def lookup_barcode(barcode_code):
+    """Lookup product from Open Food Facts by barcode and run BiteRight allergen analysis"""
+    try:
+        user_id = request.args.get('user_id', '')
+        _log(f"Barcode lookup for: {barcode_code}, user: {user_id}")
+
+        import urllib.request, json
+        url = f"https://world.openfoodfacts.org/api/v2/product/{barcode_code}.json"
+        req = urllib.request.Request(url, headers={'User-Agent': 'BiteRight-App/2.0 (contact@biteright.app)'})
+
+        product_name = f"Barcode {barcode_code}"
+        ingredients_text = ""
+        image_url = ""
+        brand = ""
+
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status == 200:
+                    off_data = json.loads(resp.read().decode('utf-8'))
+                    if off_data.get('status') == 1 and 'product' in off_data:
+                        prod = off_data['product']
+                        product_name = prod.get('product_name') or prod.get('product_name_en') or product_name
+                        brand = prod.get('brands', '')
+                        ingredients_text = prod.get('ingredients_text') or prod.get('ingredients_text_en') or prod.get('ingredients_text_with_allergens') or ''
+                        image_url = prod.get('image_front_url') or prod.get('image_url') or ''
+        except Exception as off_err:
+            _log(f"Open Food Facts lookup warning: {off_err}")
+
+        if not ingredients_text:
+            return jsonify({
+                'found': False,
+                'barcode': barcode_code,
+                'message': 'Product not found in Open Food Facts database or has no ingredient text. Try scanning the ingredient label directly!'
+            }), 404
+
+        # Run BiteRight allergen analysis
+        user_allergies = []
+        user_diets = []
+        allergy_severity = {}
+
+        if user_id:
+            try:
+                user_doc = db.collection('users').document(user_id).get()
+                if user_doc.exists:
+                    ud = user_doc.to_dict()
+                    user_allergies = ud.get('allergies', [])
+                    user_diets = ud.get('dietary_restrictions', ud.get('diets', []))
+                    allergy_severity = ud.get('allergy_severity', {})
+            except Exception as e:
+                _log(f"Error fetching user profile for barcode: {e}")
+
+        # Analyze ingredients
+        combined = processor.analyze_ingredients(
+            ingredients_text,
+            user_allergies=user_allergies,
+            user_diets=user_diets,
+            allergy_severity=allergy_severity
+        )
+
+        overall_verdict = combined.get('verdict', 'safe')
+        analysis = build_personalized_analysis(combined, user_allergies, user_diets)
+
+        result_payload = {
+            'found': True,
+            'barcode': barcode_code,
+            'product_name': f"{brand} - {product_name}".strip(' -'),
+            'brand': brand,
+            'image_url': image_url,
+            'ingredients_text': ingredients_text,
+            'verdict': overall_verdict,
+            'safety_category': 'safe' if overall_verdict in ['safe', 'low_risk'] else ('caution' if overall_verdict == 'moderate_risk' else 'unsafe'),
+            'analysis': analysis,
+            'combined_result': combined
+        }
+
+        # Automatically save to Pantry if user_id present
+        if user_id:
+            try:
+                pantry_ref = db.collection('users').document(user_id).collection('pantry').document(f"barcode_{barcode_code}")
+                pantry_data = {
+                    'product_name': result_payload['product_name'],
+                    'brand': brand,
+                    'barcode': barcode_code,
+                    'image_url': image_url,
+                    'ingredients_text': ingredients_text,
+                    'verdict': overall_verdict,
+                    'safety_category': result_payload['safety_category'],
+                    'analysis': analysis,
+                    'scanned_at': firestore.SERVER_TIMESTAMP
+                }
+                pantry_ref.set(pantry_data, merge=True)
+                _log(f"Saved barcode product to user pantry: {product_name}")
+            except Exception as pe:
+                _log(f"Pantry save warning: {pe}")
+
+        return jsonify(result_payload), 200
+    except Exception as e:
+        _log(f"Error in lookup_barcode: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/users/<user_id>/pantry', methods=['GET'])
+def get_user_pantry(user_id):
+    """Fetch all saved products/scans in user pantry, categorized by safety status"""
+    try:
+        pantry_ref = db.collection('users').document(user_id).collection('pantry').stream()
+        items = []
+        for item in pantry_ref:
+            data = item.to_dict()
+            data['id'] = item.id
+            if 'scanned_at' in data:
+                data['scanned_at'] = str(data['scanned_at'])
+            items.append(data)
+
+        # Also pull recent history scans if pantry items count == 0
+        if len(items) == 0:
+            scans_ref = db.collection('users').document(user_id).collection('scans').limit(20).stream()
+            for scan in scans_ref:
+                sd = scan.to_dict()
+                verdict = sd.get('verdict') or (sd.get('combined_result', {}).get('verdict')) or 'safe'
+                safety = 'safe' if verdict in ['safe', 'low_risk'] else ('caution' if verdict == 'moderate_risk' else 'unsafe')
+                items.append({
+                    'id': scan.id,
+                    'product_name': sd.get('product_name') or sd.get('title') or 'Scanned Item',
+                    'ingredients_text': sd.get('ingredients_text', ''),
+                    'verdict': verdict,
+                    'safety_category': safety,
+                    'analysis': sd.get('analysis', {}),
+                    'scanned_at': str(sd.get('created_at', sd.get('timestamp', '')))
+                })
+
+        return jsonify(items), 200
+    except Exception as e:
+        _log(f"Error fetching pantry: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/users/<user_id>/pantry/<item_id>', methods=['DELETE'])
+def delete_pantry_item(user_id, item_id):
+    """Remove item from user pantry"""
+    try:
+        db.collection('users').document(user_id).collection('pantry').document(item_id).delete()
+        return jsonify({'success': True, 'message': 'Pantry item deleted'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

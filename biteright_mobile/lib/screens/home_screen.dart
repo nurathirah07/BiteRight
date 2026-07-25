@@ -1,4 +1,3 @@
-// lib/screens/home_screen.dart
 import 'package:biteright_mobile/screens/scan_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -7,7 +6,9 @@ import '../models/analytics_summary.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'analytics_screen.dart';
+import 'barcode_scanner_screen.dart';
 import 'edit_account_screen.dart';
+import 'pantry_screen.dart';
 import 'profile_setup_screen.dart';
 import 'scan_screen.dart';
 import 'scan_history_screen.dart';
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _apiService.preWarmBackend();
     _loadUserData();
     _loadAllScans();
     _loadBadges();
@@ -648,25 +650,68 @@ class _HeroCard extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          // CTA button
+          // Action Buttons: Scan OCR, Scan Barcode, My Pantry
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: onScanTap,
+                  icon: const Icon(Icons.document_scanner_outlined, size: 16),
+                  label: const Text('Scan Label'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryDark,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final uid = (userProfile?['id'] ?? userProfile?['userId'] ?? '').toString();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BarcodeScannerScreen(userId: uid),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
+                  label: const Text('Barcode'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onScanTap,
-              icon: const Icon(Icons.document_scanner_outlined, size: 18),
-              label: const Text('Scan a food label'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryDark,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+            child: OutlinedButton.icon(
+              onPressed: () {
+                final uid = (userProfile?['id'] ?? userProfile?['userId'] ?? '').toString();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PantryScreen(userId: uid),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.inventory_2_rounded, size: 18, color: AppTheme.primaryDark),
+              label: const Text('My Saved Pantry (Safe / Caution / Unsafe)'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.primaryDark,
+                side: const BorderSide(color: AppTheme.primaryDark, width: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ),
