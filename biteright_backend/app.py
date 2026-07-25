@@ -499,7 +499,15 @@ def reset_password_route():
             'reset_code': None,
             'reset_code_expires': None
         })
-        
+
+        return jsonify({
+            'success': True,
+            'message': 'Password has been reset successfully'
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # ============= BARCODE & PANTRY ENDPOINTS =============
 
 @app.route('/barcode/<barcode_code>', methods=['GET'])
