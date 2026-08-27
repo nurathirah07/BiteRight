@@ -73,6 +73,19 @@ def verify_password(password, stored_hash):
 def normalize_key(value):
     return str(value or '').strip().lower().replace('-', '_').replace(' ', '_')
 
+
+def log(message, *args, **kwargs):
+    """Simple application logger used by API routes."""
+    if args or kwargs:
+        message = message % args if isinstance(message, str) and '%' in message else message
+    print(message, flush=True)
+
+
+def _log(message, *args, **kwargs):
+    """Backward-compatible alias for log used in routed error handlers."""
+    log(message, *args, **kwargs)
+
+
 def scan_timestamp(scan_data):
     """Return the best timestamp field while old and ERD-shaped docs coexist."""
     return scan_data.get('scan_date') or scan_data.get('scanned_at') or scan_data.get('timestamp') or ''
@@ -515,7 +528,7 @@ def lookup_barcode(barcode_code):
     """Lookup product from Open Food Facts by barcode and run BiteRight allergen analysis"""
     try:
         user_id = request.args.get('user_id', '')
-        _log(f"Barcode lookup for: {barcode_code}, user: {user_id}")
+        log(f"Barcode lookup for: {barcode_code}, user: {user_id}")
 
         import urllib.request, json
         url = f"https://world.openfoodfacts.org/api/v2/product/{barcode_code}.json"
@@ -571,7 +584,7 @@ def lookup_barcode(barcode_code):
         )
 
         overall_verdict = combined.get('verdict', 'safe')
-        analysis = build_personalized_analysis(combined, user_allergies, user_diets)
+        analysis = build_personalized_analysis_v2(combined, user_allergies, user_diets)
 
         result_payload = {
             'found': True,

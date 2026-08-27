@@ -1,4 +1,16 @@
-# Miscellaneous
+### SECRETS & CREDENTIALS (CRITICAL)
+
+.env
+.env.*
+*.env
+serviceAccountKey.json
+*.key
+*.pem
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+
+### Miscellaneous
+
 *.class
 *.log
 *.pyc
@@ -11,22 +23,16 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-serviceAccountKey.json
-*.key
-*.pem
 
-# IntelliJ related
+### IntelliJ related
+
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+### Flutter/Dart/Pub related
 
-# Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -36,13 +42,16 @@ serviceAccountKey.json
 /build/
 /coverage/
 
-# Symbolication related
+### Symbolication related
+
 app.*.symbols
 
-# Obfuscation related
+### Obfuscation related
+
 app.*.map.json
 
-# Android Studio will place build artifacts here
+### Android Studio will place build artifacts here
+
 /android/app/debug
 /android/app/profile
 /android/app/release
