@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/session_service.dart';
 import '../theme/app_theme.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -20,11 +20,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Future<void> _checkLoginStatus() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId');
-      final username = prefs.getString('username') ?? 'User';
+      final session = SessionService.instance;
+      await session.load();
+      final userId = session.userId;
+      final username = session.username;
 
-      if (userId != null && userId.isNotEmpty) {
+      if (session.isSignedIn && userId != null) {
         if (mounted) {
           Navigator.pushReplacementNamed(
             context,

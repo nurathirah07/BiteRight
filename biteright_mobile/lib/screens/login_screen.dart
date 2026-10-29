@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -45,13 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (response != null) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', response['user']['id'].toString());
-        await prefs.setString('username', response['user']['username']?.toString() ?? 'User');
-        await prefs.setInt('selectedTabIndex', 0);
-
-        if (!mounted) return;
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Login successful!'),
@@ -82,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text(ApiService.friendlyError(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -356,13 +348,13 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
     });
 
     try {
-      final resetCode = await widget.apiService.requestPasswordReset(
+      final sent = await widget.apiService.requestPasswordReset(
         _emailController.text.trim(),
       );
 
       if (!mounted) return;
 
-      if (resetCode != null) {
+      if (sent) {
         _codeController.clear();
         setState(() {
           _step = 'verify';
@@ -370,7 +362,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('A 6-digit verification code has been sent to your email.'),
+            content: Text('If an account exists for this email, a 6-digit code is on its way. Check your inbox and spam folder.'),
             backgroundColor: AppTheme.teal,
             duration: Duration(seconds: 5),
           ),
@@ -383,7 +375,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
+          content: Text(ApiService.friendlyError(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -422,7 +414,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
+          content: Text(ApiService.friendlyError(e)),
           backgroundColor: Colors.red,
         ),
       );

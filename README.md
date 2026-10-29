@@ -60,7 +60,7 @@ Flutter Mobile App (Dart)
 - **Framework**: Flutter (Dart) — cross-platform for Android & iOS
 - **State Management**: StatefulWidget + setState
 - **Database**: Firebase Firestore (NoSQL)
-- **Authentication**: Email/Password with OTP reset
+- **Authentication**: Email/Password with signed session tokens and OTP reset
 
 ### Backend
 - **Framework**: Python Flask REST API
@@ -107,12 +107,34 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure Firebase credentials
-# Place your firebase-adminsdk.json in the config/ directory
+# Configure environment (see the table below)
+cp .env.example .env   # then fill in the values
 
 # Run the Flask server
 python app.py
 ```
+
+#### Backend environment variables
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `SECRET_KEY` | **Yes (production)** | Signs session tokens. Generate with `python -c "import secrets; print(secrets.token_hex(32))"`. If unset, a random key is used and everyone is signed out whenever the server restarts. |
+| `FIREBASE_CREDENTIALS_JSON` | One of these two | Full service-account JSON as a single string (convenient on Render). |
+| `FIREBASE_KEY_PATH` | One of these two | Path to the service-account file (default `serviceAccountKey.json`). |
+| `BREVO_API_KEY` / `SENDER_EMAIL` | For password reset | Sends reset-code emails. SMTP (`SMTP_SERVER`, `SMTP_PORT`, `SENDER_PASSWORD`) is the fallback. |
+| `AUTH_REQUIRED` | No | Defaults to `true`. Set `false` only for local debugging without tokens. |
+| `TOKEN_MAX_AGE_DAYS` | No | Session lifetime, default 30 days. |
+| `MAX_UPLOAD_MB` | No | Largest accepted image, default 10 MB. |
+| `ENABLE_DEBUG_ENDPOINTS` | No | Exposes `/test-firebase`, `/test-products`, `/search-allergens/*`, `GET /users` and `/test/analyze`. Keep off in production. |
+| `LOG_RESET_CODES` | No | Prints reset codes to the server log. Local development only. |
+
+#### Authentication
+
+`POST /login` and `POST /users` return a `token`. Every user-scoped endpoint
+(`/users/<id>/...`, `/analyze-with-profile`, `/barcode/<code>`) requires
+`Authorization: Bearer <token>`, and a token only grants access to its own
+user. Passwords are hashed with scrypt; accounts created with the older
+SHA-256 scheme are upgraded automatically on their next sign-in.
 
 ### Mobile App Setup
 
@@ -122,8 +144,11 @@ cd biteright/biteright_mobile
 # Install Flutter dependencies
 flutter pub get
 
-# Run the app
+# Run the app against the production backend
 flutter run
+
+# ...or against a local backend (Android emulator shown)
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5000
 ```
 
 ---
@@ -136,7 +161,7 @@ biteright/
 │   ├── lib/
 │   │   ├── screens/              # UI screens (login, scan, profile setup, analytics, etc.)
 │   │   ├── models/               # Data models (UserProfile, ScanHistory, AnalyticsSummary, etc.)
-│   │   └── services/             # API service (ApiService)
+│   │   └── services/             # ApiService (HTTP client) and SessionService (sign-in state)
 │   └── pubspec.yaml
 │
 ├── biteright_backend/            # Flask backend
@@ -147,8 +172,9 @@ biteright/
 │   │   ├── processing_service.py # Hybrid ML (60%) + Rules (40%)
 │   │   └── dietary_checker.py    # Legacy dietary checker
 │   ├── models/                   # ML model files (random_forest.pkl)
-│   ├── config/                   # Firebase credentials
 │   ├── app.py                    # Flask routes & server
+│   ├── security.py               # Password hashing, session tokens, rate limiting
+│   ├── analytics.py              # Scan statistics & achievement badges
 │   └── requirements.txt
 │
 └── README.md
@@ -162,6 +188,9 @@ biteright/
 ```bash
 cd biteright_backend
 python -m pytest tests/
+
+cd ../biteright_mobile
+flutter test
 ```
 
 ### Functional Testing (API)
@@ -169,8 +198,14 @@ python -m pytest tests/
 # Extract ingredients from image
 curl -X POST -F "image=@label.jpg" http://localhost:5000/extract-ingredients
 
+# Sign in to get a session token
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "password": "your-password"}' \
+  http://localhost:5000/login
+
 # Analyze ingredients with user profile
 curl -X POST -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN" \
   -d '{"ingredients_text": "peanuts, sugar", "user_id": "USER_ID"}' \
   http://localhost:5000/analyze-with-profile
 ```

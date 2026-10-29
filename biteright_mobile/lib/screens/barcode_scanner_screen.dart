@@ -4,6 +4,9 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'scan_details_screen.dart';
 
+/// Result returned when the user chooses to photograph the label instead.
+const String kScanLabelInstead = 'scan_label';
+
 class BarcodeScannerScreen extends StatefulWidget {
   final String userId;
 
@@ -35,20 +38,23 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     });
 
     try {
-      _scannerController.stop();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Looking up barcode $barcode...'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      await _scannerController.stop();
 
       final result = await _apiService.lookupBarcode(barcode.trim(), widget.userId);
 
       if (!mounted) return;
 
-      if (result != null && result['found'] == true) {
+      if (result['found'] == true) {
+        final badges = result['newly_unlocked_badges'] as List? ?? const [];
+        if (badges.isNotEmpty) {
+          final names = badges
+              .map((b) => b is Map ? b['name']?.toString() : null)
+              .whereType<String>()
+              .join(', ');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('New badge unlocked: $names')),
+          );
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -60,31 +66,39 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           ),
         );
       } else {
-        showDialog(
+        final scanLabel = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Product Not Found'),
+          barrierDismissible: false,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Product not found'),
             content: Text(
-              result?['message'] ??
-                  'No product details found for barcode $barcode. Try taking a photo of the ingredient label instead!',
+              result['message']?.toString() ??
+                  'No product details found for barcode $barcode. Try taking a photo of the ingredient label instead.',
             ),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _scannerController.start();
-                  setState(() => _isProcessing = false);
-                },
-                child: const Text('Try Again'),
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Try again'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Scan label instead'),
               ),
             ],
           ),
         );
+        if (!mounted) return;
+        if (scanLabel == true) {
+          Navigator.pop(context, kScanLabelInstead);
+          return;
+        }
+        await _scannerController.start();
+        setState(() => _isProcessing = false);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error scanning barcode: $e')),
+          SnackBar(content: Text(ApiService.friendlyError(e))),
         );
         _scannerController.start();
         setState(() => _isProcessing = false);

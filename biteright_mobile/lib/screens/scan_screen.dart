@@ -10,7 +10,15 @@ class ScanScreen extends StatefulWidget {
   final String userId;
   final VoidCallback? onBack;
 
-  const ScanScreen({super.key, required this.userId, this.onBack});
+  /// Called after a scan is saved so other screens can refresh.
+  final VoidCallback? onScanSaved;
+
+  const ScanScreen({
+    super.key,
+    required this.userId,
+    this.onBack,
+    this.onScanSaved,
+  });
 
   @override
   State<ScanScreen> createState() => _ScanScreenState();
@@ -29,6 +37,7 @@ class _ScanScreenState extends State<ScanScreen> {
   // Editable ingredients as a single string (raw text for editing)
   String _editableIngredientsText = '';
   final TextEditingController _ingredientsController = TextEditingController();
+  final TextEditingController _productNameController = TextEditingController();
 
   // Store raw data for reference
   String _rawExtractedText = '';
@@ -72,6 +81,7 @@ class _ScanScreenState extends State<ScanScreen> {
   void dispose() {
     _scrollController.dispose();
     _ingredientsController.dispose();
+    _productNameController.dispose();
     super.dispose();
   }
 
@@ -243,7 +253,7 @@ class _ScanScreenState extends State<ScanScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Network error: $e';
+        _errorMessage = ApiService.friendlyError(e);
         _isLoading = false;
       });
     }
@@ -295,8 +305,9 @@ class _ScanScreenState extends State<ScanScreen> {
         final alerts = data['alerts'] as List? ?? [];
 
         // Prepare the scan data with ALL fields properly set
+        final productName = _productNameController.text.trim();
         final Map<String, dynamic> scanDataToSave = {
-          'product_name': 'Scanned Product',
+          'product_name': productName.isNotEmpty ? productName : 'Scanned Product',
           'ingredients': ingredients.isNotEmpty ? ingredients : data['ingredients'] ?? [],
           'ingredient_details': data['ingredient_details'] ?? [],
           'risk_level': riskLevel,
@@ -327,8 +338,17 @@ class _ScanScreenState extends State<ScanScreen> {
           if (newBadges != null && newBadges.isNotEmpty) {
             _showNewBadgesDialog(newBadges);
           }
+          widget.onScanSaved?.call();
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Analysis finished, but it could not be saved to your history.'),
+            ),
+          );
         }
         data['was_edited'] = scanDataToSave['was_edited'];
+        data['product_name'] = scanDataToSave['product_name'];
 
         setState(() {
           _scanResult = data;
@@ -342,7 +362,7 @@ class _ScanScreenState extends State<ScanScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Network error: $e';
+        _errorMessage = ApiService.friendlyError(e);
         _isAnalyzing = false;
       });
     }
@@ -357,6 +377,7 @@ class _ScanScreenState extends State<ScanScreen> {
       _rawExtractedText = '';
       _processedIngredients = [];
       _ingredientsController.clear();
+      _productNameController.clear();
       _errorMessage = null;
       _isLoading = false;
       _isAnalyzing = false;
@@ -910,6 +931,39 @@ class _ScanScreenState extends State<ScanScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                const Text(
+                  'Product name (optional)',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A1814),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _productNameController,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 80,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Oat Biscuits',
+                    counterText: '',
+                    filled: true,
+                    fillColor: Colors.white,
+                    prefixIcon: const Icon(Icons.label_outline_rounded,
+                        size: 18, color: AppTheme.primary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E0D8)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E0D8)),
+                    ),
                   ),
                 ),
 

@@ -491,9 +491,10 @@ class _ScanDetailsScreenState extends State<ScanDetailsScreen> {
     final recommendations =
         List<String>.from(_scanData['recommendations'] ?? []);
     final productName = _scanData['product_name'] ?? 'Unknown Product';
-    final scannedAt = _scanData['scanned_at'] != null
-        ? DateTime.parse(_scanData['scanned_at'] as String).toLocal()
-        : DateTime.now();
+    final scannedAt =
+        DateTime.tryParse(_scanData['scanned_at']?.toString() ?? '')
+                ?.toLocal() ??
+            DateTime.now();
 
     final riskFraction = (riskScore.toDouble() / 100).clamp(0.0, 1.0);
 

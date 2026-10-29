@@ -2,45 +2,150 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart'; // For kDebugMode, kIsWeb
+
+import 'session_service.dart';
+
+/// Error with a message that is safe to show to the user.
+class ApiException implements Exception {
+  final String message;
+  final int? statusCode;
+
+  const ApiException(this.message, {this.statusCode});
+
+  @override
+  String toString() => message;
+}
 
 class ApiService {
-  // Live Render Production Backend URL
-  static const String _liveProductionUrl = 'https://biteright-g7sm.onrender.com';
+  /// Override at build time with
+  /// `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5000`.
+  static const String _configuredBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://biteright-g7sm.onrender.com',
+  );
 
-  // Dynamically determine the base URL (defaults to live production backend)
-  static String get _defaultBaseUrl {
-    return _liveProductionUrl;
-  }
+  /// Local fallbacks, only tried in debug builds.
+  static const List<String> _debugFallbackUrls = [
+    'http://10.0.2.2:5000', // Android emulator
+    'http://localhost:5000', // Web / iOS simulator
+  ];
 
-  // Alternative URLs to try if connection fails
-  static List<String> get _alternativeUrls => [
-        _liveProductionUrl, // Live Render Cloud Backend
-        'http://172.20.10.4:5000', // Local computer IP fallback
-        'http://10.0.2.2:5000', // Android emulator fallback
-        'http://localhost:5000', // Web / iOS simulator fallback
-      ];
+  static const Duration _shortTimeout = Duration(seconds: 25);
+  // Render's free tier can take ~50s to wake up, so data calls get headroom.
+  static const Duration _defaultTimeout = Duration(seconds: 60);
+  static const Duration _extractTimeout = Duration(seconds: 120);
 
   late String _currentBaseUrl;
+  final SessionService _session = SessionService.instance;
 
   // Singleton pattern
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
 
   ApiService._internal() {
-    _currentBaseUrl = _defaultBaseUrl;
+    _currentBaseUrl = _configuredBaseUrl;
     _log('Platform: ${kIsWeb ? "Web" : Platform.operatingSystem}');
     _log('Using base URL: $_currentBaseUrl');
   }
 
+  String get baseUrl => _currentBaseUrl;
+
   void _log(String message) {
     if (kDebugMode) {
-      print('🔍 ApiService: $message');
+      debugPrint('ApiService: $message');
     }
   }
 
-  int _min(int a, int b) => a < b ? a : b;
+  // ───────────────────────── Request helpers ─────────────────────────
+
+  Uri _uri(String path, [Map<String, String>? query]) =>
+      Uri.parse('$_currentBaseUrl$path').replace(queryParameters: query);
+
+  Map<String, String> _headers({bool json = false}) {
+    final headers = <String, String>{'Accept': 'application/json'};
+    if (json) headers['Content-Type'] = 'application/json';
+    final token = _session.token;
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
+  Future<http.Response> _send(
+    Future<http.Response> request, {
+    Duration timeout = _defaultTimeout,
+  }) async {
+    final response = await request.timeout(timeout);
+    if (response.statusCode == 401 && _session.isSignedIn) {
+      _log('Session rejected by server; signing out');
+      unawaited(_session.expire());
+    }
+    return response;
+  }
+
+  Future<http.Response> _get(String path,
+          {Map<String, String>? query, Duration timeout = _defaultTimeout}) =>
+      _send(http.get(_uri(path, query), headers: _headers()),
+          timeout: timeout);
+
+  Future<http.Response> _post(String path, Object body,
+          {Duration timeout = _defaultTimeout}) =>
+      _send(
+        http.post(_uri(path),
+            headers: _headers(json: true), body: json.encode(body)),
+        timeout: timeout,
+      );
+
+  Future<http.Response> _put(String path, Object body,
+          {Duration timeout = _defaultTimeout}) =>
+      _send(
+        http.put(_uri(path),
+            headers: _headers(json: true), body: json.encode(body)),
+        timeout: timeout,
+      );
+
+  Future<http.Response> _delete(String path,
+          {Duration timeout = _defaultTimeout}) =>
+      _send(http.delete(_uri(path), headers: _headers()), timeout: timeout);
+
+  dynamic _decode(http.Response response) {
+    if (response.body.isEmpty) return null;
+    try {
+      return json.decode(utf8.decode(response.bodyBytes));
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// The server's `error`/`message` field, or [fallback].
+  String _errorMessage(http.Response response, String fallback) {
+    final data = _decode(response);
+    if (data is Map) {
+      final message = data['error'] ?? data['message'];
+      if (message != null && message.toString().trim().isNotEmpty) {
+        return message.toString();
+      }
+    }
+    return fallback;
+  }
+
+  /// Converts any error into a sentence suitable for a snackbar.
+  static String friendlyError(Object error) {
+    if (error is ApiException) return error.message;
+    if (error is TimeoutException) {
+      return 'The server took too long to respond. It may be starting up, '
+          'so please try again in a moment.';
+    }
+    if (error is SocketException || error is http.ClientException) {
+      return "Can't reach the BiteRight server. Check your internet connection and try again.";
+    }
+    return 'Something went wrong. Please try again.';
+  }
+
+  // ───────────────────────── Scan normalisation ─────────────────────────
 
   double _asConfidence(dynamic value) {
     if (value is num) {
@@ -63,17 +168,25 @@ class ApiService {
     }
     final merged = Map<String, dynamic>.from(raw);
     if (merged['analysis'] is Map) {
-      merged.addAll(Map<String, dynamic>.from(merged['analysis'] as Map));
+      final analysis = Map<String, dynamic>.from(merged['analysis'] as Map);
+      for (final entry in analysis.entries) {
+        merged.putIfAbsent(entry.key, () => entry.value);
+      }
     }
 
-    var riskLevel = (merged['risk_level'] ?? merged['safety_classification'] ?? 'unknown')
-        .toString()
-        .toLowerCase();
+    var riskLevel =
+        (merged['risk_level'] ?? merged['safety_classification'] ?? 'unknown')
+            .toString()
+            .toLowerCase();
     var riskScore = _asInt(merged['risk_score']);
     var confidence = _asConfidence(merged['confidence']);
-    final ingredients = List<String>.from(merged['ingredients'] ?? []);
+    final ingredients = List<String>.from(
+      (merged['ingredients'] as List?)?.map((e) => e.toString()) ?? const [],
+    );
     final rawText = (merged['raw_text'] ?? '').toString().trim();
-    final alerts = List<String>.from(merged['alerts'] ?? []);
+    final alerts = List<String>.from(
+      (merged['alerts'] as List?)?.map((e) => e.toString()) ?? const [],
+    );
 
     // Keep backend Risk Score (0 = safest, 100 = most dangerous) directly
     riskScore = riskScore.clamp(0, 100);
@@ -101,14 +214,16 @@ class ApiService {
       }
     }
 
-    // Align Risk Score with the verbal riskLevel to prevent contradictory UI displays
-    // (e.g. displaying Risk Score: 70% but calling the product Safe).
+    // Align Risk Score with the verbal riskLevel to prevent contradictory UI
+    // displays (e.g. Risk Score 70% on a product labelled Safe).
     if (riskLevel == 'unsafe') {
       final unsafeAlertsCount = alerts.where((a) {
         final lower = a.toLowerCase();
         return lower.contains('matches your') || lower.contains('contains');
       }).length;
-      final int minUnsafeScore = (60 + (unsafeAlertsCount > 1 ? (unsafeAlertsCount - 1) * 5 : 0)).clamp(60, 90);
+      final int minUnsafeScore =
+          (60 + (unsafeAlertsCount > 1 ? (unsafeAlertsCount - 1) * 5 : 0))
+              .clamp(60, 90);
       if (riskScore < minUnsafeScore) {
         riskScore = minUnsafeScore;
       }
@@ -128,381 +243,177 @@ class ApiService {
     return merged;
   }
 
-  /// Tests multiple URLs and returns the first working one
+  // ───────────────────────── Connectivity ─────────────────────────
+
+  /// Returns the first base URL that answers, preferring the configured one.
   Future<String?> findWorkingUrl() async {
-    _log('Testing multiple URLs to find working connection...');
-
-    List<String> urlsToTry = [_currentBaseUrl, ..._alternativeUrls];
-    urlsToTry = urlsToTry.toSet().toList();
-
-    for (String url in urlsToTry) {
+    final urls = <String>{
+      _currentBaseUrl,
+      _configuredBaseUrl,
+      if (kDebugMode) ..._debugFallbackUrls,
+    };
+    for (final url in urls) {
       try {
-        _log('Testing: $url/');
         final response = await http
-            .get(
-              Uri.parse('$url/'),
-            )
-            .timeout(const Duration(seconds: 2));
-
-        if (response.statusCode == 200 || response.statusCode == 404) {
-          _log('✅ Found working URL: $url');
+            .get(Uri.parse('$url/health'))
+            .timeout(const Duration(seconds: 5));
+        if (response.statusCode == 200) {
+          _log('Found working URL: $url');
           return url;
         }
       } catch (e) {
-        _log('❌ Failed: $url - ${e.toString().split('\n').first}');
+        _log('Failed: $url - ${e.toString().split('\n').first}');
       }
     }
-
-    _log('⚠️ No working URL found');
     return null;
   }
 
-  /// Tests the current connection and auto-switches URL if needed
+  /// Checks the backend is reachable. The first request after the server
+  /// has been idle can be slow, so this allows a generous timeout.
   Future<bool> testConnection() async {
     try {
-      _log('Testing connection to $_currentBaseUrl');
       final response = await http
-          .get(
-            Uri.parse('$_currentBaseUrl/'),
-          )
-          .timeout(const Duration(seconds: 5));
-
-      _log('Test connection status: ${response.statusCode}');
-      if (response.statusCode == 200 || response.statusCode == 404) {
-        _log('✅ Connection successful');
-        return true;
-      }
-
-      _log('Unexpected status code, trying alternatives...');
-      String? workingUrl = await findWorkingUrl();
-      if (workingUrl != null) {
-        _currentBaseUrl = workingUrl;
-        _log('✅ Switched to working URL: $_currentBaseUrl');
-        return true;
-      }
-
-      return false;
+          .get(_uri('/health'))
+          .timeout(_defaultTimeout);
+      if (response.statusCode == 200) return true;
     } catch (e) {
       _log('Connection test failed: $e');
+    }
 
-      String? workingUrl = await findWorkingUrl();
-      if (workingUrl != null) {
-        _currentBaseUrl = workingUrl;
-        _log('✅ Switched to working URL: $_currentBaseUrl');
-        return true;
-      }
+    final workingUrl = await findWorkingUrl();
+    if (workingUrl != null) {
+      _currentBaseUrl = workingUrl;
+      return true;
+    }
+    return false;
+  }
 
-      return false;
+  /// Fire-and-forget ping so a sleeping server starts waking up early.
+  Future<void> preWarmBackend() async {
+    try {
+      await http.get(_uri('/health')).timeout(const Duration(seconds: 15));
+    } catch (e) {
+      _log('Pre-warm ping warning: $e');
     }
   }
 
-  // Core app API methods
+  // ───────────────────────── Auth ─────────────────────────
+
+  Future<void> _storeSession(Map<String, dynamic> data) async {
+    final user = Map<String, dynamic>.from(data['user'] as Map? ?? const {});
+    final userId = (user['id'] ?? data['id'] ?? '').toString();
+    final token = (data['token'] ?? '').toString();
+    if (userId.isEmpty || token.isEmpty) {
+      throw const ApiException(
+          'The server did not return a valid session. Please try again.');
+    }
+    await _session.save(
+      userId: userId,
+      username: (user['username'] ?? 'User').toString(),
+      token: token,
+    );
+  }
+
+  /// Creates an account and signs in. Throws [ApiException] on failure.
+  Future<Map<String, dynamic>> createUser(String username, String email,
+      String password, List<String> allergies, List<String> diets) async {
+    final response = await _post(
+      '/users',
+      {
+        'username': username,
+        'email': email,
+        'password': password,
+        'allergies': allergies,
+        'dietary_restrictions': diets,
+      },
+      timeout: _defaultTimeout,
+    );
+
+    if (response.statusCode == 201) {
+      final data = Map<String, dynamic>.from(_decode(response) as Map);
+      data['user'] ??= {'id': data['id'], 'username': username};
+      await _storeSession(data);
+      return data;
+    }
+    throw ApiException(
+      _errorMessage(response, 'Registration failed. Please try again.'),
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Signs in. Returns null for wrong credentials and throws
+  /// [ApiException] for other failures (rate limiting, server errors).
+  Future<Map<String, dynamic>?> login(String email, String password) async {
+    final response = await _post(
+      '/login',
+      {'email': email, 'password': password},
+    );
+
+    if (response.statusCode == 200) {
+      final data = Map<String, dynamic>.from(_decode(response) as Map);
+      await _storeSession(data);
+      return data;
+    }
+    if (response.statusCode == 401) return null;
+    throw ApiException(
+      _errorMessage(response, 'Sign in failed. Please try again.'),
+      statusCode: response.statusCode,
+    );
+  }
+
+  Future<void> logout() => _session.clear();
+
+  /// Asks the server to email a reset code. Throws [ApiException] on failure.
+  Future<bool> requestPasswordReset(String email) async {
+    final response = await _post('/reset-password-request', {'email': email});
+    if (response.statusCode == 200) return true;
+    throw ApiException(
+      _errorMessage(response, 'Could not send the reset code. Please try again.'),
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Sets a new password using the emailed code. Throws [ApiException] on failure.
+  Future<bool> resetPassword(
+      String email, String code, String newPassword) async {
+    final response = await _post('/reset-password', {
+      'email': email,
+      'code': code,
+      'new_password': newPassword,
+    });
+    if (response.statusCode == 200) return true;
+    throw ApiException(
+      _errorMessage(response, 'Password reset failed. Please try again.'),
+      statusCode: response.statusCode,
+    );
+  }
+
+  // ───────────────────────── Profile ─────────────────────────
 
   Future<Map<String, dynamic>?> getDietaryOptions() async {
     try {
-      _log('Fetching from: $_currentBaseUrl/dietary-options');
-
-      final response = await http
-          .get(
-        Uri.parse('$_currentBaseUrl/dietary-options'),
-      )
-          .timeout(
-        const Duration(seconds: 45),
-        onTimeout: () {
-          _log('Connection timeout');
-          throw Exception('Connection timeout');
-        },
-      );
-
-      _log('Status code: ${response.statusCode}');
-
+      final response = await _get('/dietary-options');
       if (response.statusCode == 200) {
-        final String responseBody = response.body;
-        _log(
-            'Response body preview: ${responseBody.substring(0, _min(200, responseBody.length))}...');
-
-        final data = json.decode(responseBody);
-        _log('Successfully parsed data');
-        _log('Data keys: ${data.keys}');
-        return data;
-      } else {
-        _log('Error: HTTP ${response.statusCode}');
-        return null;
+        return Map<String, dynamic>.from(_decode(response) as Map);
       }
+      _log('Dietary options failed: HTTP ${response.statusCode}');
     } catch (e) {
       _log('Error loading options: $e');
-      await testConnection();
-      return null;
     }
+    return null;
   }
 
   Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
-      _log('Fetching profile for user: $userId');
-
-      final response = await http
-          .get(
-        Uri.parse('$_currentBaseUrl/users/$userId/profile'),
-      )
-          .timeout(
-        const Duration(seconds: 45),
-        onTimeout: () {
-          _log('Connection timeout');
-          throw Exception('Connection timeout');
-        },
-      );
-
-      _log('Profile response status: ${response.statusCode}');
-
+      final response = await _get('/users/$userId/profile');
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _log('Profile data received');
-        return data;
-      } else if (response.statusCode == 404) {
-        _log('User not found');
-        return null;
-      } else {
-        _log('Error: HTTP ${response.statusCode}');
-        return null;
+        return Map<String, dynamic>.from(_decode(response) as Map);
       }
+      _log('Profile fetch failed: HTTP ${response.statusCode}');
     } catch (e) {
       _log('Error fetching profile: $e');
-      return null;
     }
-  }
-
-  Future<List<Map<String, dynamic>>> getScanHistory(String userId,
-      {int limit = 50}) async {
-    try {
-      _log('Fetching scan history for user: $userId');
-
-      final response = await http
-          .get(
-            Uri.parse('$_currentBaseUrl/users/$userId/scans'),
-          )
-          .timeout(const Duration(seconds: 45));
-
-      _log('Scan history response: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        _log('Found ${data.length} scans');
-        return data
-            .map((scan) => normalizeScanAnalysis(
-                  Map<String, dynamic>.from(scan as Map),
-                ))
-            .toList();
-      } else {
-        _log('Failed to fetch scan history: ${response.body}');
-        return [];
-      }
-    } catch (e) {
-      _log('Error fetching scan history: $e');
-      return [];
-    }
-  }
-
-  Future<bool> deleteScan(String userId, String scanId) async {
-    try {
-      _log('Deleting scan: $scanId');
-
-      final response = await http
-          .delete(
-            Uri.parse('$_currentBaseUrl/users/$userId/scans/$scanId'),
-          )
-          .timeout(const Duration(seconds: 45));
-
-      return response.statusCode == 200;
-    } catch (e) {
-      _log('Error deleting scan: $e');
-      return false;
-    }
-  }
-
-  Future<Map<String, dynamic>?> createUser(String username, String email,
-      String password, List<String> allergies, List<String> diets) async {
-    try {
-      _log('Creating user: $username, $email');
-      _log('Allergies: $allergies');
-      _log('Diets: $diets');
-
-      final response = await http
-          .post(
-            Uri.parse('$_currentBaseUrl/users'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'username': username,
-              'email': email,
-              'password': password,
-              'allergies': allergies,
-              'dietary_restrictions': diets,
-            }),
-          )
-          .timeout(const Duration(seconds: 25));
-
-      _log('Create user response: ${response.statusCode}');
-
-      if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        _log('User created successfully');
-        _log('Response data: $data');
-
-        if (data['user'] != null) {
-          return data;
-        } else if (data['id'] != null) {
-          return {'user': data};
-        } else {
-          return data;
-        }
-      } else if (response.statusCode == 409) {
-        _log('User already exists');
-        throw Exception('User already exists');
-      } else {
-        _log('Failed to create user: ${response.body}');
-        return null;
-      }
-    } catch (e) {
-      _log('Error creating user: $e');
-      return null;
-    }
-  }
-
-  Future<bool> updateUserProfile(
-      String userId, List<String> allergies, List<String> diets) async {
-    try {
-      _log('Updating profile for user: $userId');
-      _log('Allergies: $allergies');
-      _log('Diets: $diets');
-
-      final response = await http
-          .put(
-        Uri.parse('$_currentBaseUrl/users/$userId/profile'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'allergies': allergies,
-          'dietary_restrictions': diets,
-        }),
-      )
-          .timeout(
-        const Duration(seconds: 45),
-        onTimeout: () {
-          _log('Connection timeout');
-          throw Exception('Connection timeout');
-        },
-      );
-
-      _log('Update response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        _log('Profile updated successfully');
-        return true;
-      } else {
-        _log('Update failed: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      _log('Error updating profile: $e');
-      return false;
-    }
-  }
-
-  Future<Map<String, dynamic>?> login(String email, String password) async {
-    try {
-      _log('Logging in user: $email');
-
-      final response = await http
-          .post(
-            Uri.parse('$_currentBaseUrl/login'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'email': email,
-              'password': password,
-            }),
-          )
-          .timeout(const Duration(seconds: 60));
-
-      _log('Login response: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _log('Login successful');
-        return data;
-      } else if (response.statusCode == 401) {
-        _log('Invalid credentials');
-        return null;
-      } else {
-        _log('Login failed: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      _log('Error logging in: $e');
-      return null;
-    }
-  }
-
-  Future<String?> requestPasswordReset(String email) async {
-    try {
-      _log('Requesting password reset for: $email');
-
-      final response = await http
-          .post(
-            Uri.parse('$_currentBaseUrl/reset-password-request'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'email': email,
-            }),
-          )
-          .timeout(const Duration(seconds: 60));
-
-      _log('Reset request response: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        _log('Password reset code generated successfully');
-        final data = json.decode(response.body);
-        return (data['code'] ?? '').toString();
-      } else {
-        final data = json.decode(response.body);
-        final errorMsg = data['error'] ?? 'Unknown error';
-        _log('Password reset request failed: $errorMsg');
-        throw Exception(errorMsg);
-      }
-    } catch (e) {
-      _log('Error in requestPasswordReset: $e');
-      rethrow;
-    }
-  }
-
-  Future<bool> resetPassword(String email, String code, String newPassword) async {
-    try {
-      _log('Resetting password for: $email with code: $code');
-
-      final response = await http
-          .post(
-            Uri.parse('$_currentBaseUrl/reset-password'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'email': email,
-              'code': code,
-              'new_password': newPassword,
-            }),
-          )
-          .timeout(const Duration(seconds: 60));
-
-      _log('Reset password response: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        _log('Password reset successfully');
-        return true;
-      } else {
-        final data = json.decode(response.body);
-        final errorMsg = data['error'] ?? 'Unknown error';
-        _log('Password reset failed: $errorMsg');
-        throw Exception(errorMsg);
-      }
-    } catch (e) {
-      _log('Error in resetPassword: $e');
-      rethrow;
-    }
+    return null;
   }
 
   Future<bool> updateUserProfileWithSeverity(
@@ -511,132 +422,72 @@ class ApiService {
     List<String> diets,
   ) async {
     try {
-      _log('Updating profile with severity for user: $userId');
-      _log('Allergies: $allergiesList');
-      _log('Diets: $diets');
-
-      final response = await http
-          .put(
-        Uri.parse('$_currentBaseUrl/users/$userId/profile'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'allergies': allergiesList,
-          'dietary_restrictions': diets,
-        }),
-      )
-          .timeout(
-        const Duration(seconds: 45),
-        onTimeout: () {
-          _log('Connection timeout');
-          throw Exception('Connection timeout');
-        },
-      );
-
-      _log('Update with severity response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        _log('Profile with severity updated successfully');
-        return true;
-      } else {
-        _log('Update with severity failed: ${response.body}');
-        return false;
-      }
+      final response = await _put('/users/$userId/profile', {
+        'allergies': allergiesList,
+        'dietary_restrictions': diets,
+      });
+      return response.statusCode == 200;
     } catch (e) {
-      _log('Error updating profile with severity: $e');
+      _log('Error updating profile: $e');
       return false;
     }
   }
 
+  /// Updates name, email and optionally password. Returns the response body,
+  /// or `{'error': message}` on failure.
   Future<Map<String, dynamic>?> updateAccountInfo({
     required String userId,
     required String username,
     required String email,
     String? password,
   }) async {
+    final body = <String, dynamic>{'username': username, 'email': email};
+    if (password != null && password.trim().isNotEmpty) {
+      body['password'] = password.trim();
+    }
+
     try {
-      _log('Updating account info for user: $userId');
-
-      final body = <String, dynamic>{
-        'username': username,
-        'email': email,
-      };
-      if (password != null && password.trim().isNotEmpty) {
-        body['password'] = password.trim();
-      }
-
-      final response = await http
-          .put(
-            Uri.parse('$_currentBaseUrl/users/$userId/profile'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(body),
-          )
-          .timeout(const Duration(seconds: 25));
-
-      _log('Update account response status: ${response.statusCode}');
-
+      final response = await _put('/users/$userId/profile', body,
+          timeout: _shortTimeout);
       if (response.statusCode == 200) {
-        return Map<String, dynamic>.from(json.decode(response.body));
+        await _session.updateUsername(username);
+        return Map<String, dynamic>.from(_decode(response) as Map);
       }
-
-      final details =
-          response.body.isNotEmpty ? response.body : response.reasonPhrase;
-      throw Exception(details ?? 'Failed to update account');
+      return {'error': _errorMessage(response, 'Failed to update account')};
     } catch (e) {
       _log('Error updating account info: $e');
-      return {'error': e.toString()};
+      return {'error': friendlyError(e)};
     }
   }
 
-  static const Duration _extractTimeout = Duration(seconds: 120);
+  // ───────────────────────── Scanning ─────────────────────────
 
   Future<Map<String, dynamic>?> extractIngredients(File image) async {
     try {
-      await testConnection();
-      _log('Extracting ingredients from: $_currentBaseUrl/extract-ingredients');
+      final request = http.MultipartRequest('POST', _uri('/extract-ingredients'))
+        ..headers.addAll(_headers())
+        ..files.add(await http.MultipartFile.fromPath('image', image.path));
 
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$_currentBaseUrl/extract-ingredients'),
-      );
-      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+      final streamed = await request.send().timeout(_extractTimeout);
+      final response =
+          await http.Response.fromStream(streamed).timeout(_extractTimeout);
 
-      final streamedResponse = await request.send().timeout(
-        _extractTimeout,
-        onTimeout: () {
-          throw TimeoutException(
-            'Ingredient extraction timed out after ${_extractTimeout.inSeconds}s',
-          );
-        },
-      );
-      final response = await http.Response.fromStream(streamedResponse).timeout(
-        _extractTimeout,
-        onTimeout: () {
-          throw TimeoutException(
-            'Timed out while reading extraction response',
-          );
-        },
-      );
-
-      _log('Extract response: ${response.statusCode}');
       if (response.statusCode == 200) {
-        return Map<String, dynamic>.from(json.decode(response.body));
+        return Map<String, dynamic>.from(_decode(response) as Map);
       }
-
-      _log('Extract failed: ${response.body}');
       return {
-        'error': 'Extraction failed: ${response.statusCode}',
-        'details': response.body,
+        'error': _errorMessage(response,
+            'Could not read the label (error ${response.statusCode}). Please try again.'),
       };
-    } on TimeoutException catch (e) {
-      _log('Error extracting ingredients: $e');
+    } on TimeoutException {
       return {
         'error':
-            'Extraction took too long. Use a clear photo of the ingredients list, '
-            'ensure the backend is running, and try again.',
+            'Reading the label took too long. Use a clear, well-lit photo of '
+                'the ingredients list and try again.',
       };
     } catch (e) {
       _log('Error extracting ingredients: $e');
-      return {'error': 'Network error: $e'};
+      return {'error': friendlyError(e)};
     }
   }
 
@@ -645,231 +496,163 @@ class ApiService {
     String ingredientsText,
   ) async {
     try {
-      await testConnection();
-      _log('Analyzing ingredients for user: $userId');
-      _log('Ingredients text length: ${ingredientsText.length}');
-
-      final response = await http
-          .post(
-            Uri.parse('$_currentBaseUrl/analyze-with-profile'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'ingredients_text': ingredientsText,
-              'user_id': userId,
-            }),
-          )
-          .timeout(const Duration(seconds: 20));
-
-      _log('Analyze response status: ${response.statusCode}');
+      final response = await _post('/analyze-with-profile', {
+        'ingredients_text': ingredientsText,
+        'user_id': userId,
+      });
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> analysisResult = normalizeScanAnalysis(
-          Map<String, dynamic>.from(json.decode(response.body)),
+        final result = normalizeScanAnalysis(
+          Map<String, dynamic>.from(_decode(response) as Map),
         );
-
-        _log('=== BACKEND ANALYSIS RESULT ===');
-        _log('Risk Level: ${analysisResult['risk_level']}');
-        _log('Risk Score: ${analysisResult['risk_score']}');
-        _log('Confidence: ${analysisResult['confidence']}');
-        _log('Alerts: ${analysisResult['alerts']}');
-        if (analysisResult['model_info'] != null) {
-          final info = analysisResult['model_info'];
-          _log('Model Info: ${json.encode(info)}');
-          if (info['ocr_engine'] != null) {
-            _log('OCR Engine Used: ${info['ocr_engine']}');
-            _log('OCR Confidence: ${info['ocr_confidence']}');
-          }
-        }
-        _log('Raw Body: ${response.body}');
-        _log('===============================');
-
-        return analysisResult;
+        _log('Analysis: ${result['risk_level']} '
+            '(score ${result['risk_score']}, confidence ${result['confidence']})');
+        return result;
       }
-
-      _log('Analyze failed: ${response.body}');
       return {
-        'error': 'Analysis failed: ${response.statusCode}',
-        'details': response.body,
+        'error': _errorMessage(response,
+            'Analysis failed (error ${response.statusCode}). Please try again.'),
       };
     } catch (e) {
       _log('Error analyzing ingredients: $e');
-      return {'error': 'Network error: $e'};
+      return {'error': friendlyError(e)};
     }
   }
 
+  /// Saves an analysed scan. Returns `{scan_id, newly_unlocked_badges}` or null.
   Future<Map<String, dynamic>?> addScanToHistory(
     String userId,
     Map<String, dynamic> scanData,
   ) async {
     try {
-      // CRITICAL FIX: Use the values from the analysis result directly
-      // DO NOT recalculate anything - the backend already did the calculation
-
       final normalized = normalizeScanAnalysis(scanData);
       final riskLevel = normalized['risk_level'] ?? 'unknown';
-      final riskScore = normalized['risk_score'] ?? 0;
-      final confidence = normalized['confidence'] ?? 0.75;
-      final alerts = normalized['alerts'] ?? [];
 
-      _log('=== SAVING SCAN TO HISTORY ===');
-      _log('Risk Level from analysis: $riskLevel');
-      _log('Risk Score from analysis: $riskScore');
-      _log('Confidence from analysis: $confidence');
-      _log('Alerts count: ${alerts.length}');
-
-      // Prepare the scan data to save - USE THE EXACT SAME VALUES FROM ANALYSIS
-      final Map<String, dynamic> dataToSave = {
+      final dataToSave = <String, dynamic>{
         'user_id': userId,
-        'product_name': normalized['product_name'] ?? scanData['product_name'] ?? 'Scanned Product',
-        'ingredients': normalized['ingredients'] ?? scanData['ingredients'] ?? [],
-        'ingredient_details':
-            normalized['ingredient_details'] ?? scanData['ingredient_details'] ?? [],
+        'product_name': normalized['product_name'] ?? 'Scanned Product',
+        'ingredients': normalized['ingredients'] ?? [],
+        'ingredient_details': normalized['ingredient_details'] ?? [],
         'risk_level': riskLevel,
-        'risk_score': riskScore,
+        'risk_score': normalized['risk_score'] ?? 0,
         'safety_classification': riskLevel,
-        'alerts': alerts,
-        'recommendations':
-            normalized['recommendations'] ?? scanData['recommendations'] ?? [],
-        'confidence': confidence,
-        'detection_method':
-            normalized['detection_method'] ?? scanData['detection_method'] ?? 'AI Analysis',
-        'allergens_detected':
-            normalized['allergens_detected'] ?? scanData['allergens_detected'] ?? [],
-        'raw_text': normalized['raw_text'] ?? scanData['raw_text'] ?? '',
+        'alerts': normalized['alerts'] ?? [],
+        'recommendations': normalized['recommendations'] ?? [],
+        'confidence': normalized['confidence'] ?? 0.75,
+        'detection_method': normalized['detection_method'] ?? 'AI Analysis',
+        'allergens_detected': normalized['allergens_detected'] ?? [],
+        'raw_text': normalized['raw_text'] ?? '',
+        'was_edited': normalized['was_edited'] ?? false,
         'input_image_url':
             scanData['input_image_url'] ?? scanData['image_url'] ?? '',
         'scanned_at': DateTime.now().toIso8601String(),
       };
 
-      _log('Data being saved:');
-      _log('  risk_level: ${dataToSave['risk_level']}');
-      _log('  risk_score: ${dataToSave['risk_score']}');
-      _log('  confidence: ${dataToSave['confidence']}');
-
-      final response = await http
-          .post(
-            Uri.parse('$_currentBaseUrl/users/$userId/scans'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(dataToSave),
-          )
-          .timeout(const Duration(seconds: 25));
-
-      _log('Add scan history response: ${response.statusCode}');
+      final response = await _post('/users/$userId/scans', dataToSave,
+          timeout: _shortTimeout);
 
       if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        _log('✅ Scan saved successfully with risk level: $riskLevel');
+        final data = Map<String, dynamic>.from(_decode(response) as Map);
         return {
           'scan_id': data['scan_id']?.toString(),
           'newly_unlocked_badges': data['newly_unlocked_badges'] ?? [],
         };
-      } else {
-        _log('❌ Failed to save scan history: ${response.body}');
-        return null;
       }
+      _log('Failed to save scan: HTTP ${response.statusCode}');
     } catch (e) {
       _log('Error saving scan history: $e');
-      return null;
+    }
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> getScanHistory(String userId,
+      {int limit = 50}) async {
+    try {
+      final response = await _get('/users/$userId/scans');
+      if (response.statusCode == 200) {
+        final data = _decode(response) as List? ?? const [];
+        return data
+            .map((scan) => normalizeScanAnalysis(
+                  Map<String, dynamic>.from(scan as Map),
+                ))
+            .toList();
+      }
+      _log('Scan history failed: HTTP ${response.statusCode}');
+    } catch (e) {
+      _log('Error fetching scan history: $e');
+    }
+    return [];
+  }
+
+  Future<bool> deleteScan(String userId, String scanId) async {
+    try {
+      final response = await _delete('/users/$userId/scans/$scanId');
+      return response.statusCode == 200;
+    } catch (e) {
+      _log('Error deleting scan: $e');
+      return false;
     }
   }
 
   Future<Map<String, dynamic>?> getAnalyticsSummary(String userId) async {
     try {
-      _log('Fetching analytics summary for user: $userId');
-
-      final response = await http
-          .get(
-            Uri.parse('$_currentBaseUrl/users/$userId/analytics/summary'),
-          )
-          .timeout(const Duration(seconds: 45));
-
-      _log('Analytics summary response: ${response.statusCode}');
-
+      final response = await _get('/users/$userId/analytics/summary');
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _log('Successfully fetched analytics summary');
-        return data;
-      } else {
-        _log('Failed to fetch analytics summary: ${response.body}');
-        return null;
+        return Map<String, dynamic>.from(_decode(response) as Map);
       }
+      _log('Analytics summary failed: HTTP ${response.statusCode}');
     } catch (e) {
       _log('Error fetching analytics summary: $e');
-      return null;
     }
+    return null;
   }
 
-  Future<void> preWarmBackend() async {
+  // ───────────────────────── Barcode & pantry ─────────────────────────
+
+  /// Looks up a barcode. Always returns a map: `found: true` with the
+  /// analysis, or `found: false` with a user-facing `message`.
+  Future<Map<String, dynamic>> lookupBarcode(
+      String barcode, String userId) async {
     try {
-      _log('Pre-warming backend...');
-      await http.get(Uri.parse('$_currentBaseUrl/health')).timeout(const Duration(seconds: 15));
-      _log('Backend pre-warmed');
-    } catch (e) {
-      _log('Pre-warm ping warning: $e');
-    }
-  }
+      final response = await _get(
+        '/barcode/$barcode',
+        query: userId.isNotEmpty ? {'user_id': userId} : null,
+      );
 
-  Future<Map<String, dynamic>?> lookupBarcode(String barcode, String userId) async {
-    try {
-      _log('Looking up barcode: $barcode for user: $userId');
-
-      final response = await http
-          .get(
-            Uri.parse('$_currentBaseUrl/barcode/$barcode?user_id=$userId'),
-          )
-          .timeout(const Duration(seconds: 45));
-
-      _log('Barcode response: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else if (response.statusCode == 404) {
-        final data = json.decode(response.body);
-        return {
-          'found': false,
-          'message': data['message'] ?? 'Product not found in Open Food Facts database.'
-        };
-      } else {
-        return null;
+      final data = _decode(response);
+      if (response.statusCode == 200 && data is Map) {
+        return Map<String, dynamic>.from(data);
       }
+      return {
+        'found': false,
+        'message': _errorMessage(response,
+            'No product details found for barcode $barcode. Try photographing the ingredient label instead.'),
+      };
     } catch (e) {
       _log('Error looking up barcode: $e');
-      return null;
+      return {'found': false, 'message': friendlyError(e)};
     }
   }
 
   Future<List<Map<String, dynamic>>> getUserPantry(String userId) async {
     try {
-      _log('Fetching pantry for user: $userId');
-
-      final response = await http
-          .get(
-            Uri.parse('$_currentBaseUrl/users/$userId/pantry'),
-          )
-          .timeout(const Duration(seconds: 45));
-
+      final response = await _get('/users/$userId/pantry');
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
-      } else {
-        return [];
+        final data = _decode(response) as List? ?? const [];
+        return data
+            .map((item) => Map<String, dynamic>.from(item as Map))
+            .toList();
       }
+      _log('Pantry fetch failed: HTTP ${response.statusCode}');
     } catch (e) {
       _log('Error fetching pantry: $e');
-      return [];
     }
+    return [];
   }
 
   Future<bool> deletePantryItem(String userId, String itemId) async {
     try {
-      _log('Deleting pantry item: $itemId');
-
-      final response = await http
-          .delete(
-            Uri.parse('$_currentBaseUrl/users/$userId/pantry/$itemId'),
-          )
-          .timeout(const Duration(seconds: 45));
-
+      final response = await _delete('/users/$userId/pantry/$itemId');
       return response.statusCode == 200;
     } catch (e) {
       _log('Error deleting pantry item: $e');

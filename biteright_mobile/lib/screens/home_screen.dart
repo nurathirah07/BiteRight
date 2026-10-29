@@ -1,15 +1,15 @@
-import 'package:biteright_mobile/screens/scan_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/analytics_summary.dart';
 import '../services/api_service.dart';
+import '../services/session_service.dart';
 import '../theme/app_theme.dart';
 import 'analytics_screen.dart';
 import 'barcode_scanner_screen.dart';
 import 'edit_account_screen.dart';
 import 'pantry_screen.dart';
 import 'profile_setup_screen.dart';
+import 'scan_details_screen.dart';
 import 'scan_screen.dart';
 import 'scan_history_screen.dart';
 
@@ -49,9 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadSavedTabIndex() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedIndex = prefs.getInt('selectedTabIndex');
-      if (savedIndex != null && savedIndex >= 0 && savedIndex <= 3) {
+      final savedIndex = await SessionService.instance.savedTabIndex();
+      if (savedIndex >= 0 && savedIndex <= 3) {
         if (mounted) {
           setState(() {
             _selectedIndex = savedIndex;
@@ -70,8 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('selectedTabIndex', index);
+      await SessionService.instance.saveTabIndex(index);
     } catch (e) {
       if (kDebugMode) print('Error saving tab index: $e');
     }
@@ -94,13 +92,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Name shown in the UI: the latest profile name, else the sign-in name.
+  String get _displayName {
+    final name = _userProfile?['username']?.toString().trim() ?? '';
+    return name.isNotEmpty ? name : widget.username;
+  }
+
   Future<void> _loadUserData() async {
-    setState(() => _isLoading = true);
+    // Only block the screen with a spinner on the very first load.
+    if (_userProfile == null) setState(() => _isLoading = true);
     try {
       final profile = await _apiService.getUserProfile(widget.userId);
       if (mounted) {
         setState(() {
-          _userProfile = profile?['profile'];
+          _userProfile = profile?['profile'] ?? _userProfile;
           _isLoading = false;
         });
       }
@@ -150,18 +155,54 @@ class _HomeScreenState extends State<HomeScreen> {
           scanData: normalized,
         ),
       ),
-    );
+    ).then((_) => _loadAllScans());
+  }
+
+  void _openBarcodeScanner() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BarcodeScannerScreen(userId: widget.userId),
+      ),
+    ).then((result) {
+      if (result == kScanLabelInstead) _updateSelectedIndex(1);
+      _refreshActivity();
+    });
+  }
+
+  void _openPantry() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PantryScreen(userId: widget.userId),
+      ),
+    ).then((_) => _loadAllScans());
+  }
+
+  /// Reload anything a new scan can change: history, totals and badges.
+  Future<void> _refreshActivity() async {
+    await Future.wait([_loadAllScans(), _loadBadges()]);
+  }
+
+  /// Android back button: return to the Home tab before leaving the app.
+  void _handleBackFromTab(bool didPop, Object? result) {
+    if (!didPop && _selectedIndex != 0) {
+      _updateSelectedIndex(0);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvokedWithResult: _handleBackFromTab,
+      child: Scaffold(
       backgroundColor: const Color(0xFFF7F4F0),
       body: IndexedStack(
         index: _selectedIndex,
         children: [
           _HomePage(
-            username: widget.username,
+            username: _displayName,
             userId: widget.userId,
             isLoading: _isLoading,
             userProfile: _userProfile,
@@ -171,16 +212,21 @@ class _HomeScreenState extends State<HomeScreen> {
             onScanTap: _navigateToScanDetails,
             onViewAllTap: _navigateToScanHistory,
             onScanButtonTap: () => _updateSelectedIndex(1),
+            onBarcodeTap: _openBarcodeScanner,
+            onPantryTap: _openPantry,
             onProfileButtonTap: () => _updateSelectedIndex(3),
             onRefresh: () async {
-              await _loadUserData();
-              await _loadAllScans();
-              await _loadBadges();
+              await Future.wait([
+                _loadUserData(),
+                _loadAllScans(),
+                _loadBadges(),
+              ]);
             },
           ),
           ScanScreen(
             userId: widget.userId,
             onBack: () => _updateSelectedIndex(0),
+            onScanSaved: _refreshActivity,
           ),
           AnalyticsScreen(
             userId: widget.userId,
@@ -189,10 +235,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _ProfilePage(
             userId: widget.userId,
-            username: widget.username,
+            username: _displayName,
             apiService: _apiService,
             userProfile: _userProfile,
             onNavigateToScanHistory: _navigateToScanHistory,
+            onOpenPantry: _openPantry,
+            onOpenBarcodeScanner: _openBarcodeScanner,
             onProfileUpdated: _loadUserData,
           ),
         ],
@@ -209,11 +257,12 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
+      ),
     );
   }
 }
 
-// â”€â”€â”€ Bottom Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Bottom Nav ────────────────────────────────────────────────────────────────
 
 class _BottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -301,6 +350,8 @@ class _HomePage extends StatelessWidget {
   final void Function(Map<String, dynamic>) onScanTap;
   final VoidCallback onViewAllTap;
   final VoidCallback onScanButtonTap;
+  final VoidCallback onBarcodeTap;
+  final VoidCallback onPantryTap;
   final VoidCallback onProfileButtonTap;
   final Future<void> Function() onRefresh;
 
@@ -315,6 +366,8 @@ class _HomePage extends StatelessWidget {
     required this.onScanTap,
     required this.onViewAllTap,
     required this.onScanButtonTap,
+    required this.onBarcodeTap,
+    required this.onPantryTap,
     required this.onProfileButtonTap,
     required this.onRefresh,
   });
@@ -393,6 +446,8 @@ class _HomePage extends StatelessWidget {
                         userProfile: userProfile,
                         totalScans: totalScans,
                         onScanTap: onScanButtonTap,
+                        onBarcodeTap: onBarcodeTap,
+                        onPantryTap: onPantryTap,
                       ),
 
                       const SizedBox(height: 24),
@@ -413,7 +468,7 @@ class _HomePage extends StatelessWidget {
                       _HomeBadgeGallery(badges: badges),
                       const SizedBox(height: 24),
 
-                      // â”€â”€ Recent Scans Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                      // ── Recent Scans Section ─────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -463,7 +518,7 @@ class _HomePage extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Notification Bell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Notification Bell ─────────────────────────────────────────────────────────
 
 class _ProfileShortcut extends StatelessWidget {
   final VoidCallback onTap;
@@ -499,17 +554,21 @@ class _ProfileShortcut extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Hero Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Hero Card ─────────────────────────────────────────────────────────────────
 
 class _HeroCard extends StatelessWidget {
   final Map<String, dynamic>? userProfile;
   final int totalScans;
   final VoidCallback onScanTap;
+  final VoidCallback onBarcodeTap;
+  final VoidCallback onPantryTap;
 
   const _HeroCard({
     required this.userProfile,
     required this.totalScans,
     required this.onScanTap,
+    required this.onBarcodeTap,
+    required this.onPantryTap,
   });
 
   @override
@@ -670,15 +729,7 @@ class _HeroCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    final uid = (userProfile?['id'] ?? userProfile?['userId'] ?? '').toString();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BarcodeScannerScreen(userId: uid),
-                      ),
-                    );
-                  },
+                  onPressed: onBarcodeTap,
                   icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
                   label: const Text('Barcode'),
                   style: ElevatedButton.styleFrom(
@@ -696,17 +747,9 @@ class _HeroCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                final uid = (userProfile?['id'] ?? userProfile?['userId'] ?? '').toString();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PantryScreen(userId: uid),
-                  ),
-                );
-              },
+              onPressed: onPantryTap,
               icon: const Icon(Icons.inventory_2_rounded, size: 18, color: AppTheme.primaryDark),
-              label: const Text('My Saved Pantry (Safe / Caution / Unsafe)'),
+              label: const Text('My Pantry'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.primaryDark,
                 side: const BorderSide(color: AppTheme.primaryDark, width: 1.5),
@@ -721,7 +764,7 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Stat Pill â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Stat Pill ─────────────────────────────────────────────────────────────────
 
 class _StatPill extends StatelessWidget {
   final IconData icon;
@@ -785,7 +828,7 @@ class _StatPill extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Preferences Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Preferences Row ───────────────────────────────────────────────────────────
 
 class _PreferencesRow extends StatelessWidget {
   final Map<String, dynamic> userProfile;
@@ -870,7 +913,7 @@ class _PreferenceChip extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Recent Scans List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Recent Scans List ─────────────────────────────────────────────────────────
 
 class _ProfileReminder extends StatelessWidget {
   final VoidCallback onTap;
@@ -965,7 +1008,7 @@ class _RecentScansList extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Scan Tile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Scan Tile ─────────────────────────────────────────────────────────────────
 
 class _ScanTile extends StatelessWidget {
   final Map<String, dynamic> scan;
@@ -1148,7 +1191,7 @@ class _ScanTile extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Empty Scans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Empty Scans ───────────────────────────────────────────────────────────────
 
 class _EmptyScans extends StatelessWidget {
   final VoidCallback onScanTap;
@@ -1219,7 +1262,7 @@ class _EmptyScans extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Profile Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Profile Page ──────────────────────────────────────────────────────────────
 
 class _ProfilePage extends StatelessWidget {
   final String userId;
@@ -1227,6 +1270,8 @@ class _ProfilePage extends StatelessWidget {
   final ApiService apiService;
   final Map<String, dynamic>? userProfile;
   final VoidCallback onNavigateToScanHistory;
+  final VoidCallback onOpenPantry;
+  final VoidCallback onOpenBarcodeScanner;
   final VoidCallback onProfileUpdated;
 
   const _ProfilePage({
@@ -1235,6 +1280,8 @@ class _ProfilePage extends StatelessWidget {
     required this.apiService,
     required this.userProfile,
     required this.onNavigateToScanHistory,
+    required this.onOpenPantry,
+    required this.onOpenBarcodeScanner,
     required this.onProfileUpdated,
   });
 
@@ -1263,7 +1310,7 @@ class _ProfilePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // â”€â”€ Avatar + name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+          // ── Avatar + name ──────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(vertical: 24),
             decoration: BoxDecoration(
@@ -1309,7 +1356,7 @@ class _ProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  userProfile?['email'] ?? 'user@example.com',
+                  userProfile?['email']?.toString() ?? '',
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF9A9790),
@@ -1321,7 +1368,7 @@ class _ProfilePage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // â”€â”€ Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+          // ── Menu ──────────────────────────────────────────────────
           _MenuCard(
             items: [
               _MenuItem(
@@ -1344,6 +1391,7 @@ class _ProfilePage extends StatelessWidget {
                 iconColor: const Color(0xFF854F0B),
                 iconBg: const Color(0xFFFFF3E2),
                 title: 'Dietary profile',
+                isLast: true,
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1351,20 +1399,41 @@ class _ProfilePage extends StatelessWidget {
                   ),
                 ).then((_) => onProfileUpdated()),
               ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          _MenuCard(
+            items: [
               _MenuItem(
                 icon: Icons.history_rounded,
                 iconColor: const Color(0xFF2A6E54),
                 iconBg: const Color(0xFFE9F5EE),
                 title: 'Scan history',
-                isLast: true,
                 onTap: onNavigateToScanHistory,
+              ),
+              _MenuItem(
+                icon: Icons.inventory_2_outlined,
+                iconColor: const Color(0xFF6B4FA0),
+                iconBg: const Color(0xFFF1ECFA),
+                title: 'My pantry',
+                onTap: onOpenPantry,
+              ),
+              _MenuItem(
+                icon: Icons.qr_code_scanner_rounded,
+                iconColor: const Color(0xFF185FA5),
+                iconBg: const Color(0xFFE6F1FB),
+                title: 'Scan a barcode',
+                isLast: true,
+                onTap: onOpenBarcodeScanner,
               ),
             ],
           ),
 
           const SizedBox(height: 16),
 
-          // â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+          // ── Logout ────────────────────────────────────────────────
           GestureDetector(
             onTap: () => _showLogoutDialog(context),
             child: Container(
@@ -1420,8 +1489,7 @@ class _ProfilePage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.clear();
+              await apiService.logout();
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
@@ -1440,7 +1508,7 @@ class _ProfilePage extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Menu Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Menu Card ─────────────────────────────────────────────────────────────────
 
 class _MenuCard extends StatelessWidget {
   final List<_MenuItem> items;
@@ -1525,7 +1593,7 @@ class _MenuItem extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Section Label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Section Label ─────────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
   final String label;
