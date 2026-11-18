@@ -1,11 +1,11 @@
 {
-    "name": "biteright_mobile",
-    "short_name": "biteright_mobile",
+    "name": "BiteRight",
+    "short_name": "BiteRight",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "BiteRight checks food labels against your allergy and dietary profile.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
